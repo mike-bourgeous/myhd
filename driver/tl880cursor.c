@@ -168,37 +168,22 @@ unsigned long _g_idTracker_0 = 0;
 struct OSDmemory *_g_head = NULL;
 
 /* This function merges any consecutive free areas to a single area */
-int tl880_compact_desc_list()
+int tl880_compact_osdmem()
 {
 	struct OSDmemory *listp1 = _g_head, *listp2;
 
 	listp1 = _g_head;
 
-	/*
-loc_3a2a9:
-	if(!esi || !(eax = esi->next)) {
-		return 1;
-	}
-
-	if(esi->active || eax->active) {
-		esi = eax;
-		goto loc_3a2a9;
-	}
-
-	esi->size += eax->size;
-	esi->next = eax->next;
-	kfree(eax);
-
-	goto loc_3a2a9;
-	*/
-
+	/* Walk through the linked list */
 	while(listp1 && listp1->next) {
 		listp2 = listp1->next;
 		if(!listp1->active && !listp2->active) {
+			/* Two consecutive areas are inactive, merge them */
 			listp1->size += listp2->size;
 			listp1->next = listp2->next;
 			kfree(listp2);
 		} else {
+			/* One or both areas are active, move on */
 			listp1 = listp2;
 		}
 	}
@@ -221,7 +206,7 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 		//initializeOSDMemory(sBoardInfo.osd_address, sBoardInfo.virt_addr);
 	}
 
-	//compactDescList();
+	tl880_compact_osdmem();
 
 	/* Search for an inactive block of the correct size */
 	listp1 = _g_head;

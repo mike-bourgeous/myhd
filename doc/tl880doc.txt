@@ -4,11 +4,21 @@ TL880 Register Map and Chip/Card Doc (incomplete and disorganized)
 No warranty on accuracy or fitness for any purpose is made of this data.
 This data may be freely redistributed in any form so long as credit is given to
 those who took the time to create it, and no misrepresentation is made
-regarding the origin of this work and any derivatives.
+regarding the origin of this work and any derivatives, or the original purpose
+of the creation of this document.
 
 All numbers are in hexadecimal, except for bit descriptions (binary).
 -------------------------------
 
+TL880 Memory
+------------
+
+The first 0x186000 bytes (1.5MB+24KB) of the memory region seem to be TL850Memory.
+The next 0x1000000 bytes (16MB) seem to be OSD memory.
+
+
+TL880 Registers
+---------------
 HIF 0-14 - Hardware interface
 
 0	last queued interrupt type

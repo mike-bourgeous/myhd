@@ -85,8 +85,9 @@ mdp-100a board type is 2
 
 cJanus+166d0 is input mode (enum cJanus::InputSource)
 
-cJanus+1670c is moved into cJanus+1686c, then 186000 is added, 
+cJanus+1670c is moved into cJanus+1686c, then 186000 (1.5MB+24KB) is added, 
 		and stored in cJanus+16870.
+cJanus+16710 is moved into cJanus+16874.
 
 cJanus+1673c is SDRAM type (see tl880init.c:init_sdram())
 
@@ -100,7 +101,8 @@ cJanus+167e4 is NTSC input
 cJanus+16814 is OSD context (48 bytes)
 
 cJanus+1686c is memory length (or start address?)
-cJanus+16870 is memory end address?
+cJanus+16870 is OSD memory physical address (base address + 0x186000?)
+cJanus+16874 is OSD memory length
 
 cJanus[16870]+cJanus[16874] is passed to clear_sdram with a size of 16MB
 
@@ -124,7 +126,8 @@ dword[0bb0] may be current field
 
 struct SOverlaySurface
 ----------------------
-dword[0x6c] may be pointer to next surface in linked list
+dword[0x68] is the unique ID of the surface (used as a key to find a surface)
+dword[0x6c] is a pointer to next surface in linked list
 
 
 class CDma
