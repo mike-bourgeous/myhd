@@ -155,9 +155,9 @@ void tl880_add_cursor(struct SOverlaySurface *surface)
 
 struct OSDmemory {
 	unsigned long field_0;
-	unsigned long field_4;
-	unsigned long field_8;
-	unsigned long field_c;
+	unsigned long virt_addr;
+	unsigned long phys_addr;
+	unsigned long size;
 	unsigned long active;
 	unsigned long id;
 	struct OSDmemory *next;
@@ -166,6 +166,46 @@ struct OSDmemory {
 unsigned long _g_idTracker_0 = 0;
 
 struct OSDmemory *_g_head = NULL;
+
+/* This function merges any consecutive free areas to a single area */
+int tl880_compact_desc_list()
+{
+	esi = _g_head;
+
+loc_3a2a9:
+	if(!esi) {
+		return 1;
+	}
+
+	if(!(eax = esi->field_18)) {
+		return 1;
+	}
+
+	if(!(esi->field_10)) {
+		goto loc_3a2d4;
+loc_3a2d4:
+		esi = eax;
+		goto loc_3a2a9;
+	}
+
+	if(!(eax->field_10)) {
+		goto loc_3a2d4;
+loc_3a2d4:
+		esi = eax;
+		goto loc_3a2a9;
+	}
+
+	ecx = eax->field_c;
+	esi->field_c += ecx;
+	ecx = eax->field_18;
+	esi->field_18 = ecx;
+	kfree(eax);
+
+	goto loc_3a2a9;
+
+loc_3a2d8:
+	return 1;
+}
 
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
@@ -179,7 +219,7 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 	listp1 = _g_head;
 
 	if(!_g_head) {
-		//initializeOSDMemory(sBoardInfo.osd_address, sBoardInfo.field_4);
+		//initializeOSDMemory(sBoardInfo.osd_address, sBoardInfo.virt_addr);
 	}
 
 	//compactDescList();
@@ -187,142 +227,57 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 	/* Search for an inactive block of the correct size */
 	listp1 = _g_head;
 	while(listp1 != NULL) {
-		if(!listp1->active && listp1->field_c == finalsize) {
+		if(!listp1->active && listp1->size == finalsize) {
 			/* An inactive block was found; set it active */
 			listp1->active = 1;
-			retval = (alignsize + listp1->field_4) & mask;
-			listp1->field_0 = retval - listp1->field_4;
+			retval = (alignsize + listp1->virt_addr) & mask;
+			listp1->field_0 = retval - listp1->virt_addr;
 			
 			return retval;
 		}
 		listp1 = listp1->next;
 	}
 
-	/*
-loc_3a4a5:
-	if(listp1 == NULL) {
-		goto loc_3a4c4;
-	}
-
-	if(listp1->active) {
-		goto loc_3a4b3;
-loc_3a4b3:
-		listp1 = listp1->next;
-		goto loc_3a4a5;
-	}
-
-	if(listp1->field_c == size + align - 1) {
-		goto loc_3a4b8;
-loc_3a4b8:
-		listp1->active = 1;
-		goto loc_3a56b;
-	}
-	*/
-
-loc_3a4c4:
-	listp2 = _g_head;
-	listp1 = _g_head;
-
-	/*
-	if(!_g_head) {
-		goto loc_3a4e0;
-	}
-
-loc_3a4cf:
-	if(listp1->active || listp1->field_c <= finalsize) {
-		goto loc_3a4d9;
-loc_3a4d9:
-		listp1 = listp1->next;
-		if(listp1) {
-			goto loc_3a4cf;
-		}
-		goto loc_3a4e0;
-	}
-
-	if(listp1->field_c > (size + align - 1)) {
-		goto loc_3a4fd;
-	}
-	*/
-
 	/* Search for an inactive block greater than the correct size */
 	listp1 = _g_head;
 	while(listp1) {
-		if(!listp1->active && listp1->field_c > finalsize) {
-			goto loc_3a4fd;
+		if(!listp1->active && listp1->size > finalsize) {
+			if(!(listp2 = kmalloc(0x1c, 1))) {
+				return 0;
+			}
+			
+			listp2->field_0 = 0;
+			listp2->virt_addr = 0;
+			listp2->phys_addr = 0;
+			listp2->size = 0;
+			listp2->active = 0;
+			listp2->id = ++_g_idTracker_0;
+			listp2->next = listp1->next;
+			listp1->next = listp2;
+			listp2->virt_addr = listp1->virt_addr + finalsize;
+			listp2->phys_addr = listp1->phys_addr + finalsize;
+			listp2->size = listp1->size - finalsize;
+			listp1->size = finalsize;
+			listp1->active = 1;
 		}
 	}
 
-	/* why does this loop return 0 after finding the end of the list? */
-	/* 
-	 * equivalent asm:
-	 * loc_3A4E4:                              ; CODE XREF: allocateOSDMemory_Aligned(ulong,EALIGN)+115j
-	 * 	cmp     eax, ebx        ; ebx is 0
-	 * 	jz      loc_3A58E       ; loc_3a58e sets eax to 0 then returns
-	 * 	
-	 * 	cmp     [eax+10h], ebx  ; Compare Two Operands
-	 * 	jz      loc_3A583       ; Jump if Zero (ZF=1)
-	 * 	
-	 * 	add     edx, [eax+0Ch]  ; Add
-	 * 	jmp     loc_3A586       ; Jump
-	 * loc_3A583:                              ; CODE XREF: allocateOSDMemory_Aligned(ulong,EALIGN)+7Bj
-	 * 	add     ecx, [eax+0Ch]  ; Add
-	 * 	
-	 * loc_3A586:                              ; CODE XREF: allocateOSDMemory_Aligned(ulong,EALIGN)+84j
-	 * 	mov     eax, [eax+18h]
-	 * 	jmp     loc_3A4E4       ; Jump
-	 */
-loc_3a4e0:
-	/*
-	edx = 0;
-	ecx = 0;
-loc_3a4e4:
-	if(!listp2) {
-		return 0;
-	}
-
-	if(!listp2->active) {
-		ecx += listp2->field_c;
-	} else {
-		edx += listp2->field_c;
-	}
-	listp2 = listp2->next;
-	goto loc_3a4e4;
-	*/
+	/* Out of space; count active and inactive memory and return */
 	listp2 = _g_head;
 	while(listp2) {
 		if(listp2->active) {
-			active_size += listp2->field_c;
+			active_size += listp2->size;
 		} else {
-			inactive_size += listp2->field_c;
+			inactive_size += listp2->size;
 		}
 		listp2 = listp2->next;
 	}
+	printk(KERN_WARN "tl880: out of OSD memory; active bytes: 0x%lx, inactive bytes: 0x%lx\n", active_size, inactive_size);
 	return 0;
 
-loc_3a4fd:
-	if(!(listp2 = kmalloc(0x1c, 1))) {
-		return 0;
-	}
-
-	listp2->field_0 = 0;
-	listp2->field_4 = 0;
-	listp2->field_8 = 0;
-	listp2->field_c = 0;
-	listp2->active = 0;
-	listp2->id = ++_g_idTracker_0;
-	listp2->next = 0;
-	listp2->next = listp1->next;
-	listp1->next = listp2;
-	listp2->active = 0;
-	listp2->field_c = listp1->field_c - finalsize;
-	listp2->field_4 = listp1->field_4 + finalsize;
-	listp2->field_8 = listp1->field_8 + finalsize;
-	listp1->field_c = finalsize;
-	listp1->active = 1;
-	
 loc_3a56b:
-	retval = (alignsize + listp1->field_4) & mask;
-	listp1->field_0 = retval - listp1->field_4;
+	retval = (alignsize + listp1->virt_addr) & mask;
+	listp1->field_0 = retval - listp1->virt_addr;
 
 	return retval;
 }
