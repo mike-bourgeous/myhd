@@ -80,11 +80,11 @@ struct SOverlaySurface *tl880_create_cursor(struct _SURFACE_DESC *surface)
 		return NULL;
 	}
 
-	if(!(new_surface = kmalloc(0x70, 1))) { // 112
+	if(!(new_surface = kmalloc(sizeof(struct SOverlaySurface), 1))) { // 112
 		return NULL;
 	}
 
-	memset(new_surface, 0, 0x70);
+	memset(new_surface, 0, sizeof(struct SOverlaySurface));
 
 	new_surface->surface_id = (++_g_idTracker & 0xfffff) | 0x52300000;
 	new_surface->next = NULL;
@@ -170,10 +170,11 @@ struct OSDmemory *_g_head = NULL;
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
 	struct OSDmemory *listp1, *listp2;
-	unsigned long ecx, edx, edi, retval;
+	unsigned long retval;
 	unsigned long alignsize = align - 1;
 	unsigned long mask = ~alignsize;
 	unsigned long finalsize = size + alignsize;
+	unsigned long active_size = 0, inactive_size = 0;
 	
 	listp1 = _g_head;
 
@@ -183,12 +184,11 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 
 	//compactDescList();
 
-	edi = size + align - 1;
-
 	/* Search for an inactive block of the correct size */
 	listp1 = _g_head;
 	while(listp1 != NULL) {
 		if(!listp1->active && listp1->field_c == finalsize) {
+			/* An inactive block was found; set it active */
 			listp1->active = 1;
 			retval = (alignsize + listp1->field_4) & mask;
 			listp1->field_0 = retval - listp1->field_4;
@@ -244,10 +244,13 @@ loc_3a4d9:
 	}
 	*/
 
-
-loc_3a4e0:
-	edx = 0;
-	ecx = 0;
+	/* Search for an inactive block greater than the correct size */
+	listp1 = _g_head;
+	while(listp1) {
+		if(!listp1->active && listp1->field_c > finalsize) {
+			goto loc_3a4fd;
+		}
+	}
 
 	/* why does this loop return 0 after finding the end of the list? */
 	/* 
@@ -268,26 +271,36 @@ loc_3a4e0:
 	 * 	mov     eax, [eax+18h]
 	 * 	jmp     loc_3A4E4       ; Jump
 	 */
+loc_3a4e0:
+	/*
+	edx = 0;
+	ecx = 0;
 loc_3a4e4:
 	if(!listp2) {
 		return 0;
 	}
 
-	if(listp2->active == 0) {
-		goto loc_3a583;
-loc_3a583:
+	if(!listp2->active) {
 		ecx += listp2->field_c;
-		goto loc_3a586;
+	} else {
+		edx += listp2->field_c;
 	}
-
-	edx += listp2->field_c;
-	goto loc_3a586;
-loc_3a586:
 	listp2 = listp2->next;
 	goto loc_3a4e4;
+	*/
+	listp2 = _g_head;
+	while(listp2) {
+		if(listp2->active) {
+			active_size += listp2->field_c;
+		} else {
+			inactive_size += listp2->field_c;
+		}
+		listp2 = listp2->next;
+	}
+	return 0;
 
 loc_3a4fd:
-	if(!(listp2 = kmalloc(1, 0x1c))) {
+	if(!(listp2 = kmalloc(0x1c, 1))) {
 		return 0;
 	}
 
@@ -301,16 +314,14 @@ loc_3a4fd:
 	listp2->next = listp1->next;
 	listp1->next = listp2;
 	listp2->active = 0;
-	listp2->field_c = listp1->field_c - (size + align - 1);
-	listp2->field_4 = listp1->field_4 + (size + align - 1);
-	listp2->field_8 = listp1->field_8 + (size + align - 1);
-	listp1->field_c = (size + align - 1);
+	listp2->field_c = listp1->field_c - finalsize;
+	listp2->field_4 = listp1->field_4 + finalsize;
+	listp2->field_8 = listp1->field_8 + finalsize;
+	listp1->field_c = finalsize;
 	listp1->active = 1;
 	
 loc_3a56b:
-	edx = listp1->field_4;
-	ecx = ~(align - 1);
-	retval = ((align - 1) + edx) & ~(align - 1);
+	retval = (alignsize + listp1->field_4) & mask;
 	listp1->field_0 = retval - listp1->field_4;
 
 	return retval;
