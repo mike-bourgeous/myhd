@@ -4,6 +4,7 @@
 	* Added more information to tl880doc.txt about DPC2 (0x10180,0x10184).
 	* Added audio buffer setting code to tl880audio.c.
 	* Added some DPC2 init code to tl880init.c.
+	* Correct DPC2 init code for color conversion matrix in RGB mode.
 
 2003-10-04	Mike Bourgeous		<nitrogen@slimetech.com>
 

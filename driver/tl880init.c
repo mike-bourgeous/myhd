@@ -452,13 +452,14 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	write_register(tl880dev, 0x10184, 0x53677881);
 	write_register(tl880dev, 0x10184, 0x81786753);
 
+	/* Color conversion matrix (values are from a register dump in Windows) */
 	write_register(tl880dev, 0x10180, 0x300);
-	/* I'm just making a random guess at what to put in 0x300 */
-	for(i = 0; i < 16; i++) {
-		write_register(tl880dev, 0x10184, 
-				i | (i << 4) | (i << 8) | (i << 0xc) |
-				(i << 0x10) | (i << 0x14) | (i << 0x18) | (i << 0x1c));
-	}
+	write_register(tl880dev, 0x10184, 0x012A07CB);
+	write_register(tl880dev, 0x10184, 0x07791000);
+	write_register(tl880dev, 0x10184, 0x012A021C);
+	write_register(tl880dev, 0x10184, 0x00008000);
+	write_register(tl880dev, 0x10184, 0x012A0000);
+	write_register(tl880dev, 0x10184, 0x01CB8000);
 
 	printk(KERN_DEBUG "tl880: end of init: 0x10190=0x%08lx\n", read_register(tl880dev, 0x10190));
 	printk(KERN_DEBUG "tl880: end of init: 0x10194=0x%08lx\n", read_register(tl880dev, 0x10194));
