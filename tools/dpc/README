@@ -7,8 +7,8 @@ The videoout program will enable/disable external sync/video passthrough.  Zero
 is passthrough enable/video disable, any other value is passthrough
 disable/video enable.
 
-The getsync and setsync programs will get and set the DPC PLL constant,
-respectively.  Passing a parameter to getsync will extract the DPC PLL constant
+The getconst and setconst programs will get and set the DPC PLL constant,
+respectively.  Passing a parameter to getconst will extract the DPC PLL constant
 settings from that parameter instead of register 0x5800.
 
 vim:tw=80
