@@ -27,7 +27,7 @@ struct _SURFACE_DESC {
 struct SOverlaySurface {
 	unsigned long field_0;
 	unsigned long field_4;
-	unsigned long field_8;
+	unsigned long field_8;	// OSD memory
 	unsigned long field_c;
 	unsigned long field_10;
 	unsigned long field_14; // _SURFACE_DESC->field_4
@@ -83,7 +83,7 @@ extern struct OSDmemory *_g_head;
 
 /* tl880osd.c */
 int tl880_compact_osdmem(struct tl880_dev *tl880dev);
-unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
+unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
 unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long addr);
 
 /* tl880cursor.c */

@@ -73,6 +73,9 @@
 #define TL880_CARD_JANUS		1
 #define TL880_CARD_ZERO			0
 
+/* debug */
+#define CHECK_NULL(a) ( (a) ? (printk(KERN_ERR "tl880: non-NULL %s in %s\n", #a, __FUNCTION__), (0)) : (printk(KERN_ERR "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
+
 
 /*** Driver types ***/
 struct tl880_dev;

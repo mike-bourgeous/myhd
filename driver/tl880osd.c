@@ -33,7 +33,7 @@ int tl880_compact_osdmem(struct tl880_dev *tl880dev)
 	return 1;
 }
 
-unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
+unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
 	struct OSDmemory *listp1, *newmem;
 	unsigned long retval;

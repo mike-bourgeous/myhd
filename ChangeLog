@@ -4,6 +4,7 @@
 	* Fixed misinformation in myhd_154.txt about getSDRAMoffset.
 	* Add tl880osd.c and move some functions from tl880cursor into it.
 	* Added tl880_delete_cursor() function.
+	* Change all *osd_memory to *osdmem.
 
 2003-09-29	Mike Bourgeous		<nitrogen@slimetech.com>
 

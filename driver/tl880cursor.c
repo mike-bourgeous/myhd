@@ -8,43 +8,36 @@
 unsigned long _g_idTracker = 0;
 
 void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surface);
-unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
-unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long addr);
 
 struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _SURFACE_DESC *surface)
 {
 	struct SOverlaySurface *new_surface;
 
-	if(!surface) {
+	if(CHECK_NULL(surface)) {
 		return NULL;
 	}
 
-	if(surface->field_18 != 0x1c) { // dword
+	if(surface->field_18 != 0x1c) { /* 28 */
 		return NULL;
 	}
 
-	if(surface->field_10 != 0x20) { // word
+	if(surface->field_10 != 32 || surface->field_12 != 32) {
+		printk(KERN_ERR "tl880: tl880_create_cursor(): invalid dimensions (%i, %i)\n",
+				surface->field_10, surface->field_12);
 		return NULL;
 	}
 
-	if(surface->field_12 != 0x20) { // word
+	if(surface->field_14 == 0 || surface->field_14 >= 5) {
 		return NULL;
 	}
 
-	if(!surface->field_14) { // word
-		return NULL;
-	}
-
-	if(surface->field_14 >= 5) { // word
-		return NULL;
-	}
-
-	if(!(new_surface = kmalloc(sizeof(struct SOverlaySurface), 1))) { // 112
+	if(!(new_surface = kmalloc(sizeof(struct SOverlaySurface), 1))) {
 		return NULL;
 	}
 
 	memset(new_surface, 0, sizeof(struct SOverlaySurface));
 
+	/* What happens after there have been 1048575 surfaces created? */
 	new_surface->surface_id = (++_g_idTracker & 0xfffff) | 0x52300000;
 	new_surface->next = NULL;
 
@@ -59,7 +52,7 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 
 	new_surface->field_50 = surface->field_0;
 
-	if(!(new_surface->field_8 = tl880_allocate_osd_memory(tl880dev, 0x200, 0x10))) {
+	if(!(new_surface->field_8 = tl880_allocate_osdmem(tl880dev, 0x200, 0x10))) {
 		kfree(new_surface);
 		return NULL;
 	}
@@ -103,8 +96,7 @@ struct SOverlaySurface *g_cursor_list = NULL;
 
 void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cursor)
 {
-	if(!surface) {
-		printk(KERN_ERR "tl880: NULL surface in tl880_add_cursor\n");
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(cursor)) {
 		return;
 	}
 
@@ -114,60 +106,47 @@ void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cursor
 
 void tl880_delete_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cursor)
 {
-	eax = g_cursor_list;
-	esi = cursor;
+	struct SOverlaySurface *listp = g_cursor_list;
 
-	if(!tl880dev || !cursor) {
-		printk(KERN_ERR "tl880: NULL parameter in tl880_delete_cursor\n");
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(cursor)) {
 		return;
 	}
 
-	if(esi == eax) {
-		eax = esi->field_6c;
-		g_cursor_list = eax;
+	if(cursor == g_cursor_list) {
+		g_cursor_list = cursor->next;
 		goto loc_3b31f;
 	}
 
-	goto loc_3b304;
-
-loc_3b304:
-	if(!eax) {
-		goto loc_3b33a;
+	if(!listp) {
+		return;
 	}
 
 loc_3b308:
-	ecx = eax->field_6c;
-	if(ecx == esi) {
+	if(listp->next == cursor) {
 		goto loc_3b315;
 	}
 
-	eax = ecx;
-	if(eax) {
+	listp = listp->next;
+	if(listp) {
 		goto loc_3b308;
 	}
 
 loc_3b315:
-	if(!eax) {
-		goto loc_3b33a;
+	if(!listp) {
+		return;
 	}
 
-	ecx = esi->field_6c;
-	eax->field_6c = ecx;
+	listp->next = cursor->next;
 
 loc_3b31f:
-	eax = esi->field_8;
-	esi->field_6c = 0;
-	if(!eax) {
-		goto loc_3b330;
+	cursor->next = NULL;
+	if(cursor->field_8) {
+		/* deallocateOSDMemory(cursor->field_8); */
 	}
 
-	/* deallocateOSDMemory(eax); */
+	cursor->field_8 = 0;
+	kfree(cursor);
 
-loc_3b330:
-	esi->field_8 = 0;
-	kfree(esi);
-
-loc_3b33a:
 	return;
 }
 
