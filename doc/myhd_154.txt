@@ -143,5 +143,6 @@ function CDMA::VopOn returns 1 if aux video is enabled (reg 10000 bit 4)
 
 cJanus Functions
 ----------------
+isr_VideoSync_Tv() - Interrupt service routine that swaps field buffers
 NtscDpcEofService(tagContext *,int) - End of field interrupt service routine
 

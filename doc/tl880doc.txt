@@ -33,19 +33,74 @@ VSC 1000-1028
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000000	VSC Enable (?)
-	00000000|00000000|00000000|00000010
-	00000000|00000000|00000000|00000100
+	00000000|00000000|00000000|00000001	VSC Enable (?) 0 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00000000|00000000|00000010	0 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00000000|00000000|00000100	0 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00000000|00000000|00001000	0 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00000000|00000000|00010000	1 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00000000|00000000|00100000	0 in cJanus::StartNtsc->SetVSCCtrl
+	00000000|00nnnnnn|nnnnnnnn|nn000000	0x64 in cJanus::StartNtsc->SetVSCCtrl
 
 1008 is VSC interrupt mask
 100c is last queued VSC interrupt
 
-1010 is VSC MIF
+1010 is used in SetVSCMIF
      is used in cJanus::RotateVscCapFrame bits 0xb-0x8,0x3-0x0
+     SetVSCMIF writes 1010 and then verifies with ReadTL850RegBits up to 5 times
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn	0 in cJanus::StartNtsc->SetVSCMIF
+	00000000|00000000|0000nnnn|00000000	1 in cJanus::StartNtsc->SetVSCMIF
 
 1014 is written with 0x61777 in cJanus::StartNtsc
-     is SetVSCScaler
+     is used in SetVSCScaler
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|0000nnnn|nnnnnnnn|nnnnnnnn	(arg4 << 13) / arg0 in SetVSCScaler (arg0=arg4=720 in cJanus::StartNtsc->SetVSCScaler)
+	nnnnnnnn|00000000|00000000|00000000	0 in SetVSCScaler
+
 1018 is written with 0x2d002d0 in cJanus::StartNtsc
+     used in SetVSCScaler
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn	arg0 in SetVSCScaler
+	000000nn|nnnnnnnn|00000000|00000000	arg4 in SetVSCScaler
+
+101c used in SetVSCVBI
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn	arg0 in SetVSCVBI
+	0000000n|nnnnnnnn|00000000|00000000	arg4 in SetVSCVBI
+
+1020 used in SetVSCVBI
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn	arg8 in SetVSCVBI
+	0000000n|nnnnnnnn|00000000|00000000	argc in SetVSCVBI
+
+1024 used in SetVSCVBI
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	000000nn|nnnnnnnn|nnnnnnnn|nnnnn000	arg10 in SetVSCVBI
+
+1028 used in SetVSCVBI
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	000000nn|nnnnnnnn|nnnnnnnn|nnnnn000	arg10 in SetVSCVBI
 
 APU (Audio Processing Unit) 3000-307c
 
@@ -163,6 +218,7 @@ MCE 6000-603c
 600c is MCE interrupt type
 
 6014 used in isr_StartCodeSearch, cJanus::SearchHdrWithPacing
+     written with 3 in cJanus::isr_NonSlice_Tv
 
 6018 is a bitfield used in cJanus::SearchHdrWithPacing
 
@@ -220,16 +276,20 @@ VPIP 7000-7030
 
 7008 is VPIP interrupt type
 
-700c is used in DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting,
-     cJanus::UpdateVpipBufReg
+700c is used in cJanus::DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting,
+     cJanus::UpdateVpipBufReg, cJanus::DeinterlaceBottom
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|0000nnnn
-	00000000|00000000|0000nnnn|00000000
-	00000000|0000nnnn|00000000|00000000
-	0000nnnn|00000000|00000000|00000000
+	00000000|00000000|00000000|0000nnnn	tagContext[1d4] in cJanus::DeinterlaceTop
+						tagContext[1d4] in cJanus::DeinterlaceBottom
+	00000000|00000000|0000nnnn|00000000	tagContext[368] in cJanus::DeinterlaceTop
+						tagContext[1d8] in cJanus::DeinterlaceBottom
+	00000000|0000nnnn|00000000|00000000	tagContext[1bc] in cJanus::DeinterlaceTop
+						tagContext[1c4] in cJanus::DeinterlaceBottom
+	0000nnnn|00000000|00000000|00000000	tagContext[1c0] in cJanus::DeinterlaceTop
+						tagContext[1c8] in cJanus::DeinterlaceBottom
 
 7010 used in cJanus::VpipSetting
 
@@ -336,7 +396,15 @@ register 10000 is display options bitfield:
 	00000001 00000000	Color bars
 	00000100 00000000	Y'PbPr color
 
-register 10004 is a status register for the video generator (?)
+10004 is a status register for the video generator (?)
+      used in isr_VideoSync_Tv
+      probably read-only
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000100	Read in isr_VideoSync_Tv
+
 
 10008 DPC interrupt mask bitfield
 1000C DPC interrupt type bitfield
@@ -418,7 +486,15 @@ register 10004 is a status register for the video generator (?)
   0x5800 is DD
 
 10040 bottom two bits used in DoProgressiveFrame as a bitfield, apparently some
-kind of register selection for 10068,1006c
+      kind of register selection for 10068,1006c
+      used in cJanus::isr_NonSlice_Tv
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|000000nn
+	00000000|00000000|00000000|00100000	1 in cJanus::isr_NonSlice_Tv
+	
 
 10048 is DispBufReg(?) or NtscDispFrame?
       bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
@@ -569,6 +645,9 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 25768-257e8 Demux command table?
 
 26800 and 26804 used in Demux_stop and demux_init
+
+27804,27808 used in Demux_GetSTC (([27804] >> 0xf) | ([27808] << 0x11))
+            probably read-only
 
 27810 written with _setValue in Demux_UpdatePCR
       written with 0xa000 in cJanus::SetNtscAudioClock
