@@ -52,7 +52,7 @@ unsigned long _g_idTracker = 0;
 
 void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surface);
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
-
+unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long addr);
 
 struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _SURFACE_DESC *surface)
 {
@@ -107,7 +107,7 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 		return NULL;
 	}
 
-	if(1 /* (new_surface->field_c = getSDRAMoffset(new_surface->field_8)) == -1 */) {
+	if((new_surface->field_c = tl880_get_osdmem_offset(tl880dev, new_surface->field_8)) == -1) {
 		/* deallocateOSDMemory(new_surface->field_8); */
 		kfree(new_surface);
 		return NULL;
