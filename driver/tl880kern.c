@@ -114,6 +114,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 	int err = 0;
 
 	if(!file || !tl880dev) {
+		printk(KERN_ERR "tl880: NULLs passed to tl880_ioctl!\n");
 		return -EINVAL;
 	}
 
@@ -124,6 +125,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		err = !access_ok(VERIFY_READ, (void *)arg, _IOC_SIZE(cmd));
 	}
 	if(err) {
+		printk(KERN_ERR "tl880: Invalid parameter to tl880_ioctl\n");
 		return -EFAULT;
 	}
 	
@@ -150,6 +152,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			break;
 		default:
 			/* return -ENOIOCTLCMD; */
+			printk(KERN_ERR "tl880: unsupported ioctl\n");
 			return -ENOTTY;
 	}
 	return 0;
@@ -352,6 +355,8 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 			write_register(tl880dev, 0x10198, 0xe5900);
 			break;
 		case PCI_SUBSYSTEM_VENDOR_ID_TELEMANN:
+		case PCI_SUBSYSTEM_VENDOR_ID_ZERO:
+			/* The HiPix uses subsytem ID 0000:0000 */
 			printk(KERN_INFO "tl880: Found Telemann Systems ");
 			switch(tl880dev->subsys_device_id) {
 				case PCI_SUBSYSTEM_DEVICE_ID_HIPIX:

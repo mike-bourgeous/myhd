@@ -42,8 +42,11 @@
 #include "tuner.h"
 
 /*** Driver definitions ***/
+
+/* I2C */
 #define I2C_CLIENTS_MAX				16
 
+/* PCI */
 #define PCI_VENDOR_ID_TERALOGIC			0x544c
 #define PCI_DEVICE_ID_TERALOGIC_880		0x350
 
@@ -55,7 +58,8 @@
 #define PCI_SUBSYSTEM_DEVICE_ID_WINTV_HD	0x4600
 
 #define PCI_SUBSYSTEM_VENDOR_ID_TELEMANN	0x1378
-#define PCI_SUBSYSTEM_DEVICE_ID_HIPIX		0xBEEF
+#define PCI_SUBSYSTEM_VENDOR_ID_ZERO		0x0000
+#define PCI_SUBSYSTEM_DEVICE_ID_HIPIX		0x0000
 
 /* We'll give each new manufacturer a 0x10 bump */
 #define TL880_CARD_HIPIX		0x20
@@ -238,6 +242,16 @@ void tl880_disable_apu(struct tl880_dev *tl880dev);
 void tl880_ntsc_audio_dpc(struct tl880_dev *tl880dev);
 void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev);
 void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
+
+/* tl880dpc.c */
+void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
+void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
+
+/* tl880modes.c */
+
+/* tl880demux.c */
+
+/* tl880dma.c */
 
 #endif /* __KERNEL__ */
 

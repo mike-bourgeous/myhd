@@ -146,3 +146,9 @@ cJanus Functions
 isr_VideoSync_Tv() - Interrupt service routine that swaps field buffers
 NtscDpcEofService(tagContext *,int) - End of field interrupt service routine
 
+
+cSemaphore Functions
+--------------------
+Wait() takes a 64-bit int
+Signal() takes a long and a uint
+

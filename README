@@ -1,8 +1,6 @@
 MyHD driver and utility package  --  http://myhd.sourceforge.net/
 Copyright 2003, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
 
-debuglogs/
-	Output from SoftICE register dumps and so on (useless without parsing)
 doc/
 	What I know about the chip so far
 driver/
