@@ -166,6 +166,23 @@ void tl880_dpc_video_sync_dvd(struct tl880_dev *tl880dev)
 	dpc_hsync_cnt++;
 	if(0 /* (cJanus->0x10388)->0x26c != 0 */) {
 		goto loc_294ea;
+loc_294ea:
+		/* ebp = 1; */
+		
+		/* field_select xor= ebp */
+		field_select ^= 1;
+		
+		write_regbits(tl880dev, 0x10000, 0, 0, field_select);
+		
+		if(field_select == 0) {
+			var_10 = 0;
+			
+			goto loc_295c9;
+		}
+		
+		var_10 = 1;
+		
+		goto loc_29511;
 	}
 
 	/* val = (cJanus->0x10388)->0x270; */
@@ -189,27 +206,9 @@ void tl880_dpc_video_sync_dvd(struct tl880_dev *tl880dev)
 		write_regbits(tl880dev, 0x10000, 0, 0, 1);
 	}
 
-loc_294e1:
 	var_10 = 0;
 
 	goto loc_295c9;
-
-loc_294ea:
-	/* ebp = 1; */
-
-	/* field_select xor= ebp */
-	field_select ^= 1;
-
-	write_regbits(tl880dev, 0x10000, 0, 0, field_select);
-
-	if(field_select == 0) {
-		/* goto loc_294e1; */
-		var_10 = 0;
-		
-		goto loc_295c9;
-	}
-
-	var_10 = 1;
 
 loc_29511:
 	/* ebp = &(cJanus->0xf4); */

@@ -1,0 +1,10 @@
+Add functions to set interrupt masks
+Get rid of temporary static variables
+Add ioctl interface for mode switch function and other functions
+Use request_firmware() when it becomes more commonly available
+
+
+
+
+vim: tw=80
+

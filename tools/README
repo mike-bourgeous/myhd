@@ -1,3 +1,5 @@
+MyHD Linux Driver - Userspace Tools
+
 To turn on color bars, first insmod the tl880 driver, then run
 
 cd dpc; ./dpcaux 0 0 0; cd ..
@@ -14,36 +16,48 @@ regload
 	Loads a dump of the TL880 register space from a file (must be 1048576
 	bytes).  This will probably hard lock your system if the card has
 	already been initialized.
+	
 regdump
 	Dumps the entire 1MB register space to a file.  Note that most of the
 	register space is either unused or redundant; hexdump can be used to
 	filter out the redundant areas and produce an ascii file for human
 	consumption.
+	
 readreg
 	Reads the value of a register and prints it to stdout.  Parameter is in
 	hexadecimal.  Uses mmap() and dereferences a pointer.  The mmap()
 	interface will go away in the future in favor of an ioctl().
+	
 writereg
 	Writes a value to a register.  Parameters are in hexadecimal.  Uses
 	mmap() and dereferences a pointer.  The mmap() interface will go away in
 	the future in favor of an ioctl().
+	
 setbits
 	Command line interface to the set_bits() function.
+	
 write4reg
-	Writes four registers at once; useful for writing parsed SoftICE dumps
+	Writes four registers at once; useful for writing parsed register dumps
 	to the TL880 register space.
+	
 iocsetvip
 	Sets the VIP state (0, 1, or 2).  I don't know what that means,
 	exactly....  Does something to the GPIO regs (0x10194,0x10198).
+	
 iocreadreg
 	Same thing as readreg but uses an ioctl() instead of mmap() and
 	dereference.  The ioctl() interface will be preferred in the future.
+	
 iocwritereg
 	Same thing as writereg but uses an ioctl() instead of mmap() and
 	dereference.  The ioctl() interface will be preferred in the future.
+	
 randram
 	Randomizes part of the TL880 memory (to see if anything happens).
 
+testdpcint.sh
+	Enables video output and activates DPC interrupts to test the DPC
+	interrupt handler.
 
 vim: tw=80
 

@@ -14,8 +14,7 @@ at http://myhd.sourceforge.net/howtohelp.php.
 
 For more information, please view the mailing list archives.  Also read all the
 README files in this driver distribution (find . -name README).  Reading source
-code is also good.  The tl880kern.c file has the most comments, if you were
-wondering.
+code is also good.
 
 Remember that this driver has no video capture capability.  The kernel module
 creates three devices per TL880 card in /dev/tl880 to allow all users to mmap

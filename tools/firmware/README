@@ -1,7 +1,9 @@
 The firmware files included in this distribution are copied from /dev/zero
 and will not work for any card.  They may even cause your system to hang if
 you try to upload them.  You must extract a valid firmware from the card's
-driver.
+driver.  Firmware is not necessary for many card functions.  This program should
+eventually be replaced with use of the request_firmware() kernel function when
+kernels including that function become more widespread.
 
 To extract the firmware from the MyHD 1.54 driver, download the 1.54 driver
 .zip file (file number 23 date 2002-05-17) from:
@@ -30,6 +32,8 @@ Verify that the file is 595144 bytes, and run ./wintvhd_firmware_2120114.sh
 
 a6e5b1a3ee3504aa3a99f54bbcadb517  Janus.sys
 
+
+Once the firmware is extracted, simply use ./firmupload to upload.
 
 vim:tw=80
 
