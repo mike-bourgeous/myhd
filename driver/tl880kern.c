@@ -57,10 +57,20 @@
 #undef  IDEBUG	 		/* debug irq handler */
 #undef  MDEBUG	 		/* debug memory management */
 
+/* driver global variables */
 unsigned int debug;
 
+/* module parameters */
 MODULE_PARM(debug, "i");
+MODULE_PARM_DESC(debug, "Set TL880 driver debug level (currently ignored)");
+
+/* local static functions */
+static struct tl880_dev *unconfigure_tl880(struct tl880_dev *tl880dev);
+
+/* module information for modinfo */
 MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Mike Bourgeous http://myhd.sf.net/");
+MODULE_DESCRIPTION("Kernel driver for TL880-based HDTV cards");
 
 
 #ifdef DEBUG
@@ -397,6 +407,7 @@ struct tl880_dev *tl880_create_dev()
 
 	/** Housekeeping **/
 	tl880dev->next = NULL;
+	tl880dev->pcidev = NULL;
 	tl880dev->id = 0;
 	tl880dev->subsys_vendor_id = 0;
 	tl880dev->subsys_device_id = 0;
@@ -411,6 +422,10 @@ struct tl880_dev *tl880_create_dev()
 	tl880dev->unkspace = NULL;
 	tl880dev->unkphys = 0;
 	tl880dev->unklen = 0;
+
+	/** DMA **/
+	tl880dev->dmavirt = NULL;
+	tl880dev->dmaphys = 0;
 
 	/** I2C **/
 	tl880dev->minbus = 0;
@@ -493,22 +508,32 @@ static int configure_tl880(struct pci_dev *dev)
 	
 	printk(KERN_INFO "tl880: initializing card number %i\n", n_tl880s);
 
+	/* Allocate device info struct */
 	if(!(tl880dev = tl880_create_dev())) {
 		printk(KERN_ERR "tl880: could not create tl880 device struct; out of memory\n");
 		return -ENOMEM;
 	}
 	
+	/* Verify 32-bit DMA */
+	if((result = pci_set_dma_mask(dev, 0xffffffff))) {
+		printk(KERN_ERR "tl880: card does not support 32-bit DMA\n");
+		delete_tl880(tl880dev);
+		return result;
+	}
+
+	/* Set IRQ handler */
 	if((result = request_irq(dev->irq, tl880_irq, SA_SHIRQ, "tl880", tl880dev)) < 0) {
 		printk(KERN_ERR "tl880: could not set irq handler for irq %i\n", dev->irq);
 		delete_tl880(tl880dev);
 		return result;
 	}
+	tl880dev->irq = dev->irq;
 
+	/* Initialize housekeeping values */
+	tl880dev->pcidev = dev;
 	tl880dev->id = n_tl880s;
 	tl880dev->subsys_vendor_id = dev->subsystem_vendor;
 	tl880dev->subsys_device_id = dev->subsystem_device;
-	
-	tl880dev->irq = dev->irq;
 
 	/* Map and store memory region (bar0) */
 	tl880dev->memspace = ioremap(pci_resource_start(dev, 0), pci_resource_len(dev, 0));
@@ -516,7 +541,7 @@ static int configure_tl880(struct pci_dev *dev)
 	tl880dev->memlen = pci_resource_len(dev, 0);
 	if(!tl880dev->memlen) {
 		printk(KERN_ERR "tl880: card %i mem has zero length!\n", tl880dev->id);
-		delete_tl880(tl880dev);
+		unconfigure_tl880(tl880dev);
 		return -ENODEV;
 	}
 
@@ -526,7 +551,7 @@ static int configure_tl880(struct pci_dev *dev)
 	tl880dev->reglen = pci_resource_len(dev, 3);
 	if(!tl880dev->reglen) {
 		printk(KERN_ERR "tl880: card %i register space has zero length!\n", tl880dev->id);
-		delete_tl880(tl880dev);
+		unconfigure_tl880(tl880dev);
 		return -ENODEV;
 	}
 
@@ -536,7 +561,7 @@ static int configure_tl880(struct pci_dev *dev)
 	tl880dev->unklen = pci_resource_len(dev, 4);
 	if(!tl880dev->unklen) {
 		printk(KERN_ERR "tl880: card %i unknown space has zero length!\n", tl880dev->id);
-		delete_tl880(tl880dev);
+		unconfigure_tl880(tl880dev);
 		return -ENODEV;
 	}
 
@@ -545,6 +570,12 @@ static int configure_tl880(struct pci_dev *dev)
 		tl880dev->regphys, (unsigned long)tl880dev->regspace,
 		tl880dev->unkphys, (unsigned long)tl880dev->unkspace);
 
+	/* Allocate DMA buffer */
+	if(!(tl880dev->dmavirt = pci_alloc_consistent(dev, 0x100000, &tl880dev->dmaphys))) {
+		printk(KERN_ERR "tl880: dma failed to allocate; most functions unavailable\n");
+		tl880dev->dmaphys = 0;
+	}
+		
 	/* Create /dev/tl880/... character devices with world read/write */
 	sprintf(buf, "mem%i", tl880dev->id);
 	tl880dev->devfs_device = devfs_register(devfs_dir, buf, 
@@ -593,23 +624,39 @@ static struct tl880_dev *unconfigure_tl880(struct tl880_dev *tl880dev)
 	
 	printk(KERN_INFO "tl880: deinitializing card number %i\n", tl880dev->id);
 
+	tl880_disable_interrupts(tl880dev);
+
 	tl880_deinit_i2c(tl880dev);
 
 	free_irq(tl880dev->irq, tl880dev);
+
+	/* Unmap memory regions */
 	if(tl880dev->memspace) {
 		iounmap(tl880dev->memspace);
+		tl880dev->memspace = NULL;
 	}
 	if(tl880dev->regspace) {
 		iounmap(tl880dev->regspace);
+		tl880dev->regspace = NULL;
 	}
 	if(tl880dev->unkspace) {
 		iounmap(tl880dev->unkspace);
+		tl880dev->unkspace = NULL;
 	}
 
+	/* Free DMA regions */
+	if(tl880dev->dmavirt) {
+		pci_free_consistent(tl880dev->pcidev, 0x100000, tl880dev->dmavirt, tl880dev->dmaphys);
+		tl880dev->dmavirt = NULL;
+		tl880dev->dmaphys = 0;
+	}
+
+	/* Remove /dev devfs entries */
 	if(tl880dev->devfs_device) {
 		devfs_unregister(tl880dev->devfs_device);
 	}
 
+	/* Return the next card in the linked list and free this one */
 	next = tl880dev->next;
 	delete_tl880(tl880dev);
 	

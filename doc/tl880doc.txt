@@ -634,11 +634,14 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 247e8 plus some offset is used in SetChannelWritePtr
 
+247f0 plus some offset is used in SetTransportCaptureBuffer
+
 24be8 plus some offset is used in SetPesChannelWritePtr
 
 24d68.. used in InitPSI
 
 25718-25728,25750,25754 used in _auxLdDscMbox (called in VopLoadDescriptor)
+	This function is related to DMA.
 
 25728 is auxTstDscrMboxEmpty
 

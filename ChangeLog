@@ -2,6 +2,12 @@
 
 	* Added extra information about CDma.
 	* Added tl880_set_dpc_clock.
+	* Added some comments to tl880.h.
+	* Added pci_dev and DMA buffer to struct tl880_dev.
+	* Added DMA buffer allocate/deallocate to tl880kern.c.
+	* Added new DMA function to tl880dma.c.
+	* Added some more comments to tl880kern.c.
+	* Fixed potential memory leak if memory mapping failed.
 
 2003-09-13	Mike Bourgeous		<nitrogen@slimetech.com>
 

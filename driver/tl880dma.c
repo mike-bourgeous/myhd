@@ -74,17 +74,27 @@ void tl880_aux_dma_free(unsigned int dma)
 }
 
 struct tl880_dma_info {
-	unsigned long field_0;
-	unsigned long field_4;
-	unsigned long field_8;
-	unsigned long field_c;
-	unsigned long field_10;
+	unsigned long field_0;		/* ex: 1f54a280 */
+	unsigned long field_4;		/* ex: 0000000c */
+	unsigned long field_8;		/* ex: 00005000 */
+	unsigned long field_c;		/* ex: 00002800 */
+	unsigned long field_10;		/* ex: 0000ff14 */
 	unsigned long field_14;
 };
 
 void tl880_aux_load_dma_mbox(struct tl880_dev *tl880dev, struct tl880_dma_info *dmainfo)
 {
-loc_1d68a:
+	/*
+	 * Example register writes for these registers:
+	 * 25758 0000FF14
+	 * 25718 00001F54
+	 * 2571C 0000A280
+	 * 25720 0000A000
+	 * 25724 0000A000
+	 * 25728 0000000C
+	 */
+
+
 	if(!tl880dev || !dmainfo) {
 		printk(KERN_ERR "tl880: NULL pointer to tl880_aux_load_dma_mbox\n");
 	}

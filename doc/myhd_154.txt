@@ -136,10 +136,18 @@ function CDma::Init(x,y):
 	cJanus::InitAuxVideo
 	CDma::DmaRelatedWSettings
 
+CDma+0 may be pointer to a KStreamAdapter
+CDma+48 is enum VOPMode
 CDma+60 may be xres for capture
 CDma+64 may be yres for capture
 CDma+6c may be xres for preview
 CDma+70 may be yres for preview
+
+
+DMA FUNCTIONS
+-------------
+_auxLdDscMbox seems to be the function that writes a DMA pointer to the card
+SetTransportCaptureBuffer gets TL850 memory, and writes to MIF region
 
 
 OSD FUNCTIONS

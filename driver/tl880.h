@@ -126,71 +126,75 @@ struct tl880_i2c_bus {
 
 struct tl880_dev {
 	/** Housekeeping stuff **/
-	struct tl880_dev *next;	/* Linked list pointer */
-	int id;			/* Card number */
-	unsigned short subsys_vendor_id;
-	unsigned short subsys_device_id;
-	unsigned short board_type;
+	struct tl880_dev *next;			/* Linked list pointer */
+	struct pci_dev *pcidev;			/* PCI device structure */
+	int id;					/* Card number */
+	unsigned short subsys_vendor_id;	/* Card vendor ID */
+	unsigned short subsys_device_id;	/* Card device ID */
+	unsigned short board_type;		/* Card type identifier */
 
 	/** Card's I/O and memory space **/
-	void *memspace;
-	unsigned long memphys;
-	unsigned long memlen;
-	void *regspace;
-	unsigned long regphys;
-	unsigned long reglen;
-	void *unkspace;
-	unsigned long unkphys;
-	unsigned long unklen;
+	void *memspace;				/* Mapped memory space */
+	unsigned long memphys;			/* Physical memory address */
+	unsigned long memlen;			/* Memory space length */
+	void *regspace;				/* Mapped register space */
+	unsigned long regphys;			/* Physical register address */
+	unsigned long reglen;			/* Register space length */
+	void *unkspace;				/* Mapped unknown space */
+	unsigned long unkphys;			/* Physical unknown address */
+	unsigned long unklen;			/* Unknown space length */
+
+	/** DMA buffer **/
+	void *dmavirt;				/* System-side DMA buffer pointer */
+	dma_addr_t dmaphys;			/* Bus-side DMA buffer pointer */
 
 	/** I2C stuff **/
-	int minbus;
-	int maxbus;
-	struct tl880_i2c_bus *i2cbuses;
+	int minbus;				/* Lower bus-type ID for this card */
+	int maxbus;				/* Upper bus-type ID for this card */
+	struct tl880_i2c_bus *i2cbuses;		/* Array of I2C buses on this card */
 
 	/** Interrupt stuff **/
-	struct tq_struct bh;		/* Device-specific info for interrupt bottom half */
-	unsigned int irq;		/* Interrupt line */
+	struct tq_struct bh;			/* Device-specific info for interrupt bottom half */
+	unsigned int irq;			/* Interrupt line */
 
-	unsigned long int_mask;		/* Global interrupt enable mask */
-	unsigned long int_type;		/* Type of interrupt to service */
-	unsigned long int_count;	/* Number of interrupts received */
+	unsigned long int_mask;			/* Global interrupt enable mask */
+	unsigned long int_type;			/* Type of interrupt to service */
+	unsigned long int_count;		/* Number of interrupts received */
 
-	unsigned long vsc_mask;		/* VSC interrupt mask */
-	unsigned long vsc_type;		/* Type of VSC interrupt received */
-	unsigned long vsc_count;	/* Number of VSC interrupts */
+	unsigned long vsc_mask;			/* VSC interrupt mask */
+	unsigned long vsc_type;			/* Type of VSC interrupt received */
+	unsigned long vsc_count;		/* Number of VSC interrupts */
 	
-	unsigned long apu_mask;		/* APU interrupt mask */
-	unsigned long apu_type;		/* Type of APU interrupt received */
-	unsigned long apu_count;	/* Number of APU interrupts */
+	unsigned long apu_mask;			/* APU interrupt mask */
+	unsigned long apu_type;			/* Type of APU interrupt received */
+	unsigned long apu_count;		/* Number of APU interrupts */
 
-	unsigned long blt_mask;		/* BLT interrupt mask */
-	unsigned long blt_type;		/* Type of BLT interrupt received */
-	unsigned long blt_count;	/* Number of BLT interrupts */
+	unsigned long blt_mask;			/* BLT interrupt mask */
+	unsigned long blt_type;			/* Type of BLT interrupt received */
+	unsigned long blt_count;		/* Number of BLT interrupts */
 
-	unsigned long mce_mask;		/* MCE interrupt mask */
-	unsigned long mce_type;		/* Type of MCE interrupt received */
-	unsigned long mce_count;	/* Number of MCE interrupts */
+	unsigned long mce_mask;			/* MCE interrupt mask */
+	unsigned long mce_type;			/* Type of MCE interrupt received */
+	unsigned long mce_count;		/* Number of MCE interrupts */
 
-	unsigned long vpip_mask;	/* VPIP interrupt mask */
-	unsigned long vpip_type;	/* Type of VPIP interrupt received */
-	unsigned long vpip_count;	/* Number of VPIP interrupts */
-	unsigned long vpip_lock;	/* VPIP handler is running */
+	unsigned long vpip_mask;		/* VPIP interrupt mask */
+	unsigned long vpip_type;		/* Type of VPIP interrupt received */
+	unsigned long vpip_count;		/* Number of VPIP interrupts */
 
-	unsigned long hpip_mask;	/* HPIP interrupt mask */
-	unsigned long hpip_type;	/* Type of HPIP interrupt received */
-	unsigned long hpip_count;	/* Number of HPIP interrupts */
+	unsigned long hpip_mask;		/* HPIP interrupt mask */
+	unsigned long hpip_type;		/* Type of HPIP interrupt received */
+	unsigned long hpip_count;		/* Number of HPIP interrupts */
 
-	unsigned long dpc_mask;		/* DPC interrupt mask */
-	unsigned long dpc_type;		/* Type of DPC interrupt received */
-	unsigned long dpc_count;	/* Number of DPC interrupts */
+	unsigned long dpc_mask;			/* DPC interrupt mask */
+	unsigned long dpc_type;			/* Type of DPC interrupt received */
+	unsigned long dpc_count;		/* Number of DPC interrupts */
 
-	unsigned long tsd_mask;		/* TSD interrupt mask */
-	unsigned long tsd_type; 	/* Type of TSD interrupt received */
-	unsigned long tsd_count;	/* Number of TSD interrupts */
+	unsigned long tsd_mask;			/* TSD interrupt mask */
+	unsigned long tsd_type;			/* Type of TSD interrupt received */
+	unsigned long tsd_count;		/* Number of TSD interrupts */
 
 	/** Devfs stuff **/
-	devfs_handle_t devfs_device;
+	devfs_handle_t devfs_device;		/* Devfs information */
 };
 
 #endif /* __KERNEL__ */

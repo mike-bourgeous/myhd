@@ -18,7 +18,7 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 	/* esi = cJanus->0x10f94; */
 	/* cJanus->0x10f98 = 1; // is this VPIP_in_middle_of_field? */
 
-	if(row_cnt < 0x10 /* number of rows? */) {
+	if(row_cnt < 0x10 /* number of rows in vpip table? */) {
 		write_regbits(tl880dev, 0x7000, 0x15, 0x10, 0x3d /* (cJanus->0x10f94)->0xd8[row_cnt * 4] */);
 		write_register(tl880dev, 0x701c, 0x92 /* (cJanus->0x10f94)->0x10[row_cnt * 4] */);
 		row_cnt++;
