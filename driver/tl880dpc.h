@@ -81,7 +81,7 @@ struct tl880_mode_def {
 /* tl880dpc.c */
 unsigned long tl880_calc_dpc_pll_const(unsigned long a, unsigned char b, unsigned char c);
 void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
-void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 interlace);
+void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigned long yres, long interlace);
 void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
 int tl880_dpc_int(struct tl880_dev *tl880dev);
 

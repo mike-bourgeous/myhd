@@ -16,11 +16,9 @@ void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsign
 	write_register(tl880dev, 0x5800, tl880_calc_dpc_pll_const(a, b, c));
 }
 
-
-
 /* This function has not been fully tested and may be incorrect */
 /* I would probably discard this function and store these values as part of a mode array */
-void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 interlace)
+void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigned long yres, long interlace)
 {
 	unsigned long val = 0;
 	unsigned long var_4 = 1;
@@ -45,16 +43,17 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 int
 				val = tl880_calc_dpc_pll_const(0x14, 2, 0);
 			}
 			break;
-	}
-
-	if(interlace) {
-		val = 0x60070;
-	} else if(1 /* cJanus->0x16720 != 1 */) {
-		val = 0x60050;
-	} else if(0 /* cJanus->0x16724 == 0x10 */) {
-		val = 0x60050;
-	} else {
-		val = 0x60070;
+		default:
+			if(interlace) {
+				val = 0x60070;
+			} else if(1 /* cJanus->0x16720 != 1 */) {
+				val = 0x60050;
+			} else if(0 /* cJanus->0x16724 == 0x10 */) {
+				val = 0x60050;
+			} else {
+				val = 0x60070;
+			}
+			break;
 	}
 
 	write_register(tl880dev, 0x5800, val);

@@ -1,6 +1,8 @@
 2003-09-20	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Better flow in tl880_isr_video_sync_dvd in tl880dpc.c.
+	* Added script to test DPC interrupt in tools/.
+	* Fixed a bug in tl880dpc.c (tl880_set_dpc_clock).
 
 2003-09-19	Mike Bourgeous		<nitrogen@slimetech.com>
 

@@ -11,6 +11,9 @@ all:
 	gcc -O2 -Wall iocsetvip.c -o iocsetvip -ggdb3 -I../driver/
 	gcc -O2 -Wall iocreadreg.c -o iocreadreg -ggdb3 -I../driver/
 	gcc -O2 -Wall iocwritereg.c -o iocwritereg -ggdb3 -I../driver/
+
+	chmod +x testdpcint.sh
+
 clean:
 	rm -f randram regload regdump readreg setbits write4reg writereg iocsetvip iocreadreg iocwritereg
 
