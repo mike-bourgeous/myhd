@@ -127,28 +127,19 @@ void VopLoadDescriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)
 	unsigned long var_4;
 	unsigned long tsdDmaMode = 0, tsdDmaActive = 0;
 	unsigned long g_tsDMAenabled = 0;
+	unsigned long tsDmaBufCnt = 0, tsDmaFullness = 0;
+	unsigned long g_tsBufWrPtr = 0;		/* Offset within DMA buffer */
 
-	
-	/*
-	eax = arg_4;
-	esi = (unsigned long)CDma;
-	eax <<= 4;
-	eax = eax+esi+4;
-	*/
-
-	edi = 0;
-
-	/* eax = (unsigned long)&CDma[(arg_4 << 2) + 1]; */
+	/* eax = (unsigned long)&CDma[(arg_4 << 4) + 4]; */
 	
 	if(CDma[0x34] == 0 || CDma[0x3c] == 0) {
 		/* eax = *(unsigned long *)(eax+4); */
-		eax = CDma[arg_4 * 4 + 2];
+		var_4 = CDma[arg_4 * 16 + 8];
 	} else {
 		/* eax = *(unsigned long *)(eax+8); */
-		eax = CDma[arg_4 * 4 + 3];
+		var_4 = CDma[arg_4 * 16 + 0xc];
 	}
 
-	var_4 = eax;
 #if 0
 	eax = 0 /* g_tsDMAenabled */;
 	if(0 /* g_tsDMAenabled */ == 0) {
@@ -164,44 +155,35 @@ void VopLoadDescriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)
 	}
 #endif
 
-	if(g_tsDMAenabled || (arg_4 != 0 && !(CDma[0x38] || CDma[0x3c]))) {
+	if(g_tsDMAenabled && (arg_4 || !(CDma[0x38] || CDma[0x3c]))) {
 		
 loc_25a66:
-		if(0 /* tsDmaBufCnt */ != 0) {
-			goto loc_25a73;
+		if(tsDmaBufCnt == 0) {
+			eax = 0 /* GetRawStreamCounter() */;
 		}
-		
-		eax = 0 /* GetRawStreamCounter() */;
 		
 loc_25a73:
 		/* 0x5e00 is 128 ts packets of 188 bytes each */
-		/* eax = RawStreamBufFullness() / 0x5e00; */
-		eax = 0;
+		eax = 0 /* RawStreamBufFullness() / 0x5e00 */;
 		
 		esi = 0x5e00;
 		
-		/*
-		edx = 0;
-		ecx = esi;
-		eax /= ecx;
-		*/
-		
-		/* tsDmaFullness = eax; */
-		if(eax == 0) {
+		tsDmaFullness = 0 /* RawStreamBufFullness() / 0x5e00 */; 
+		if(tsDmaFullness == 0) {
 			goto loc_25c08;
 		}
 		
-		if(0 /* tsDmaBufCnt */ != 0) {
+		if(tsDmaBufCnt != 0) {
 			goto loc_25aa1;
 		}
 		
-		if(eax >= 7) {
+		if(tsDmaFullness >= 7) {
 			goto loc_25c08;
 		}
 		
 loc_25aa1:
 		/* eax *= 0x5e00; */
-		edi = eax * 0x5e00;
+		edi = tsDmaFullness * 0x5e00;
 		
 		ebx = 0x2f000;
 		
@@ -212,37 +194,22 @@ loc_25aa1:
 		*/
 		ecx = 0x2f000 - 0 /* GetRawStreamRdPtr(1) */;
 		
-		if(ecx >= 0) {
+		if((0x2f000 - 0 /* GetRawStreamRdPtr(1) */) >= 0) {
 			goto loc_25ac8;
 		}
 		
-		/*
-		eax = GetRawStreamRdPtr(1);
-		edi = ebx;
-		edi -= eax;
-		*/
 		edi = 0x2f000 - 0 /* GetRawStreamRdPtr(1) */;
 		
 loc_25ac8:
 		tsd_dma_info.field_10 = 0xff04;
 		
-		/* eax = GetRawStreamRdPtr(0); */
-		eax = 0;
+		eax = 0 /* GetRawStreamRdPtr(0) */;
 		
-		ecx = 0 /* g_tsBufWrPtr */;
+		ecx = g_tsBufWrPtr;
 		tsd_dma_info.field_14 = eax;
-		/* eax = g_rawStreamPhyAddr; */
-		eax = tl880dev->dmaphys;
+		eax = tl880dev->dmaphys;	/* g_rawStreamPhyAddr */
 		ecx += eax;
 		tsd_dma_info.phys_addr = ecx;
-		edx = 0;
-		/*
-		eax = edi;
-		ecx = esi;
-		eax /= ecx;
-		*/
-		/* eax = edi / esi; */
-		/* eax = edi / 0x5e00; */
 		
 		tsdDmaMode = 0;
 		tsd_dma_info.field_8 = 0x5e00;
@@ -276,49 +243,45 @@ loc_25b29_auxdma:
 			goto loc_25b62;
 		}
 		
-		/* eax = CDma[0x60]; */
 		CDma[0x28] = CDma[0x60];
-		/* eax = CDma[0x64]; */
 		CDma[0x2c] = CDma[0x64];
 		eax = CDma[0x68];
+		CDma[0x5c] = eax;
 		goto loc_25b71;
 		
 loc_25b62:
-		/* eax = CDma[0x6c]; */
 		CDma[0x28] = CDma[0x6c];
-		/* eax = CDma[0x70]; */
 		CDma[0x2c] = CDma[0x70];
 		eax = CDma[0x74];
+		CDma[0x5c] = eax;
 		
 loc_25b71:
-		CDma[0x5c] = eax;
 		eax = CDma[0x2c] + 3;
 		
 		/* SetupAuxVideo(CDma[0x28], eax); */
 		goto loc_25bd2;
 		
 loc_25b80:
-		if(eax == 0) {
+		if(CDma[0x38] == 0) {
 			goto loc_25ba2;
 		}
 		
 		ecx = CDma[0x60];
-		if(CDma[0x28] != ecx) {
+		if(CDma[0x28] != CDma[0x60]) {
 			goto loc_25b94;
 		}
 		
 		eax = CDma[0x2c];
-		if(eax == CDma[0x64]) {
+		if(CDma[0x2c] == CDma[0x64]) {
 			goto loc_25bd2;
 		}
 		
 loc_25b94:
 		eax = CDma[0x64];
 		edx = CDma[0x68];
-		/* CDma[0x28] = ecx; */
 		CDma[0x28] = CDma[0x60];
-		/* CDma[0x2c] = eax; */
 		CDma[0x2c] = CDma[0x64];
+		CDma[0x5c] = edx;
 		goto loc_25bc3;
 		
 loc_25ba2:
@@ -339,22 +302,19 @@ loc_25ba2:
 loc_25bb7:
 		eax = CDma[0x70];
 		edx = CDma[0x74];
-		CDma[0x28] = ecx;
+		CDma[0x28] = CDma[0x6c];
 		CDma[0x2c] = CDma[0x70];
+		CDma[0x5c] = edx;
 		
 loc_25bc3:
 		eax += 3;
-		CDma[0x5c] = edx;
 		
 		/* SetupAuxVideo(ecx, eax); */
 		
 loc_25bd2:
-		/* eax = var_4; // delete this line */
 		ecx = CDma[0x5c];
 		vop_dma_info.phys_addr = var_4;
-		/* eax = CDma[0x2c]; */
 		eax = CDma[0x2c] / CDma[0x5c];
-		/* esi = CDma[0x28]; */
 		esi = CDma[0x28] * CDma[0x5c];
 		vop_dma_info.field_4 = eax;
 		vop_dma_info.field_8 = esi;
