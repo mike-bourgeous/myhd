@@ -17,7 +17,7 @@ all:
 
 	gcc -O2 -Wall rgb2ypbpr.c -o rgb2ypbpr -ggdb3
 
-	chmod +x testdpcint.sh
+	chmod +x testdpcint.sh dpc2dump.sh dpc2rand.sh
 
 clean:
 	rm -f randram regload regdump readreg setbits write4reg \
