@@ -51,8 +51,10 @@ struct SOverlaySurface {
 unsigned long _g_idTracker = 0;
 
 void tl880_add_cursor(struct SOverlaySurface *surface);
+unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
 
-struct SOverlaySurface *tl880_create_cursor(struct _SURFACE_DESC *surface)
+
+struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _SURFACE_DESC *surface)
 {
 	struct SOverlaySurface *new_surface;
 
@@ -100,7 +102,7 @@ struct SOverlaySurface *tl880_create_cursor(struct _SURFACE_DESC *surface)
 
 	new_surface->field_50 = surface->field_0;
 
-	if(1 /* !(new_surface->field_8 = allocateOSDMemory_Aligned(0x200, 0x10)) */) {
+	if(!(new_surface->field_8 = tl880_allocate_osd_memory(tl880dev, 0x200, 0x10))) {
 		kfree(new_surface);
 		return NULL;
 	}
@@ -129,7 +131,7 @@ void tl880_show_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surfa
 		if(!surface) {
 			printk(KERN_ERR "tl880: NULL surface in tl880_show_cursor\n");
 		} else {
-			write_regbits(tl880dev, 0x10100, 0x19, 4, surface->field_c >> 4);
+			write_regbits(tl880dev, 0x10100, 0x19, 4, surface->field_c / 16);
 			write_regbits(tl880dev, 0x10108, 9, 8, surface->field_3c);
 			write_regbits(tl880dev, 0x10108, 0x19, 0x18, surface->field_40);
 			write_regbits(tl880dev, 0x10108, 7, 0, surface->field_14);
@@ -193,7 +195,7 @@ int tl880_compact_osdmem()
 
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
-	struct OSDmemory *listp1, *listp2;
+	struct OSDmemory *listp1, *newmem;
 	unsigned long retval;
 	unsigned long alignsize = align - 1;
 	unsigned long mask = ~alignsize;
@@ -226,38 +228,80 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 	listp1 = _g_head;
 	while(listp1) {
 		if(!listp1->active && listp1->size > finalsize) {
-			if(!(listp2 = kmalloc(0x1c, 1))) {
+			if(!(newmem = kmalloc(0x1c, 1))) {
 				return 0;
 			}
 			
-			listp2->field_0 = 0;
-			listp2->virt_addr = 0;
-			listp2->phys_addr = 0;
-			listp2->size = 0;
-			listp2->active = 0;
-			listp2->id = ++_g_idTracker_0;
-			listp2->next = listp1->next;
-			listp1->next = listp2;
-			listp2->virt_addr = listp1->virt_addr + finalsize;
-			listp2->phys_addr = listp1->phys_addr + finalsize;
-			listp2->size = listp1->size - finalsize;
+			newmem->field_0 = 0;
+			newmem->virt_addr = 0;
+			newmem->phys_addr = 0;
+			newmem->size = 0;
+			newmem->active = 0;
+			newmem->id = ++_g_idTracker_0;
+			newmem->next = listp1->next;
+			listp1->next = newmem;
+			newmem->virt_addr = listp1->virt_addr + finalsize;
+			newmem->phys_addr = listp1->phys_addr + finalsize;
+			newmem->size = listp1->size - finalsize;
 			listp1->size = finalsize;
 			listp1->active = 1;
 		}
 	}
 
 	/* Out of space; count active and inactive memory and return */
-	listp2 = _g_head;
-	while(listp2) {
-		if(listp2->active) {
-			active_size += listp2->size;
+	listp1 = _g_head;
+	while(listp1) {
+		if(listp1->active) {
+			active_size += listp1->size;
 		} else {
-			inactive_size += listp2->size;
+			inactive_size += listp1->size;
 		}
-		listp2 = listp2->next;
+		listp1 = listp1->next;
 	}
 	printk(KERN_WARNING "tl880: out of OSD memory; active bytes: 0x%lx, inactive bytes: 0x%lx\n", active_size, inactive_size);
 	return 0;
+}
+
+unsigned long tl880_get_osdmem_offset(unsigned long id)
+{
+	unsigned long eax;
+	struct OSDmemory *ecx;
+	ecx = _g_head;
+
+loc_3a5ea:
+	if(!ecx) {
+		goto loc_3a61a;
+	}
+
+	eax = ecx->id;
+	if((eax & 0xfff00000) != 0x52300000) {
+		goto loc_3a61a;
+	}
+
+	if(ecx->active == 0) {
+		goto loc_3a60e;
+	}
+
+	eax = ecx->virt_addr;
+	eax += ecx->field_0;
+	if(eax == id) {
+		 goto loc_3a613;
+	}
+
+loc_3a60e:
+	ecx = ecx->next;
+	goto loc_3a5ea;
+
+loc_3a613:
+	eax = ecx->phys_addr;
+	eax += ecx->field_0;
+	goto locret_3a61d;
+	
+loc_3a61a:
+	return -1;
+
+locret_3a61d:
+	return eax;
 }
 
 
