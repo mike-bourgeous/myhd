@@ -2,6 +2,9 @@
 
 	* Fixed comment in WinTV-HD firmware extract script.
 	* Changed 8020 to 8024 in the HPIP range in tl880doc.txt.
+	* Removed two of the "still needed" items from README.
+	* Fixed a bug regarding I2C client allocation, attachment, and
+	  detachment.
 
 2003-08-18	Mike Bourgeous		<nitrogen@slimetech.com>
 

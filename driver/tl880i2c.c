@@ -201,9 +201,23 @@ void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *
 {
 	int i;
 	int j;
-	
-	for(i = 0; i < I2C_CLIENTS_MAX; i++) {
-		for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
+
+	if(!tl880dev) {
+		printk(KERN_ERR "tl880: null tl880dev in tl880_call_i2c_clients\n");
+		return;
+	}
+
+	if(!tl880dev->i2cbuses) {
+		printk(KERN_ERR "tl880: no i2cbuses found in tl880_call_i2c_clients on card %i\n", tl880dev->id);
+		return;
+	}
+
+	printk(KERN_DEBUG "tl880: tl880_call_i2c_clients:\n");
+	printk(KERN_DEBUG "tl880:\ttl880dev: 0x%08lx (card number %i)\n", (unsigned long) tl880dev, tl880dev->id);
+	printk(KERN_DEBUG "tl880:\ti2cbuses: 0x%08lx\n", (unsigned long)tl880dev->i2cbuses);
+
+	for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
+		for(i = 0; i < I2C_CLIENTS_MAX; i++) {
 			if (!tl880dev->i2cbuses[j].i2c_clients[i]) {
 				continue;
 			}
@@ -248,6 +262,10 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 			break;
 		}
 	}
+
+	if(i == I2C_CLIENTS_MAX) {
+		printk(KERN_ERR "tl880: out of I2C client spaces\n");
+	}
 	
 	if(client->driver->id == I2C_DRIVERID_TUNER) {
 		int tuner_type;
@@ -258,7 +276,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 			case TL880_CARD_MYHD_MDP110:
 			case TL880_CARD_MYHD_MDP120:
 			default:
-				tuner_type = 40;
+				tuner_type = 31;
 		}
 				
 		client->driver->command(client, TUNER_SET_TYPE, &tuner_type);
@@ -271,12 +289,20 @@ static int tl880_i2c_detach_inform(struct i2c_client *client)
 {
 	struct tl880_i2c_bus *i2cbus = (struct tl880_i2c_bus *)client->adapter->data;
 	struct tl880_dev *tl880dev = (struct tl880_dev *)i2cbus->dev;
+	int i;
 
 	if(!client) {
 		printk(KERN_ERR "tl880: null parameter given to %s\n", __FUNCTION__);
 	}
 
 	printk(KERN_DEBUG "tl880: i2c client %s detach from bus %i-%i\n", client->name, tl880dev->id, i2cbus->busno);
+
+	/* Remove this client's entry from the bus's list of clients */
+	for(i = 0; i < I2C_CLIENTS_MAX; i++) {
+		if(i2cbus->i2c_clients[i] == client) {
+			i2cbus->i2c_clients[i] = NULL;
+		}
+	}
 
 	return 0;
 }
@@ -343,11 +369,16 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 	for(i = tl880dev->minbus; i <= tl880dev->maxbus; i++) {
 		struct tl880_i2c_bus *bus = tl880dev->i2cbuses;
 		int j = i - tl880dev->minbus;
+		int k;
 		bus[j].busid = i;
 		bus[j].busno = i - tl880dev->minbus;
 		memcpy(&bus[j].i2c_adap, &tl880_i2c_adap_template, sizeof(struct i2c_adapter));
 		memcpy(&bus[j].i2c_algo, &tl880_i2c_algo_template, sizeof(struct i2c_algo_bit_data));
 		bus[j].dev = tl880dev;
+
+		for(k = 0; k < I2C_CLIENTS_MAX; k++) {
+			tl880dev->i2cbuses[i].i2c_clients[k] = NULL;
+		}
 		
 		/* 32 - length("tl880") = 27 */
 		snprintf(bus[j].i2c_adap.name+strlen(bus[j].i2c_adap.name), 27, " %i-%i", tl880dev->id, bus[j].busno);

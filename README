@@ -37,12 +37,7 @@ i2cdump 1 0xa shows the registers of the NXT2000.
 
 Still needed:
 
-Someone who can write a Windows program to dump the register space and find out
-where the PCI device's memory ranges are mapped.
-
 Someone with PCI DMA experience.
-
-A parsing tool for SoftICE logs/register dumps (this one is less important).
 
 Someone who can figure out how to use WinDBG to peer into the Windows drivers.
 
