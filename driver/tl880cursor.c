@@ -170,41 +170,25 @@ struct OSDmemory *_g_head = NULL;
 /* This function merges any consecutive free areas to a single area */
 int tl880_compact_desc_list()
 {
+	struct OSDmemory *esi, *eax;
+
 	esi = _g_head;
 
 loc_3a2a9:
-	if(!esi) {
+	if(!esi || !(eax = esi->next)) {
 		return 1;
 	}
 
-	if(!(eax = esi->field_18)) {
-		return 1;
-	}
-
-	if(!(esi->field_10)) {
-		goto loc_3a2d4;
-loc_3a2d4:
+	if(esi->active || eax->active) {
 		esi = eax;
 		goto loc_3a2a9;
 	}
 
-	if(!(eax->field_10)) {
-		goto loc_3a2d4;
-loc_3a2d4:
-		esi = eax;
-		goto loc_3a2a9;
-	}
-
-	ecx = eax->field_c;
-	esi->field_c += ecx;
-	ecx = eax->field_18;
-	esi->field_18 = ecx;
+	esi->size += eax->size;
+	esi->next = eax->next;
 	kfree(eax);
 
 	goto loc_3a2a9;
-
-loc_3a2d8:
-	return 1;
 }
 
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
@@ -272,14 +256,8 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 		}
 		listp2 = listp2->next;
 	}
-	printk(KERN_WARN "tl880: out of OSD memory; active bytes: 0x%lx, inactive bytes: 0x%lx\n", active_size, inactive_size);
+	printk(KERN_WARNING "tl880: out of OSD memory; active bytes: 0x%lx, inactive bytes: 0x%lx\n", active_size, inactive_size);
 	return 0;
-
-loc_3a56b:
-	retval = (alignsize + listp1->virt_addr) & mask;
-	listp1->field_0 = retval - listp1->virt_addr;
-
-	return retval;
 }
 
 
