@@ -262,11 +262,12 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 	return 0;
 }
 
-unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long id)
+unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long addr)
 {
-	struct OSDmemory *listp;
-	listp = _g_head;
+	struct OSDmemory *listp = _g_head;
 
+	/*
+	listp = _g_head;
 loc_3a5ea:
 	if(!listp) {
 		return -1;
@@ -281,7 +282,7 @@ loc_3a5ea:
 		goto loc_3a60e;
 	}
 
-	if(listp->virt_addr + listp->field_0 == id) {
+	if(listp->virt_addr + listp->field_0 == addr) {
 		goto loc_3a613;
 loc_3a613:
 		return listp->phys_addr + listp->field_0;
@@ -290,6 +291,21 @@ loc_3a613:
 loc_3a60e:
 	listp = listp->next;
 	goto loc_3a5ea;
+	*/
+
+	while(listp) {
+		/* Check for invalid memory block ID (sign of memory corruption or bug) */
+		if((listp->id & 0xfff00000) != 0x52300000) {
+			printk(KERN_ERR "tl880: invalid ID in tl880_get_osdmem_offset: 0x%08lx (should be 0x523xxxxx)\n", listp->id);
+			break;
+		}
+
+		if(listp->active && listp->virt_addr + listp->field_0 == addr) {
+			return listp->phys_addr + listp->field_0;
+		}
+	}
+
+	return -1;
 }
 
 
