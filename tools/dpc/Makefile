@@ -5,5 +5,5 @@ all:
 	gcc -O2 -Wall setconst.c -o setconst -ggdb3 -I../../driver/
 
 clean:
-	rm -f dpcsync videoout dpcconst
+	rm -f dpcsync videoout getconst setconst
 
