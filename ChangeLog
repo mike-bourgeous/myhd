@@ -1,3 +1,14 @@
+2003-08-14	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added tl880_set_dpc_pll_const function to driver/tl880init.c
+	* Created new tool - tools/dpc/setconst.c
+	* Created new tool - tools/dpc/getconst.c
+	* Renamed tools/dpc/dpcaux to tools/dpc/dpcsync
+
+2003-08-11	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added documentation on sync generator registers to tl880doc.txt
+
 2003-07-28	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added more information to doc/myhd_154.txt and doc/tl880doc.txt,
