@@ -41,7 +41,7 @@ struct tl880_mode_def tl880_mode_table[] = {
 
 		.bb = 40,
 		.cc = 1,
-		.dd = 0x01151bb0;
+		.dd = 0x01151bb0
 	}
 };
 

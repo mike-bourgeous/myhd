@@ -137,7 +137,10 @@ function CDma::Init(x,y):
 	CDma::DmaRelatedWSettings
 
 CDma+0 may be pointer to a KStreamAdapter
+CDma+28 may be temporary xres for dma setup
+CDma+2c may be temporary yres for dma setup
 CDma+48 is enum VOPMode
+CDma+5c is copied from +68, +74
 CDma+60 may be xres for capture
 CDma+64 may be yres for capture
 CDma+6c may be xres for preview
@@ -148,6 +151,7 @@ DMA FUNCTIONS
 -------------
 _auxLdDscMbox seems to be the function that writes a DMA pointer to the card
 SetTransportCaptureBuffer gets TL850 memory, and writes to MIF region
+VopLoadDescriptor(int,int) is called in VopIsrEven and VopIsrOdd
 
 
 OSD FUNCTIONS

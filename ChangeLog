@@ -5,6 +5,7 @@
 	* Started mode table.
 	* Split register stuff into its own header.
 	* Added mode set function.
+	* Added more DMA code (still not functional though).
 
 2003-09-15	Mike Bourgeous		<nitrogen@slimetech.com>
 
