@@ -4,8 +4,8 @@
  * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
  */
 
-#ifndef _TL880_DPC_H_
-#define _TL880_DPC_H_
+#ifndef _TL880DPC_H_
+#define _TL880DPC_H_
 
 #ifdef __KERNEL__
 
@@ -89,5 +89,5 @@ int tl880_dpc_int(struct tl880_dev *tl880dev);
 
 #endif /* __KERNEL__ */
 
-#endif /* _TL880_DPC_H_ */
+#endif /* _TL880DPC_H_ */
 

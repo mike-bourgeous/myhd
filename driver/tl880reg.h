@@ -4,8 +4,8 @@
  * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
  */
 
-#ifndef _TL880_REG_H_
-#define _TL880_REG_H_
+#ifndef _TL880REG_H_
+#define _TL880REG_H_
 
 #ifdef __KERNEL__
 
@@ -77,5 +77,5 @@ void write_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit,
 #endif /* __KERNEL__ */
 
 
-#endif /* _TL880_REG_H_ */
+#endif /* _TL880REG_H_ */
 

@@ -236,7 +236,7 @@ extern unsigned long dma_bitmask;
 
 #include "tl880reg.h"
 #include "tl880dpc.h"
-
+#include "tl880osd.h"
 
 #endif /* _TL880_H_ */
 
