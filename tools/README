@@ -57,7 +57,8 @@ randram
 
 testdpcint.sh
 	Enables video output and activates DPC interrupts to test the DPC
-	interrupt handler.
+	interrupt handler.  You need to compile all the other tools first to use
+	this script.
 
 vim: tw=80
 
