@@ -125,4 +125,49 @@ unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long 
 	return -1;
 }
 
+int tl880_deallocate_osdmem(struct tl880_dev *tl880dev, unsigned long addr)
+{
+	struct OSDmemory *listp = _g_head;
+	unsigned long esi;
+
+	if(!_g_head) {
+		return 0;
+	}
+
+loc_3a5aa:
+	esi = listp->virt_addr;
+	esi += listp->field_0;
+
+	if(esi == addr) {
+		goto loc_3a5cb;
+	}
+
+	esi = listp->id;
+	esi &= 0xfff00000;
+	if(esi != 0x52300000) {
+		return 0;
+	}
+
+	listp = listp->next;
+
+	if(listp) {
+		goto loc_3a5aa;
+	}
+
+loc_3a5cb:
+	if(!listp) {
+		return 0;
+	}
+
+	esi = listp->id;
+	esi &= 0xfff00000;
+	if(esi != 0x52300000) {
+		return 0;
+	}
+
+	listp->active = 0;
+	listp->field_0 = 0;
+
+	return 1;
+}
 

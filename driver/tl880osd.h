@@ -13,8 +13,8 @@
 
 /*** Driver types ***/
 struct _SURFACE_DESC {
-	unsigned long field_0;
-	unsigned long field_4;
+	unsigned long field_0;		// Used with findCursor
+	unsigned long field_4;		// Used with WriteOSDBlock
 	unsigned long field_8;
 	unsigned long field_c;
 	unsigned short field_10;

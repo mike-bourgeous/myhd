@@ -1,3 +1,7 @@
+2003-10-01	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added tl880_deallocate_osdmem().
+
 2003-09-30	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_get_osdmem_offset() to tl880cursor.c.

@@ -225,6 +225,13 @@ MCE 6000-603c
      bits 0xa-0x9 and 0x8-0x8 written with write_regbits in UpdateMce
      written with 0xc000 (bits 0xe, 0xf) in cJanus::InitMce
 
+6004 used in GetNextTocWord
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|nnnnnn00	Used in cJanus::GetNextTocWord (wait for 4)
+
 6008 is MCE interrupt mask
 600c is MCE interrupt type
 
@@ -235,6 +242,8 @@ MCE 6000-603c
 
 6024 used in InitVldShiftAmt
      bits 0x4-0x0 written with 0 in cJanus::InitMceToc
+
+6028 used in GetNextTocWord (simply returns after status wait read(6028))
 
 602c used in LoadQuantTable; write 0x400 then table values?
 

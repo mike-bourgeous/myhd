@@ -115,23 +115,10 @@ void tl880_delete_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cur
 	if(cursor == g_cursor_list) {
 		g_cursor_list = cursor->next;
 	} else {
-		/*
-loc_3b308:
-		if(listp->next == cursor) {
-			goto loc_3b315;
-		}
-		
-		listp = listp->next;
-		if(listp) {
-			goto loc_3b308;
-		}
-		*/
-		
 		while(listp && listp->next != cursor) {
 			listp = listp->next;
 		}
 		
-loc_3b315:
 		if(!listp) {
 			return;
 		}
@@ -147,6 +134,42 @@ loc_3b315:
 	kfree(cursor);
 
 	return;
+}
+
+void tl880_delete_cursor_list(struct tl880_dev *tl880dev)
+{
+	if(CHECK_NULL(tl880dev)) {
+		return;
+	}
+
+	while(g_cursor_list) {
+		tl880_delete_cursor(tl880dev, g_cursor_list);
+	}
+}
+
+struct SOverlaySurface *tl880_find_cursor(struct tl880_dev *tl880dev, unsigned long addr)
+{
+	struct SOverlaySurface *eax = g_cursor_list;
+	unsigned long ecx;
+
+loc_3b35b:
+	if(!eax) {
+		goto loc_3b36d;
+	}
+
+	ecx = eax->field_50;
+	if(eax->field_50 == addr) {
+		goto locret_3b36f;
+	}
+
+	eax = eax->next;
+	goto loc_3b35b;
+
+loc_3b36d:
+	return NULL;
+	
+locret_3b36f:
+	return eax;
 }
 
 
