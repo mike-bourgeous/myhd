@@ -117,11 +117,16 @@ void tl880_aux_load_dma_mbox(struct tl880_dev *tl880dev, struct tl880_dma_info *
 }
 
 // #if 0
+/* 
+ * I suspect this function has other functions inlined into it, or it had a lot
+ * of duplicate code that was optimized away, as it has a really convoluted
+ * execution flow through it.
+ */
 void VopLoadDescriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)
 {
 	struct tl880_dma_info vop_dma_info;
 	struct tl880_dma_info tsd_dma_info;
-	unsigned long eax = 0, ebx = 0, ecx = 0, edx = 0;
+	unsigned long eax = 0, ecx = 0, edx = 0;
 	unsigned long esi = 0, edi = 0;
 	unsigned long CDma[0x100];
 	unsigned long var_4;
@@ -140,37 +145,19 @@ void VopLoadDescriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)
 		var_4 = CDma[arg_4 * 16 + 0xc];
 	}
 
-#if 0
-	eax = 0 /* g_tsDMAenabled */;
-	if(0 /* g_tsDMAenabled */ == 0) {
-		goto loc_25b29_auxdma;
-	}
-
-	if(arg_4) {
-		goto loc_25a66;
-	}
-
-	if(CDma[0x38] || CDma[0x3c]) {
-		goto loc_25b29_auxdma;
-	}
-#endif
-
 	if(g_tsDMAenabled && (arg_4 || !(CDma[0x38] || CDma[0x3c]))) {
-		
-loc_25a66:
 		if(tsDmaBufCnt == 0) {
 			eax = 0 /* GetRawStreamCounter() */;
 		}
 		
-loc_25a73:
 		/* 0x5e00 is 128 ts packets of 188 bytes each */
 		eax = 0 /* RawStreamBufFullness() / 0x5e00 */;
 		
-		esi = 0x5e00;
-		
-		tsDmaFullness = 0 /* RawStreamBufFullness() / 0x5e00 */; 
+		tsDmaFullness = 0 /* RawStreamBufFullness() / 0x5e00 */;
+
+		/*
 		if(tsDmaFullness == 0) {
-			goto loc_25c08;
+			return;
 		}
 		
 		if(tsDmaBufCnt != 0) {
@@ -178,29 +165,23 @@ loc_25a73:
 		}
 		
 		if(tsDmaFullness >= 7) {
-			goto loc_25c08;
+			return;
+		}
+		*/
+
+		if(tsDmaFullness == 0 || (tsDmaBufCnt == 0 && tsDmaFullness >= 7)) {
+			return;
 		}
 		
 loc_25aa1:
-		/* eax *= 0x5e00; */
 		edi = tsDmaFullness * 0x5e00;
 		
-		ebx = 0x2f000;
-		
-		/*
-		eax = GetRawStreamRdPtr(1);
-		ecx = ebx;
-		ecx -= eax;
-		*/
 		ecx = 0x2f000 - 0 /* GetRawStreamRdPtr(1) */;
 		
-		if((0x2f000 - 0 /* GetRawStreamRdPtr(1) */) >= 0) {
-			goto loc_25ac8;
+		if(ecx < edi) {
+			edi = 0x2f000 - 0 /* GetRawStreamRdPtr(1) */;
 		}
 		
-		edi = 0x2f000 - 0 /* GetRawStreamRdPtr(1) */;
-		
-loc_25ac8:
 		tsd_dma_info.field_10 = 0xff04;
 		
 		eax = 0 /* GetRawStreamRdPtr(0) */;
@@ -220,7 +201,6 @@ loc_25ac8:
 		tl880_aux_load_dma_mbox(tl880dev, &tsd_dma_info);
 	} else { 
 loc_25b29_auxdma:
-		ebx = 1;
 		tsdDmaMode = 1;
 		if(eax != 0) {
 			goto loc_25bd2;
@@ -262,27 +242,26 @@ loc_25b71:
 		goto loc_25bd2;
 		
 loc_25b80:
-		if(CDma[0x38] == 0) {
-			goto loc_25ba2;
-		}
-		
-		ecx = CDma[0x60];
-		if(CDma[0x28] != CDma[0x60]) {
-			goto loc_25b94;
-		}
-		
-		eax = CDma[0x2c];
-		if(CDma[0x2c] == CDma[0x64]) {
-			goto loc_25bd2;
-		}
-		
+		if(CDma[0x38] != 0) {
+			ecx = CDma[0x60];
+			if(CDma[0x28] != CDma[0x60]) {
+				goto loc_25b94;
+			}
+			
+			eax = CDma[0x2c];
+			if(CDma[0x2c] == CDma[0x64]) {
+				goto loc_25bd2;
+			}
+			
 loc_25b94:
-		eax = CDma[0x64];
-		edx = CDma[0x68];
-		CDma[0x28] = CDma[0x60];
-		CDma[0x2c] = CDma[0x64];
-		CDma[0x5c] = edx;
-		goto loc_25bc3;
+			eax = CDma[0x64];
+			edx = CDma[0x68];
+			CDma[0x28] = CDma[0x60];
+			CDma[0x2c] = CDma[0x64];
+			CDma[0x5c] = edx;
+			goto loc_25bc3;
+		}
+
 		
 loc_25ba2:
 		if(CDma[0x3c] == 0) {
@@ -290,21 +269,28 @@ loc_25ba2:
 		}
 		
 		ecx = CDma[0x6c];
+		eax = CDma[0x2c];
+		/*
 		if(CDma[0x28] != CDma[0x6c]) {
 			goto loc_25bb7;
 		}
 		
-		eax = CDma[0x2c];
 		if(CDma[0x2c] == CDma[0x70]) {
 			goto loc_25bd2;
 		}
-		
+		*/
+
+		if(CDma[0x28] != CDma[0x6c] || CDma[0x2c] != CDma[0x70]) {
+			goto loc_25bb7;
 loc_25bb7:
-		eax = CDma[0x70];
-		edx = CDma[0x74];
-		CDma[0x28] = CDma[0x6c];
-		CDma[0x2c] = CDma[0x70];
-		CDma[0x5c] = edx;
+			eax = CDma[0x70];
+			edx = CDma[0x74];
+			CDma[0x28] = CDma[0x6c];
+			CDma[0x2c] = CDma[0x70];
+			CDma[0x5c] = edx;
+		} else {
+			goto loc_25bd2;
+		}
 		
 loc_25bc3:
 		eax += 3;
@@ -312,19 +298,12 @@ loc_25bc3:
 		/* SetupAuxVideo(ecx, eax); */
 		
 loc_25bd2:
-		ecx = CDma[0x5c];
 		vop_dma_info.phys_addr = var_4;
-		eax = CDma[0x2c] / CDma[0x5c];
-		esi = CDma[0x28] * CDma[0x5c];
-		vop_dma_info.field_4 = eax;
-		vop_dma_info.field_8 = esi;
-		esi >>= 1;
-		vop_dma_info.field_c = esi;
+		vop_dma_info.field_4 = CDma[0x2c] / CDma[0x5c];
+		vop_dma_info.field_8 = CDma[0x28] * CDma[0x5c];
+		vop_dma_info.field_c = (CDma[0x28] * CDma[0x5c]) / 2;
 		vop_dma_info.field_10 = 0xff14;
-		tsdDmaActive = ebx;
-		
-loc_25bff:
-		/* set up parameters */
+		tsdDmaActive = 1;
 		
 loc_25c03:
 		tl880_aux_load_dma_mbox(tl880dev, &vop_dma_info);

@@ -1,3 +1,16 @@
+2003-09-19	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Working on tl880dma.c.  Less fake register usage.  Improve flow.
+
+2003-09-18	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Working on tl880dma.c.  Improve flow somewhat.
+	* Added comment about GPIO line 2 to tl880gpio.c.
+
+2003-09-17	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Working on tl880dma.c.
+
 2003-09-16	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_mode_def struct.
