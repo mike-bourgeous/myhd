@@ -1,0 +1,40 @@
+TL880 Kernel Module
+2003, Mike Bourgeous
+
+Original Framework (based on Stradis driver) in tl880kern.c
+2003, Mark Lehrer
+
+This kernel module only detects TL880-based cards and creates devices in /dev
+to map their memory regions.  It also has a preliminary interrupt handler and
+ioctl interface, as well as working I2C support for some cards.  It is written
+with support for multiple cards in one system.
+
+This is my first Linux device driver, and thus probably doesn't follow the
+popular design style for kernel modules.
+
+This module is only suitable for developers and testing.  It has no video
+capture ability.  Only use this driver if you want to help with its development,
+or you want to help with testing.
+
+The driver must be manually loaded as root by using insmod tl880.o after it is
+compiled.  There is no install functionality because this driver is far from
+ready for "prime time" use.
+
+You may also compile the module with a custom I2C implementation rather than
+relying on the bit-banging interface in the kernel.  This implementation is much
+faster than the bit-banging interface, but might not be as reliable, and
+produces different results with some tests.  To compile this version of the
+module, run "make newi2c" instead of just "make" on the command line.
+
+I2C support (tl880i2c.c) is mostly complete.  There are several I2C interfaces
+provided, which are selected by card revision.  Load the i2c-dev and
+i2c-algo-bit modules before loading this module.  The MyHD has devices on all
+three of its I2C buses.  Cards other than the MyHD, WinTV-HD, HiPix, and Janus
+will probably use different GPIO lines for the I2C bus(es) than the
+possibilities already handled in tl880i2c.c.  Once the correct port is known,
+the bus needs to be registered with the bit shift algorithm driver or the new
+tl880 algorithm driver in tl880ni2c.c.
+
+
+vim: tw=80
+

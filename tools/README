@@ -1,0 +1,49 @@
+To turn on color bars, first insmod the tl880 driver, then run
+
+cd dpc; ./dpcaux 0 0 0; cd ..
+
+The videoout program in the dpc directory switches video passthrough on/off.  So
+far this only works for the MyHD.
+
+The firmware is not required for simple color bars operation, but will be
+required later on for anything MPEG related.  See the README file in the
+firmware/ directory for more information and possible sources for firmware.
+
+Description of tools:
+regload
+	Loads a dump of the TL880 register space from a file (must be 1048576
+	bytes).  This will probably hard lock your system if the card has
+	already been initialized.
+regdump
+	Dumps the entire 1MB register space to a file.  Note that most of the
+	register space is either unused or redundant; hexdump can be used to
+	filter out the redundant areas and produce an ascii file for human
+	consumption.
+readreg
+	Reads the value of a register and prints it to stdout.  Parameter is in
+	hexadecimal.  Uses mmap() and dereferences a pointer.  The mmap()
+	interface will go away in the future in favor of an ioctl().
+writereg
+	Writes a value to a register.  Parameters are in hexadecimal.  Uses
+	mmap() and dereferences a pointer.  The mmap() interface will go away in
+	the future in favor of an ioctl().
+setbits
+	Command line interface to the set_bits() function.
+write4reg
+	Writes four registers at once; useful for writing parsed SoftICE dumps
+	to the TL880 register space.
+iocsetvip
+	Sets the VIP state (0, 1, or 2).  I don't know what that means,
+	exactly....  Does something to the GPIO regs (0x10194,0x10198).
+iocreadreg
+	Same thing as readreg but uses an ioctl() instead of mmap() and
+	dereference.  The ioctl() interface will be preferred in the future.
+iocwritereg
+	Same thing as writereg but uses an ioctl() instead of mmap() and
+	dereference.  The ioctl() interface will be preferred in the future.
+randram
+	Randomizes part of the TL880 memory (to see if anything happens).
+
+
+vim: tw=80
+

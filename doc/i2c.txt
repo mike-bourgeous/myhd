@@ -1,0 +1,82 @@
+Various TL880 Cards and their I2C Configurations
+
+-------------------------------------------------------------------------------
+MyHD
+
+I2C control MyHD:
+
+Bus|
+ # | SCL Write | SDA Write | SCL Read  | SDA Read
+---+-----------+-----------+-----------+-----------
+ 0 | GPIO 0x1a | GPIO 0x1b | GPIO 0x1a | GPIO 0x1b
+ 1 | GPIO 0x12 | GPIO 0x11 | GPIO 0x12 | GPIO 0x10
+ 2 | GPIO 0x17 | GPIO 0x16 | GPIO 0x17 | GPIO 0x16
+
+I2C devices MyHD:
+
+      |Bus|
+ Addr | # | Chip name 
+------+---+------------------------------------------------
+ 0x14 | 1 | ATI/NxtWave NXT2000 (VSB demodulator)
+ 0x80 | 0 | Micronas MSP (Audio processor)
+ 0x86 | 0 | Micronas VPX (Video processor)
+ 0xC0 | 2 | Philips Unknown Tuner or FCV1236 Tuner (Tuner)
+
+-------------------------------------------------------------------------------
+WinTV-HD
+
+I2C control WinTV-HD:
+
+Bus|
+ # | SCL Write | SDA Write | SCL Read  | SDA Read
+---+-----------+-----------+-----------+-----------
+ 3 | GPIO 0x03 | GPIO 0x01 | GPIO 0x03 | GPIO 0x00
+ 4 | GPIO 0x1b | GPIO 0x1a | GPIO 0x1b | GPIO 0x1a
+
+I2C devices WinTV-HD:
+
+      |Bus|
+ Addr | # | Chip name 
+------+---+------------------------------------------------
+ 0x14 | 3 | ATI/NxtWave NXT2000 (VSB demodulator)
+ 0x30 | 4 | Unknown device
+ 0x80 | 4 | Micronas MSP (Audio processor)
+ 0xA0 | 4 | Unknown device
+ 0xC2 | 4 | Philips, Temic, or other generic tuner
+ 
+
+-------------------------------------------------------------------------------
+HiPix
+
+I2C control HiPix:
+
+Bus|
+ # | SCL Write | SDA Write | SCL Read  | SDA Read
+---+-----------+-----------+-----------+-----------
+ 5 | GPIO 0x1a | GPIO 0x1b | GPIO 0x1a | GPIO 0x1b
+
+
+HiPix is still untested.
+
+
+===============================================================================
+
+Possible I2C Addresses of Devices both Real and Fabled
+
+-------------------------------------------------------------------------------
+I2C Address Table
+
+ Addr | Chip name
+------+-----------
+ 0x18 | Philips VSB
+ 0x28 | Oren VSB
+ 0x42 | HMP8172
+ 0x70 | IO Expander
+ 0x80 | MSP34xx
+ 0x86 | VPX32xx
+ 0xC0 | Philips Tuner
+ 0xC2 | Temic Tuner
+
+
+vim:tw=80
+

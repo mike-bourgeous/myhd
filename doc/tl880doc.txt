@@ -1,0 +1,135 @@
+TL880 Register Map and Chip/Card Doc (incomplete and disorganized)
+2003, Mike Bourgeous
+-------------------------------
+No warranty on accuracy or fitness for any purpose is made of this data.
+This data is placed into the public domain with the exception that if this data is
+used in any way, credit must be given to those who took the time to create it.
+
+All numbers are in hexadecimal, except for bit descriptions (binary).
+-------------------------------
+
+HIF 0-14
+
+0	last queued interrupt type
+4	interrupt type enable mask
+
+Known interrupt types are in tl880kern.c: tl880_bh().
+If a demux interrupt is received (interrupt type | 0x400), it is important to clear
+that bit in the interrupt enable mask before leaving the interrupt handler, and
+only reset the bit when the TSD has been dealt with; otherwise, it will continually
+interrupt the processor, preventing anything else from happening.  Without any data
+fed to the TSD, reading from register 27814 after the first TSD interrupt will 
+cause it to stop interrupting.
+
+VSC 1000-1028
+
+APU (Audio Processing Unit) 3000-307c
+
+3004 bit 2 -- stereo/mono NTSC audio
+
+3028 may be ntsc recording offset in sdram
+
+BLT (Blitter?) 4000-405c
+
+5800 DPC PLL constant
+
+MCE 6000-603c
+
+VPIP 7000-7030
+
+HPIP 8000-8020
+
+register 10000 is display options bitfield:
+
+00000000 00000001	Top/bottom field or top/bottom buffer
+00000000 00000010	Image display enable
+00000000 00000100	OSD display enable
+00000000 00010000	Aux enable?
+00000000 00100000	Sync enable/external display enable (not sure)
+00000000 01000000	This does something to the color.
+00000001 00000000	Color bars
+00000100 00000000	Y'PbPr color
+
+register 10004 is a status register for the video generator (?)
+
+10008 DPC interrupt mask bitfield
+1000c DPC interrupt type bitfield
+
+	00000100 isr_VideoSync (vertical retrace?)
+	00100000 IntDpcEof0 (end of top field?)
+	01000000 IntDpcEof1 (end of bottom field?)
+
+register 10048 is DispBufReg(?) or NtscDispFrame?
+
+register 10080 to 100AC are the OSD context
+
+register 10084 is something like "sdram offset" - used in overlay display lists
+
+to turn on the display:
+
+DPC2 10180-10184
+
+register	sync value	dump value
+--------	----------	----------
+10190		0x00000400	0x0cffffff
+10194		0x00000400	0x000eff00
+10198		0x00000400	0x000e5d00
+
+10190	GPIO output
+10194	GPIO enable
+10198	GPIO output	i2c output
+1019C	GPIO input	i2c input (see i2c.txt)
+
+Registers 10180-101A0 are written with YPbPr values in OSDProperty::SetProperty
+
+Zeros for bi-level (VGA) sync, something else for tri-level sync:
+101A0
+101A4
+101A8
+
+18000 mcu firmware start
+1C000 mcu data start
+20000 tsd firmware start
+
+27814 last queued tsd interrupt
+
+MIF 28000, 28020-280dc
+
+
+Some of the values sometimes written to a few registers:
+00000004 0000009B
+00001010 00000100
+00001010 00000102
+00001010 00000302
+00001010 00000304
+00001010 00000504
+00001010 00000506
+00001010 00000700
+00001010 00000706
+00007000 00000015
+00007000 007DE310
+0000700C 09080700
+0000701C 00000090
+0000701C 00000092
+0000701C 03E07C90
+0000701C 03E07C92
+0000701C 07C0F892
+0000701C 0F81F090
+0000701C 0F81F092
+0000702C 00000000
+0000702C 80000000
+00010000 00000032
+00010000 00000033
+00010048 00C00098
+00010048 00C000BA
+00025718 00001F54
+0002571C 0000A280
+00025720 0000A000
+00025724 0000A000
+00025728 0000000C
+00025758 0000FF14
+
+
+The OSD addresses all get OR'd with 0x52300000.
+
+

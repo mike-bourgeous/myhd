@@ -1,0 +1,82 @@
+2003-07-28	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added more information to doc/myhd_154.txt and doc/tl880doc.txt,
+	  including new memory offsets and a list of some of the register
+	  blocks of the internal TL880 components.
+
+2003-07-24	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added initial MSP34xx support.
+	* Created tl880audio.c (routines to handle audio)
+
+2003-07-20	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added inital tuner support.
+	* Created tl880input.c (routines to switch inputs)
+
+2003-06-25	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Reworked all I2C support, with excellent results on MyHD (still
+	  needs testing on other cards).
+	* Swapped SDA/SCL lines on WinTV-HD to see if they were wrong (might
+	  need to swap them back).
+	* Swapped SDA/SCL lines on WinTV-HD back to previous values.
+	* Updated I2C documentation (doc/i2c.txt).
+
+2003-06-24	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added support for HiPix.
+
+2003-06-16	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Corrected MDP-120 detection.
+
+2003-06-13	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Changed DPC clock so that 1024x768p is 60.0Hz 48.3kHz exactly.
+
+2003-06-05	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added randram tool to randomize card memory, in an attempt to get
+	  something to display on the OSD.
+
+2003-06-03	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* MDP-120 should now be detected by name, and I2C may work.
+
+2003-05-30	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* board_type is now correctly set for the WinTV-HD (should make I2C
+	  support one step closer)
+	* Added build support for SMP kernels
+	* Removed the debuglogs/ directory from the distribution (it will be
+	  made available elsewhere soon)
+
+2003-05-30	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added I2C support for WinTV-HD (though I don't know if it will work,
+	  as I don't own a WinTV-HD -- read the comments in tl880i2c.c)
+	* Added firmware extract tool for WinTV-HD driver 2.1.20114
+
+2003-05-29	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Optimized I2C code and reordered the bus numbers
+	* Added checks for NULL values in I2C code (though if a null value is
+	  ever given it means there's something seriously amiss with the
+	  kernel far beyond an invalid parameter)
+
+2003-05-16	Mike Bourgeous		<nitrogen@slimetech.com>
+	
+	* Lots of changes made in the last month...
+	* I2C support
+	* Most of the tools are converted to the ioctl interface
+	* Init code in the driver (obsoletes tools/init)
+	* New tool to switch video passthrough mode (videoout)
+	* Driver source code slightly more organized
+
+2003-04-01	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Setbits tool behavior changed
+	* Added ioctl for read and write register
+	* Added tools to use the new ioctls
+

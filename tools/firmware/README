@@ -1,0 +1,35 @@
+The firmware files included in this distribution are copied from /dev/zero
+and will not work for any card.  They may even cause your system to hang if
+you try to upload them.  You must extract a valid firmware from the card's
+driver.
+
+To extract the firmware from the MyHD 1.54 driver, download the 1.54 driver
+.zip file (file number 23 date 2002-05-17) from:
+
+http://www.mitinc.co.kr/mitinc/down/down_driver.jsp
+
+Extract Mdp100.sys from the win9x directory in the archive, and place it in
+this directory.
+
+Verify that the file is 555064 bytes long, and run ./myhd_firmware_154.sh.
+
+0ed06b2afcfe445d5590e8ef9415047b  Mdp100.sys
+
+
+You can also use the Mdp100_2K.sys file from the 1.55.3.9e driver's w2000
+directory.
+
+Verify that the file is 438244 bytes, and run ./myhd_firmware_15539e.sh.
+
+55914c5ca9f0d4e79b80a173ff1cb345  Mdp100_2K.sys
+
+
+You can also use the Janus.sys file from the WinTV-HD update version 2.1.20114.
+
+Verify that the file is 595144 bytes, and run ./wintvhd_firmware_2120114.sh
+
+a6e5b1a3ee3504aa3a99f54bbcadb517  Janus.sys
+
+
+vim:tw=80
+

@@ -1,0 +1,122 @@
+Useful MyHD 1.54 Driver Information (incomplete)
+2003, Mike Bourgeous
+-------------------------------
+No warranty on accuracy or fitness for any purpose is made of this data.
+This data is placed into the public domain with the exception that if this data is
+used in any way, credit must be given to those who took the time to create it.
+
+All numbers are in hexadecimal.
+
+This file is a bunch of disorganized notes, many of which are probably useless.
+-------------------------------
+
+subtract from file offset to get memory offset: 10320
+
+In SoftICE Win9x to break on WriteTL850Reg, use:
+bpx mdp100+c126
+
+or, in Win2k or Win9x after loading the symbols from the driver, use:
+bpx WriteTL850Reg
+
+MyHD osd memory sometimes 8351e000
+MyHD osd memory sometimes 8361f000
+bg palette entry offset 0x408 from start of OSD memory
+
+Beginning of osd memory is the OSD color palette (32 bits per entry)
+
+SoftICE Breakpoints:
+mdp100+3fda	demux_init (uploads tsd microcode)
+mdp100+c126	write register
+mdp100+d996	do_i2cwrite
+mdp100+1bb58	somewhere in dpcinthandler
+mdp100+200e4	initmce
+mdp100+2036e	loadmcmicrocode
+mdp100+208d0	initmcetoc
+mdp100+21614	write osd block
+mdp100+216b7	write osd block just before call to WRITE_REGISTER_BUFFER_ULONG
+mdp100+29fbe	initialize osd memory
+mdp100+2a084	initialize osd memory just before call to MapToUserSpace
+mdp100+2a0bc	initialize osd memory after sBoardInfo is filled in
+mdp100+2adfe	create cursor
+mdp100+2af18	set cursor position
+mdp100+2af3e	show cursor
+mdp100+2f088	philips tuner change channel
+mdp100+2f1e2	philips 1236d change channel
+mdp100+2f35c	temic 4040fi5 change channel
+mdp100+30748	somewhere in isr_videosync_tv
+
+Set a breakpoint in SetDpcClock some time
+Set a breakpoint in cJanus::SetGPIO some time
+
+In win2k card registers usually mapped to baab7000
+
+
+
+cJanus class layout:
+Use "e gpJanus+offset" to edit the cJanus class in SoftICE
+
+cJanus+0 may be a struct tagContext?
+
+cJanus+0b9c may be _last_p_picture_cnt
+
+cJanus+11010 is sys pll eq (?)
+
+cJanus+15b58 is channel change semaphore
+
+cJanus+16658 may be demux queue
+
+cJanus+166b8 is initialization info
+initialization info+0 is board type
+board type is read from registry and/or read from card (see tl880kern.c)
+mdp-110b board type is 4
+mdp-100b board type is 3
+mdp-100a board type is 2
+
+cJanus+166d0 is input mode (enum cJanus::InputSource)
+
+cJanus+1673c is SDRAM type (see tl880init.c:init_sdram())
+
+cJanus+16748 and cJanus+16841 appear to be bools related to input mode
+
+cJanus+167d8 has something to do with ntsc audio and is set to 0x2800
+cJanus+167dc has something to do with ntsc audio and is set to 0x1c00
+
+cJanus+167e4 is NTSC input
+
+cJanus+16814 is OSD context (48 bytes)
+
+cJanus+1686c is memory start address?
+cJanus+16870 is memory end address?
+
+memory is 0x186000 bytes long?
+
+
+definitely set a breakpoint in code that uses getSDRAMoffset (3a5e4)
+
+
+struct tagContext
+-----------------
+dword[0350] may be repeat_first_field flag
+dword[0370-037c] have something to do with caption buffers
+
+OSD FUNCTIONS
+-------------
+.text:0002dfc8 cJanus::InitOSDContext() - zeros out 12 (0xb) dwords at gpJanus+16814
+
+.text:0002dfd8 cJanus::SaveOSDContext() - reads 12 registers (0x30/48 bytes)
+		starting at 0x10080 ending at 0x100ac to gpJanus+16814..16840
+		
+.text:0002dffe cJanus::RestoreOSDContext() - writes 12 dwords from gpJanus+16814 onward
+		to registers 0x10080 to 0x100ac
+		
+.text:000313a2 OSDProperty::GetProperty(struct _HW_STREAM_REQUEST_BLOCK *)
+.text:00031472 OSDProperty::SetProperty(struct _HW_STREAM_REQUEST_BLOCK *)
+.text:0003192a OSDProperty::NumProperties() - returns 0x15
+.text:0003192e OSDProperty::PropertyList - returns KSPROPERTY_ITEM
+		*OSDProperty::m_OSDPropItm (.text:00012d50)
+.text:00031934 WriteOSDBlock(ulong, uchar*, ulong, ulong, ulong, int)
+.text:0003a2de initializeOSDMemory(ulong, ulong)
+.text:0003a430 deinitializeOSDMemory()
+.text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN)
+.text:0003a596 deallocateOSDMemory(ulong)
+

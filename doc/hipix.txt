@@ -1,0 +1,4 @@
+Hipix gpJanus class layout:
+
+gpJanus+6FAB1C is init_sdram value.
+
