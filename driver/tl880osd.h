@@ -143,7 +143,6 @@ void tl880_delete_cursor_list(struct tl880_dev *tl880dev);
 struct SOverlaySurface *tl880_find_cursor(struct tl880_dev *tl880dev, unsigned long addr);
 
 
-
 #endif /* __KERNEL__ */
 
 #endif /* _TL880OSD_H_ */

@@ -20,5 +20,7 @@ all:
 	chmod +x testdpcint.sh
 
 clean:
-	rm -f randram regload regdump readreg setbits write4reg writereg iocsetvip iocreadreg iocwritereg
+	rm -f randram regload regdump readreg setbits write4reg \
+	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
+	striperam
 

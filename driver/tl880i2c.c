@@ -264,7 +264,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 	}
 	
 	if(client->driver->id == I2C_DRIVERID_TUNER) {
-		int tuner_type;
+		int tuner_type, cmdval;
 
 		switch(tl880dev->board_type) {
 			case TL880_CARD_MYHD_MDP100A:
@@ -272,10 +272,13 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 			case TL880_CARD_MYHD_MDP110:
 			case TL880_CARD_MYHD_MDP120:
 			default:
-				tuner_type = 31;
+				tuner_type = TUNER_PHILIPS_ATSC;
 		}
-				
+		
 		client->driver->command(client, TUNER_SET_TYPE, &tuner_type);
+
+		cmdval = 211250 * 16 / 1000; /* US channel 13 */
+		client->driver->command(client, VIDIOCSFREQ, &cmdval);
 	}
 
 	return 0;
@@ -312,8 +315,6 @@ static struct i2c_algo_bit_data tl880_i2c_algo_template = {
 	mdelay:  10, 
 	timeout: 100
 };
-
-#define I2C_HW_B_TL880	0xdd
 
 static struct i2c_adapter tl880_i2c_adap_template = {
 	name:			"tl880",

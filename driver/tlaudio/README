@@ -1,0 +1,12 @@
+These files are from the linux kernel and bttv driver provided for use with the
+PCHDTV.  See http://www.pchdtv.com/ for the latest version of their driver.
+These files were taken from the debian-1.1 tarball, and from kernel 2.4.20.
+
+Modifications: change detection to look for TL880 I2C instead of bttv I2C,
+change module description to reflect modifications.
+
+Kernel module's name is tlmsp3400.o (do not install msp3400.o).
+
+
+vim:tw=80
+

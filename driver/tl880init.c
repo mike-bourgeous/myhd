@@ -373,7 +373,7 @@ void tl880_init_hipix(struct tl880_dev *tl880dev)
 	// i2c_write8(0x54, 7, 0);
 	
 	/* Loads a bunch of VPX settings */
-	// LoadDefaultSettings()
+	// LoadDefaultSettings();
 	
 	// _VPXWriteFP(0x154, 0x350);
 	// i2c_write(0x86, 1, 0xf2, &writeval, 1);
@@ -383,6 +383,7 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 {
 	unsigned long cmdval;
 	unsigned char tunerstatus = 0;
+	int i;
 	
 	tl880_init_chip(tl880dev);
 
@@ -408,6 +409,7 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 			}
 			break;
 		case PCI_SUBSYSTEM_VENDOR_ID_TELEMANN:
+		case PCI_SUBSYSTEM_VENDOR_ID_ZERO:
 			switch(tl880dev->subsys_device_id) {
 				case PCI_SUBSYSTEM_DEVICE_ID_HIPIX:
 					tl880_init_hipix(tl880dev);
@@ -426,8 +428,37 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 
 	tl880_init_ntsc_audio(tl880dev);
 	tl880_set_ntsc_input(tl880dev, 0);
-	cmdval = 211250 * 16 / 1000;
-	tl880_call_i2c_clients(tl880dev, VIDIOCSFREQ, &cmdval); /* US channel 13 */
+	cmdval = 211250 * 16 / 1000; /* US channel 13 */
+	tl880_call_i2c_clients(tl880dev, VIDIOCSFREQ, &cmdval);
+
+	/* Initialize DPC2? (whatever that is) */
+	write_register(tl880dev, 0x10180, 0x200);
+	write_register(tl880dev, 0x10184, 0xf7fafcff);
+	write_register(tl880dev, 0x10184, 0xfcf6f4f4);
+	write_register(tl880dev, 0x10184, 0x402a1807);
+	write_register(tl880dev, 0x10184, 0x7e766855);
+	write_register(tl880dev, 0x10184, 0xf7fafcff);
+	write_register(tl880dev, 0x10184, 0xfcf6f4f4);
+	write_register(tl880dev, 0x10184, 0x402a1807);
+	write_register(tl880dev, 0x10184, 0x7e766855);
+
+	write_register(tl880dev, 0x10180, 0x210);
+	write_register(tl880dev, 0x10184, 0x3c241204);
+	write_register(tl880dev, 0x10184, 0xfbf6f5f1);
+	write_register(tl880dev, 0x10184, 0x53677881);
+	write_register(tl880dev, 0x10184, 0x81786753);
+	write_register(tl880dev, 0x10184, 0x3c241204);
+	write_register(tl880dev, 0x10184, 0xfbf6f5f1);
+	write_register(tl880dev, 0x10184, 0x53677881);
+	write_register(tl880dev, 0x10184, 0x81786753);
+
+	write_register(tl880dev, 0x10180, 0x300);
+	/* I'm just making a random guess at what to put in 0x300 */
+	for(i = 0; i < 16; i++) {
+		write_register(tl880dev, 0x10184, 
+				i | (i << 4) | (i << 8) | (i << 0xc) |
+				(i << 0x10) | (i << 0x14) | (i << 0x18) | (i << 0x1c));
+	}
 
 	printk(KERN_DEBUG "tl880: end of init: 0x10190=0x%08lx\n", read_register(tl880dev, 0x10190));
 	printk(KERN_DEBUG "tl880: end of init: 0x10194=0x%08lx\n", read_register(tl880dev, 0x10194));

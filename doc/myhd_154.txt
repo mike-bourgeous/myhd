@@ -114,6 +114,8 @@ definitely set a breakpoint in code that uses getSDRAMoffset (3a5e4)
 
 struct tagContext
 -----------------
+dword[000c] may be source aspect ratio
+dword[00a8] may be display aspect ratio
 dword[0264] may be horizontal resolution
 dword[0268] may be vertical resolution
 dword[026c] may be interlaced flag
@@ -121,6 +123,7 @@ dword[0284] == 0 then don't run VpipHandler
 dword[034c] may be field order for non-DVD playback
 dword[0350] may be repeat_first_field flag
 dword[0370-037c] have something to do with caption buffers
+dword[0ba8] may be display aspect ratio
 dword[0bb0] may be current field
 
 

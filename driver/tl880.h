@@ -37,14 +37,15 @@
 #include <linux/vmalloc.h>
 #include <linux/videodev.h>
 #include <linux/i2c-algo-bit.h>
-#include "audiochip.h"
-#include "msp3400.h"
-#include "tuner.h"
+#include "tlaudio/audiochip.h"
+#include "tlaudio/msp3400.h"
+#include "tltuner/tuner.h"
 
 /*** Driver definitions ***/
 
 /* I2C */
 #define I2C_CLIENTS_MAX				16
+#define I2C_HW_B_TL880				0xdd
 
 /* PCI */
 #define PCI_VENDOR_ID_TERALOGIC			0x544c
@@ -73,7 +74,7 @@
 #define TL880_CARD_JANUS		1
 #define TL880_CARD_ZERO			0
 
-/* debug */
+/* Debug */
 #define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
 #define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
 
@@ -168,6 +169,25 @@ struct tl880_dev {
 #endif /* __KERNEL__ */
 
 /*** Userspace definitions such as ioctls ***/
+/* 
+ * Read register IOCTL - register is read from parameter, then the value read
+ * is written back to the parameter.  Single unsigned long.
+ */
+#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned long *)
+
+/*
+ * Write register IOCTL - register is read from parameter[0], the value to
+ * write is read from parameter[1].  Array [2] unsigned long.
+ */
+#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned long *)
+
+/*
+ * VIP state IOCTL - parameter is a pointer to VIP state int (0 off, 1 on, 2
+ * special?)
+ */
+#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned long *)
+
+
 
 #ifdef __KERNEL__
 

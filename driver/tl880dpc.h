@@ -62,14 +62,7 @@ struct tl880_mode_def {
 
 #endif /* __KERNEL__ */
 
-
-/*** Userspace ioctls ***/
-
-/*
- * VIP state IOCTL - parameter is a pointer to VIP state int (0 off, 1 on, 2
- * special?)
- */
-#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned long *)
+/*** Userspace definitions such as ioctls ***/
 
 
 #ifdef __KERNEL__

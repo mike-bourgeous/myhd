@@ -70,5 +70,12 @@ testdpcint.sh
 	interrupt handler.  You need to compile all the other tools first to use
 	this script.
 
+dpc2rand.sh
+	Randomizes the DPC2 registers (see tl880doc.txt).
+
+dpc2dump.sh
+	Dumps the current DPC2 register state to a shell script using
+	./iocwritereg.
+
 vim: tw=80
 

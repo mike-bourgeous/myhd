@@ -149,5 +149,16 @@ loc_32D19:
 	 * [gpJanus+167e8] = bitsval
 	 * long[gpJanus+157ec] = 0xc
 	 */
+
+	/* Set card memory capture address (?) */
+	if(1 /* audio_mode == 0 */) {
+		write_register(tl880dev, 0x3034, 0x1000); /* 1000 used as base */
+		write_register(tl880dev, 0x303c, 0x87fc); /* base + 77fc */
+		write_register(tl880dev, 0x3038, 0x1000);
+	} else {
+		write_register(tl880dev, 0x304c, 0x1000);
+		write_register(tl880dev, 0x3054, 0x87fc);
+		write_register(tl880dev, 0x3038, 0x1000);
+	}
 }
 

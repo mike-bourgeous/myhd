@@ -50,17 +50,8 @@
 /*** Driver types ***/
 #endif /* __KERNEL__ */
 
-/* 
- * Read register IOCTL - register is read from parameter, then the value read
- * is written back to the parameter.  Single unsigned long.
- */
-#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned long *)
+/*** Userspace definitions such as ioctls ***/
 
-/*
- * Write register IOCTL - register is read from parameter[0], the value to
- * write is read from parameter[1].  Array [2] unsigned long.
- */
-#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned long *)
 
 #ifdef __KERNEL__
 

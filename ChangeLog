@@ -1,6 +1,15 @@
+2003-10-06	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added dpc2rand.sh and dpc2dump.sh tools.
+	* Added more information to tl880doc.txt about DPC2 (0x10180,0x10184).
+	* Added audio buffer setting code to tl880audio.c.
+	* Added some DPC2 init code to tl880init.c.
+
 2003-10-04	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Improved cursor test tool (incl. color palette support).
+	* Added tltuner/ and tlaudio/ directory for kernel modules modified to
+	  work with the TL880 driver.
 
 2003-10-03	Mike Bourgeous		<nitrogen@slimetech.com>
 

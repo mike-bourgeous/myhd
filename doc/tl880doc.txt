@@ -403,7 +403,7 @@ HPIP 8000-8024
 
 DPC 10000-10200
 
-register 10000 is display options bitfield:
+10000 is display options bitfield:
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -418,6 +418,13 @@ register 10000 is display options bitfield:
 	00000000|00000000|00000001|00000000	Color bars
 	00000000|00000000|00000100|00000000	Y'PbPr color (needs other settings too)
 
+10004 is display status bitfield:
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000100	Used in cJanus::isr_VideoSync(_Dvd)
+	0nnnnnnn|nnnn0000|00000000|00000000	Used in cJanus::WaitForActiveRegion
 
 10008 DPC interrupt mask bitfield
 1000C DPC interrupt type bitfield
@@ -567,7 +574,7 @@ register 10084 changes OSD image(?) - something like "sdram offset" - used in
 	
 
 
-Registers 10140-10180 are written with Y'PbPr values in OSDProperty::SetProperty
+Registers 10140-1017c are written with Y'PbPr values in OSDProperty::SetProperty
 	These control the color palette used for the cursor.
 
 	11111111|11111111|00000000|00000000
@@ -580,7 +587,51 @@ Registers 10140-10180 are written with Y'PbPr values in OSDProperty::SetProperty
 
 DPC2 10180-10184
 10180 and 10184 do some weird stuff..  10180 seems to possibly be a register 
-select/status, and 10184 is register/status content.
+select/status, and 10184 is register/status content.  Reading from or writing
+to 10184 increments 10180.  It appears that there are 0x400 registers total.
+	
+	10180 | 10184  | Desc
+	------+--------+-----------
+	0     |testregs|Used in cJanus::dpc2_registers (CLUT = color look-up table?)
+	------+--------+-----------
+	104   |testregs|Used in cJanus::dpc2_registers
+	------+--------+-----------
+	200   |f7fafcff|Used in cJanus::InitDisplay
+	      |fcf6f4f4|
+	      |402a1807|
+	      |7e766855|
+	      |f7fafcff|
+	      |fcf6f4f4|
+	      |402a1807|
+	      |7e766855|
+	------+--------+-----------
+	200   |testregs|Used in cJanus::dpc2_registers
+	------+--------+-----------
+	210   |38281808|Used in cJanus::InitDisplay
+	      |78685848|
+	      |48586878|
+	      |08182838|
+	      |38281808|
+	      |78685848|
+	      |48586878|
+	      |08182838|
+	------+--------+-----------
+	210   |3c241204|Used in cJanus::InitDisplay
+	      |fbf6f5f1|
+	      |53677881|
+	      |81786753|
+	      |3c241204|
+	      |fbf6f5f1|
+	      |53677881|
+	      |81786753|
+	------+--------+-----------
+	300   |ccmatrix|Used in cJanus::SetColorConversionMatrix 
+	      |        |(changing these will change display colors)
+	------+--------+-----------
+	300   |testregs|Used in cJanus::dpc2_registers
+	------+--------+-----------
+	10000 |not used|Used in cJanus::DisplayColorBars
+	------+--------+-----------
 
 MyHD: to turn on external display:
 
