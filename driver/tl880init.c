@@ -151,6 +151,11 @@ static void tl880_default_dpc_reg(struct tl880_dev *tl880dev)
 	write_register(tl880dev, 0x10160, 0);
 }
 
+static void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c)
+{
+	write_register(tl880dev, 0x5800, (((((a & 0x3ff) << 8) | (b & 0x1f)) << 4) | (c & 3)) << 4);
+}
+
 /* XXX: This function is not finished! */
 static void tl880_init_dpc_pll(struct tl880_dev *tl880dev)
 {
