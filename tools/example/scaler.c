@@ -12,7 +12,7 @@
 #include <sys/ioctl.h>
 #include "tl880.h"
 
-static int memfd = 0;
+static int regfd = 0;
 
 void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
 {
@@ -29,9 +29,9 @@ void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsig
 
 int map_regspace()
 {
-	if((memfd = open("/dev/tl880/reg0", O_RDWR)) < 0) {
+	if((regfd = open("/dev/tl880/reg0", O_RDWR)) < 0) {
 		perror("Unable to open /dev/tl880/reg0");
-		memfd = 0;
+		regfd = 0;
 		return -1;
 	}
 	
@@ -40,23 +40,23 @@ int map_regspace()
 
 void unmap_regspace()
 {
-	close(memfd);
+	close(regfd);
 }
 
 void write_register(long reg, unsigned long value)
 {
 	unsigned long regval[2] = {reg, value};
-	if(!memfd)
+	if(!regfd)
 		return;
 	
-	if(ioctl(memfd, TL880IOCWRITEREG, regval) < 0) {
+	if(ioctl(regfd, TL880IOCWRITEREG, regval) < 0) {
 		perror("Unable to write register");
 	}
 }
 
 unsigned long read_register(long reg)
 {
-	if(ioctl(memfd, TL880IOCREADREG, &reg) < 0) {
+	if(ioctl(regfd, TL880IOCREADREG, &reg) < 0) {
 		perror("Unable to read register");
 		return 0;
 	}

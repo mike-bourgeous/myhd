@@ -38,13 +38,13 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 	memset(new_surface, 0, sizeof(struct SOverlaySurface));
 
 	/* What happens after there have been 1048575 surfaces created? */
-	new_surface->surface_id = (++_g_idTracker & 0xfffff) | 0x52300000;
+	new_surface->id = (++_g_idTracker & 0xfffff) | 0x52300000;
 	new_surface->next = NULL;
 
 	new_surface->field_14 = surface->field_4;
 	new_surface->field_18 = surface->field_8;
-	new_surface->field_30 = surface->field_10;
-	new_surface->field_34 = surface->field_12;
+	new_surface->width = surface->field_10;
+	new_surface->height = surface->field_12;
 	
 	new_surface->field_3c = (surface->field_14 != 4) ? surface->field_14 : 0;
 	
@@ -82,10 +82,10 @@ void tl880_show_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surfa
 			printk(KERN_ERR "tl880: NULL surface in tl880_show_cursor\n");
 		} else {
 			write_regbits(tl880dev, 0x10100, 0x19, 4, surface->field_c / 16);
-			write_regbits(tl880dev, 0x10108, 9, 8, surface->field_3c);
-			write_regbits(tl880dev, 0x10108, 0x19, 0x18, surface->field_40);
-			write_regbits(tl880dev, 0x10108, 7, 0, surface->field_14);
-			write_regbits(tl880dev, 0x10108, 0x17, 0x10, surface->field_18);
+			write_regbits(tl880dev, 0x10108, 9, 8, surface->field_3c); // horizontal scaling
+			write_regbits(tl880dev, 0x10108, 0x19, 0x18, surface->field_40); // vertical scaling
+			write_regbits(tl880dev, 0x10108, 7, 0, surface->field_14); // 32 - horizontal size
+			write_regbits(tl880dev, 0x10108, 0x17, 0x10, surface->field_18); // 32 - vertical size
 		}
 	}
 	
@@ -108,13 +108,16 @@ void tl880_delete_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cur
 {
 	struct SOverlaySurface *listp = g_cursor_list;
 
+	/* Check for bugs in the code/memory corruption/invalid parameters */
 	if(CHECK_NULL(tl880dev) || CHECK_NULL(cursor) || CHECK_NULL_W(g_cursor_list)) {
 		return;
 	}
 
+	/* Check for special case where list head is the match */
 	if(cursor == g_cursor_list) {
 		g_cursor_list = cursor->next;
 	} else {
+		/* Walk the list until there's a match or the end is reached */
 		while(listp && listp->next != cursor) {
 			listp = listp->next;
 		}
@@ -150,29 +153,6 @@ void tl880_delete_cursor_list(struct tl880_dev *tl880dev)
 struct SOverlaySurface *tl880_find_cursor(struct tl880_dev *tl880dev, unsigned long addr)
 {
 	struct SOverlaySurface *listp = g_cursor_list;
-
-	/*
-	unsigned long ecx;
-loc_3b35b:
-	if(!eax) {
-		goto loc_3b36d;
-	}
-
-	ecx = eax->field_50;
-	if(eax->field_50 == addr) {
-		goto locret_3b36f;
-	}
-
-	eax = eax->next;
-	goto loc_3b35b;
-
-loc_3b36d:
-	return NULL;
-	
-locret_3b36f:
-	return eax;
-
-	*/
 
 	/* Walk the list */
 	while(listp) {

@@ -1,5 +1,6 @@
 all:
 	gcc -O2 -Wall randram.c -o randram -ggdb3
+	gcc -O2 -Wall striperam.c -o striperam -ggdb3
 	gcc -O2 -Wall regload.c -o regload -ggdb3
 	gcc -O2 -Wall regdump.c -o regdump -ggdb3
 
@@ -11,6 +12,8 @@ all:
 	gcc -O2 -Wall iocsetvip.c -o iocsetvip -ggdb3 -I../driver/
 	gcc -O2 -Wall iocreadreg.c -o iocreadreg -ggdb3 -I../driver/
 	gcc -O2 -Wall iocwritereg.c -o iocwritereg -ggdb3 -I../driver/
+
+	gcc -O2 -Wall cursor.c -o cursor -ggdb3 -I../driver/
 
 	chmod +x testdpcint.sh
 

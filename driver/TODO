@@ -3,6 +3,7 @@ Get rid of temporary static and/or global variables (move to tl880_dev)
 Add ioctl interface for mode switch function and other functions
 Use request_firmware() when it becomes more commonly available
 Replace all ints/longs with appropriate u32/s32/u16/s16 etc. types
+Replace osdmem stuff with a proven public domain malloc algorithm
 
 
 

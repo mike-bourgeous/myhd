@@ -33,43 +33,30 @@ int tl880_compact_osdmem(struct tl880_dev *tl880dev)
 	return 1;
 }
 
-#if 0
 int tl880_init_osdmem(struct tl880_dev *tl880dev, unsigned long addr, unsigned long size)
 {
-	edi = 0;
-
 	if(_g_head) {
-		tl880_deinit_osdmem(tl880dev);
+		/* tl880_deinit_osdmem(tl880dev); */
+		return 0;
 	}
 
-loc_3a2ee:
 	if(!(_g_head = kmalloc(0x1c, 1))) {
 		return 0;
 	}
 
-loc_3a305:
-	eax->field_0 = 0;
-	eax = _g_head;
-	eax->field_4 = 0;
-	eax = _g_head;
-	eax->field_8 = 0;
-	eax = _g_head;
-	eax->field_c = 0;
-	eax = _g_head;
-	eax->field_10 = 0;
-	eax = _g_idTracker_0;
-	ecx = _g_head;
-	eax++;
-	_g_idTracker_0 = eax;
-	eax &= 0xfffff;
-	eax |= 0x52300000;
-	ecx->field_14 = eax;
-	eax = _g_head;
-	eax->field_18 = 0;
+	_g_head->field_0 = 0;		// ex: 00000000
+	_g_head->virt_addr = 0;		// ex: 01f10000
+	_g_head->phys_addr = 0;		// ex: 001d8000
+	_g_head->size = 0;		// ex: 00000517
+	_g_head->active = 0;		// ex: 00000001
+	_g_head->id = (++_g_idTracker_0 & 0xfffff) | 0x52300000;	// ex: 52300002
+	_g_head->next = 0;		// ex: e27a8388
 
+#if 0
+	/* The next section of code maps to userspace */
 	if(!m_pkmOSD) {
 		eax = gpJanus;
-		esi = cJanus->field_16870;
+		esi = cJanus->field_16870;	/* base mem address + 0x186000 ? */
 		esi += cJanus->field_8;
 		if(!(eax = __imp__ExAllocatePoolWithTag(0, 8, ' mdW'))) {
 			eax = 0;
@@ -92,25 +79,24 @@ loc_3a39e:
 	eax = m_pkmOSD.MapToUserSpace();
 	
 	ecx = gpJanus;
-
-	sBoardInfo.virtual_address = eax;
-	edx = cJanus->field_16874;
-	sBoardInfo.memory_length = edx;
-	ecx = ecx->field_16870;
-	sBoardInfo.physical_address = ecx;
-	ecx = _g_head;
+#endif
+	
+	/*
+	sBoardInfo.virtual_address = eax; // result from MapToUserSpace (ex. tl880dev->memspace + 0x186000)
+	sBoardInfo.memory_length = cJanus->field_16874;
+	sBoardInfo.physical_address = cJanus->field_16870;
 	sBoardInfo.field_c = 0x80;
-	_g_head->field_4 = eax;
-	eax = _g_head;
-	ecx = sBoardInfo.physical_address;
-	_g_head->field_8 = ecx;
-	eax = _g_head;
-	ecx = sBoardInfo.memory_length;
-	_g_head->field_c = ecx;
+	*/
+	_g_head->virt_addr = (unsigned long)(tl880dev->memspace + 0x186000);
+	/* _g_head->field_8 = sBoardInfo.physical_address; */
+	/* _g_head->field_8 = cJanus->field_16870; */
+	_g_head->phys_addr = tl880dev->memphys + 0x186000;
+	/* _g_head->size = sBoardInfo.memory_length; */
+	_g_head->size = 0x1000000;
 
 	return 1;
 }
-#endif	
+
 
 unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
@@ -156,7 +142,7 @@ unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long si
 			newmem->phys_addr = 0;
 			newmem->size = 0;
 			newmem->active = 0;
-			newmem->id = ++_g_idTracker_0;
+			newmem->id = (++_g_idTracker_0 & 0xfffff) | 0x52300000;
 			newmem->next = listp1->next;
 			listp1->next = newmem;
 			newmem->virt_addr = listp1->virt_addr + finalsize;

@@ -55,6 +55,12 @@ iocwritereg
 randram
 	Randomizes part of the TL880 memory (to see if anything happens).
 
+striperam
+	Sets part of the TL880 memory to alternating pattern.
+
+cursor
+	Uploads and displays a simple cursor on the TL880 screen.
+
 testdpcint.sh
 	Enables video output and activates DPC interrupts to test the DPC
 	interrupt handler.  You need to compile all the other tools first to use

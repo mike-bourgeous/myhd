@@ -1,7 +1,18 @@
+2003-10-03	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added cursor test to tools/.  Rock on!
+	* Change memfd to regfd in example tool.
+
+2003-10-02	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added cursor functions to tl880osd.h.
+	* Added example values for some OSD structs to tl880osd.h.
+
 2003-10-01	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_deallocate_osdmem().
 	* Added tl880_init_osdmem().
+	* Added some more comments to tl880cursor.c.
 
 2003-09-30	Mike Bourgeous		<nitrogen@slimetech.com>
 
