@@ -385,7 +385,7 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 }
 
 
-struct tl880_dev *create_tl880()
+struct tl880_dev *tl880_create_dev()
 {
 	struct tl880_dev *tl880dev;
 
@@ -419,6 +419,7 @@ struct tl880_dev *create_tl880()
 	
 	/** Interrupt **/
 	tl880dev->irq = 0;
+	tl880dev->int_count = 0;
 	tl880dev->int_type = 0;
 	INIT_TQUEUE(&tl880dev->bh, tl880_bh, tl880dev);
 	/*
@@ -457,8 +458,8 @@ static int configure_tl880(struct pci_dev *dev)
 	
 	printk(KERN_INFO "tl880: initializing card number %i\n", n_tl880s);
 
-	if(!(tl880dev = create_tl880())) {
-		printk(KERN_ERR "tl880: could not create tl880 device struct\n");
+	if(!(tl880dev = tl880_create_dev())) {
+		printk(KERN_ERR "tl880: could not create tl880 device struct; out of memory\n");
 		return -ENOMEM;
 	}
 	

@@ -1,3 +1,9 @@
+2003-09-11	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added interrupt count variables to struct tl880_dev.
+	* Added variables to struct tl880_dev for all known interrupt types.
+	* Renamed create_tl880 to tl880_create_dev.
+
 2003-09-09	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Tidied up driver/tl880demux.c a bit.

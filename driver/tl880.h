@@ -149,12 +149,44 @@ struct tl880_dev {
 	struct tl880_i2c_bus *i2cbuses;
 
 	/** Interrupt stuff **/
-	struct tq_struct bh;	/* Device-specific info for interrupt bottom half */
-	int irq;		/* Interrupt line */
-	unsigned long int_type;	/* Type of interrupt to service */
-	unsigned long tsd_data; /* Extra data for tsd interrupt */
-	unsigned long dpc_data; /* Extra data for dpc interrupt */
-	unsigned long dpc_mask;
+	struct tq_struct bh;		/* Device-specific info for interrupt bottom half */
+	unsigned int irq;		/* Interrupt line */
+
+	unsigned long int_type;		/* Type of interrupt to service */
+	unsigned long int_count;	/* Number of interrupts received */
+
+	unsigned long vsc_mask;		/* VSC interrupt mask */
+	unsigned long vsc_type;		/* Type of VSC interrupt received */
+	unsigned long vsc_count;	/* Number of VSC interrupts */
+	
+	unsigned long apu_mask;		/* APU interrupt mask */
+	unsigned long apu_type;		/* Type of APU interrupt received */
+	unsigned long apu_count;	/* Number of APU interrupts */
+
+	unsigned long blt_mask;		/* BLT interrupt mask */
+	unsigned long blt_type;		/* Type of BLT interrupt received */
+	unsigned long blt_count;	/* Number of BLT interrupts */
+
+	unsigned long mce_mask;		/* MCE interrupt mask */
+	unsigned long mce_type;		/* Type of MCE interrupt received */
+	unsigned long mce_count;	/* Number of MCE interrupts */
+
+	unsigned long vpip_mask;	/* VPIP interrupt mask */
+	unsigned long vpip_type;	/* Type of VPIP interrupt received */
+	unsigned long vpip_count;	/* Number of VPIP interrupts */
+	unsigned long vpip_lock;	/* VPIP handler is running */
+
+	unsigned long hpip_mask;	/* HPIP interrupt mask */
+	unsigned long hpip_type;	/* Type of HPIP interrupt received */
+	unsigned long hpip_count;	/* Number of HPIP interrupts */
+
+	unsigned long dpc_mask;		/* DPC interrupt mask */
+	unsigned long dpc_type;		/* Type of DPC interrupt received */
+	unsigned long dpc_count;	/* Number of DPC interrupts */
+
+	unsigned long tsd_mask;		/* TSD interrupt mask */
+	unsigned long tsd_type; 	/* Type of TSD interrupt received */
+	unsigned long tsd_count;	/* Number of TSD interrupts */
 
 	/** Devfs stuff **/
 	devfs_handle_t devfs_device;

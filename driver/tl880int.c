@@ -32,6 +32,86 @@
 
 #include "tl880.h"
 
+
+void tl880_vpip_handler(struct tl880_dev *tl880dev)
+{
+	static row_cnt; /* evil - put in struct */
+	static field_cnt; /* evil - put in struct */
+	unsigned long bitsval = 0;
+	
+	esi = cJanus->0x10f94;
+	ebp = 1;
+	cJanus->0x10f98 = 1;
+
+	eax = row_cnt;
+	if(eax >= *esi) {
+		goto loc_37fce;
+	}
+
+	write_regbits(0x7000, 0x15, 0x10, (cJanus->0x10f94)->0xd8[row_cnt * 4]);
+
+	write_register(0x701c, (cJanus->0x10f94)->0x10[row_cnt * 4]);
+
+	row_cnt++;
+
+	goto loc_38088;
+
+loc_37fce:
+	eax = field_cnt;
+	if(eax >= (cJanus->0x10f94)->4) {
+		goto loc_38069;
+	}
+
+	var_8 = 0;
+
+	row_cnt = 1;
+	ebx = 0x702c;
+	set_bits(&bitsval, 0x702c, 0x16, 0xc, (cJanus->0x10f94)->0xc);
+
+	edi = 0x7000;
+	
+	if(read_regbits(tl880dev, 0x7000, 0x16, 0x16)) {
+		write_regbits(tl880dev, 0x7000, 0x16, 0x16, 0);
+	} else {
+		write_regbits(tl880dev, 0x7000, 0x16, 0x16, 1);
+	}
+	
+	write_register(tl880dev, 0x702c, var_10 | 0x80000000);
+	write_register(tl880dev, 0x702c, var_10);
+
+	write_regbits(tl880dev, 0x7000, 0x15, 0x10, (cJanus->0x10f94)->0xd8);
+
+	write_register(tl880dev, 0x701c, (cJanus->0x10f94)->0x10);
+
+	field_cnt++;
+	
+	goto loc_38088;
+
+loc_38069:
+	row_cnt = 1;
+	field_cnt = 1;
+	eax = cJanus->0x10388;
+	cJanus->0x10f98 = 0;
+	(cJanus->0x10388)->0xb70 = 1;
+	
+loc_38088:
+}
+	
+	
+	
+
+void tl880_vpip_int(struct tl880_dev *tl880dev)
+{
+	tl880dev->vpip_count++;
+	tl880dev->vpip_type = read_register(tl880dev, 0x7008) & read_register(tl880dev, 0x7004);
+	
+	if(tl880dev->vpip_type & 1 /* || !cJanus[0x10388][0x284] */) {
+		tl880_vpip_handler(tl880dev);
+	}
+
+	tl880dev->vpip_type = 0;
+}
+
 void __init tl880_bh(void *dev_id)
 {
 	struct tl880_dev *tl880dev = (struct tl880_dev*)dev_id;
@@ -142,6 +222,7 @@ void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 	/* If this card is already processing an interrupt, disable interrupts and return */
 	if(tl880dev->int_type) {
 		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx\n", tl880dev->int_type);
+		tl880dev->int_mask = read_register(tl880dev, 4);
 		write_register(tl880dev, 4, 0);
 		return;
 	}
@@ -162,7 +243,7 @@ void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 	if(tl880dev->int_type & 0x400) {
 		write_regbits(tl880dev, 4, 0xa, 0xa, 0);	/* Clear tsd bit in the int register */
 		printk(KERN_DEBUG "tl880: ts demux interrupt: 0x%08lx\n", 
-			tl880dev->tsd_data = read_register(tl880dev, 0x27814));
+			tl880dev->tsd_type = read_register(tl880dev, 0x27814));
 	}
 	if(tl880dev->int_type & 0x40) {
 		write_regbits(tl880dev, 4, 6, 6, 0);

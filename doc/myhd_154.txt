@@ -59,10 +59,14 @@ cJanus+0 may be a struct tagContext?
 
 cJanus+0b9c may be _last_p_picture_cnt
 
+cJanus+10388 is a pointer to some kind of struct used in VpipIntHandler
+	
+	if [cJanus+10388]+284 == 0 then don't run VpipHandler
+
 cJanus+10f94 is a pointer to some other structure
 
-	[cJanus+10f94]+0 may be something to do with row count
-	[cJanus+10f94]+4 may be something to do with field count
+	[cJanus+10f94]+0 may be something to do with row count, probably rows per field for vpip
+	[cJanus+10f94]+4 may be something to do with field count, probably fields per group for vpip
 
 cJanus+10f98 set to 1 in cJanus::VpipHandler
 
@@ -81,6 +85,9 @@ mdp-100a board type is 2
 
 cJanus+166d0 is input mode (enum cJanus::InputSource)
 
+cJanus+1670c is moved into cJanus+1686c, then 186000 is added, 
+		and stored in cJanus+16870.
+
 cJanus+1673c is SDRAM type (see tl880init.c:init_sdram())
 
 cJanus+16748 and cJanus+16841 appear to be bools related to input mode
@@ -92,7 +99,7 @@ cJanus+167e4 is NTSC input
 
 cJanus+16814 is OSD context (48 bytes)
 
-cJanus+1686c is memory start address?
+cJanus+1686c is memory length (or start address?)
 cJanus+16870 is memory end address?
 
 cJanus[16870]+cJanus[16874] is passed to clear_sdram with a size of 16MB
@@ -156,4 +163,66 @@ Signal() takes a long and a uint
 Interrupt Functions
 -------------------
 TL850InterruptVectorString(uint) - Returns a string description of an ISR by #
-	
+
+Interrupt function pointers are stored in an array.
+
+	Note: many of these may be wrong
+	0x001: V_apu_iauwrp1
+	0x002: V_apu_iauwrp0
+	0x004: V_apu_capunf
+	0x005: V_apu_capovf
+	0x00a: V_apu_iauwrp2
+	0x00f: V_apu_matconf_poc
+	0x010: V_apu_matconf_cwp
+	0x011: V_apu_matconf_prp
+	0x014: V_apu_matconf_iar0
+	0x015: V_apu_matconf_iar1
+	0x01d: V_apu_iecfrm_192
+	0x022: V_blt_late
+	0x023: V_blt_chain_blt
+	0x024: V_blt_end
+	0x060: V_dpc_syncloss
+	0x061: V_dpc_syncacq
+	0x062: V_dpc_hsynccnt
+	0x063: V_dpc_vsynccnt
+	0x064: V_dpc_hvsynccnt
+	0x065: V_dpc_eof0
+	0x066: V_dpc_eof1
+	0x067: V_dpc_displ
+	0x068: V_dpc_mem_uf
+	0x069: V_dpc_aux_uf
+	0x06a: V_dpc_aux_of
+	0x06b: V_dpc_idx_of
+	0x080: V_vsc_ibuf_ov
+	0x081: V_vsc_vline
+	0x082: V_vsc_vblank0
+	0x083: V_vsc_vblank1
+	0x084: V_vsc_f0
+	0x085: V_vsc_f1
+	0x086: V_vsc_vbi
+	0x0c0: V_mce_sync_done
+	0x0c1: V_mce_vtoc_uf
+	0x0c2: V_mce_vld_noslice_start
+	0x0c3: V_mce_vld_err
+	0x0c4: V_mce_rzq_run
+	0x0c5: V_mce_mc_ieng_err
+	0x0c6: V_mce_mc_ibuf_ov
+	0x0c7: V_mce_toc_rdy
+	0x0c8: V_mce_toc_flush_done
+	0x0c9: V_mce_vld_rlfifo_udf
+	0x0e0: V_vpip_done
+	0x100: V_hpip_done
+	0x123: V_mcu_slice_2manymb
+	0x124: V_mcu_skpbafterinra
+	0x128: V_mcu_noSSErr
+	0x144: V_tsd_isq
+	0x145: V_tsd_sync_acquired
+	0x146: V_tsd_sync_lost
+	0x147: V_tsd_error_packet
+	0x148: V_tsd_packet_received
+	0x14a: V_tsd_commands_executed
+	0x14b: V_tsd_stc_alarm_clock
+	0x14f: V_tsd_collision
+
+
+
