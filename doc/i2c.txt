@@ -20,7 +20,7 @@ I2C devices MyHD:
  0x14 | 1 | ATI/NxtWave NXT2000 (VSB demodulator)
  0x80 | 0 | Micronas MSP (Audio processor)
  0x86 | 0 | Micronas VPX (Video processor)
- 0xC0 | 2 | Philips Unknown Tuner or FCV1236 Tuner (Tuner)
+ 0xC0 | 2 | Philips FCV1236 Tuner (Tuner)
 
 -------------------------------------------------------------------------------
 WinTV-HD
@@ -42,7 +42,7 @@ I2C devices WinTV-HD:
  0x30 | 4 | Unknown device
  0x80 | 4 | Micronas MSP (Audio processor)
  0xA0 | 4 | Unknown device
- 0xC2 | 4 | Philips, Temic, or other generic tuner
+ 0xC2 | 4 | Temic or other generic tuner
  
 
 -------------------------------------------------------------------------------
@@ -55,8 +55,14 @@ Bus|
 ---+-----------+-----------+-----------+-----------
  5 | GPIO 0x1a | GPIO 0x1b | GPIO 0x1a | GPIO 0x1b
 
-
-HiPix is still untested.
+      |Bus|
+ Addr | # | Chip name 
+------+---+------------------------------------------------
+ 0x20 | 5 | Unknown device
+ 0x28 | 5 | Oren VSB Demodulator
+ 0x54 | 5 | Unknown device
+ 0x86 | 5 | VPX Video Decoder?
+ 0xC2 | 5 | Temic or other generic tuner
 
 
 ===============================================================================
