@@ -1,4 +1,4 @@
-Stuff associated with video output.  Running the dpcaux program will set the 
+Stuff associated with video output.  Running the dpcsync program will set the 
 external sync to 1024x768p (can be changed in the source code - read the source
 to find out how - note that the DPC clock probably needs to be reprogrammed for
 any mode change; right now it's hard coded to one value in tl880init.c).
@@ -6,6 +6,10 @@ any mode change; right now it's hard coded to one value in tl880init.c).
 The videoout program will enable/disable external sync/video passthrough.  Zero
 is passthrough enable/video disable, any other value is passthrough
 disable/video enable.
+
+The getsync and setsync programs will get and set the DPC PLL constant,
+respectively.  Passing a parameter to getsync will extract the DPC PLL constant
+settings from that parameter instead of register 0x5800.
 
 vim:tw=80
 

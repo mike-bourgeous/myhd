@@ -12,6 +12,56 @@
 #include <sys/ioctl.h>
 #include "tl880.h"
 
+typedef struct {
+	/* 0x10014 */
+	unsigned char a:1;
+	unsigned char b:1;
+	unsigned char c:1;
+	unsigned char d:1;
+	unsigned short e:10;
+	unsigned short f:11;
+	unsigned char g:1;
+	unsigned char h:1;
+	unsigned char i:1;
+	unsigned char j:1;
+
+	/* 0x10018 */
+	unsigned short k:9;
+	unsigned char l:1;
+	unsigned char m:1;
+	unsigned char n:7;
+	unsigned short o:9;
+
+	/* 0x1001c */
+	unsigned char p:3;
+	unsigned char q:8;
+	unsigned short r:11;
+	unsigned char s:4;
+	unsigned char t:1;
+
+	/* 0x10020 */
+	unsigned char u:3;
+	unsigned char v:8;
+	unsigned short w:11;
+	unsigned char x:4;
+
+#if 0
+	reg = 0x10028;
+	value = 0;
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* CC - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* DD - 1 */
+	write_register(reg, value);
+	
+	reg = 0x10024;
+	value = 0;
+	set_bits(&value, reg, 0x15, 0, 5);		/* Z - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* AA - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* BB - 4 */
+	write_register(reg, value);
+#endif
+} mode_def_letters;
+
+
 static int memfd = 0;
 
 void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
@@ -282,55 +332,55 @@ void set_sync_720x480i()
 	unsigned long value = 0;
 	long reg = 0x10014;
 
-	set_bits(&value, reg, 0, 0, 0);
-	set_bits(&value, reg, 1, 1, 0);
-	set_bits(&value, reg, 2, 2, 1);
-	set_bits(&value, reg, 3, 3, 0);
-	set_bits(&value, reg, 0xf, 6, 0xf4);		/* 244 */
-	set_bits(&value, reg, 0x1a, 0x10, 0x2d0);	/* 720 */
-	set_bits(&value, reg, 0x1b, 0x1b, 1);
-	set_bits(&value, reg, 0x1c, 0x1c, 1);
-	set_bits(&value, reg, 0x1d, 0x1d, 0);
-	set_bits(&value, reg, 0x1e, 0x1e, 0);
+	set_bits(&value, reg, 0, 0, 0);			/* A - 0 */
+	set_bits(&value, reg, 1, 1, 0);			/* B - 0 */
+	set_bits(&value, reg, 2, 2, 1);			/* C - 1 */
+	set_bits(&value, reg, 3, 3, 0);			/* D - 0 */
+	set_bits(&value, reg, 0xf, 6, 0xf4);		/* E - 244 */
+	set_bits(&value, reg, 0x1a, 0x10, 0x2d0);	/* F - 720 */
+	set_bits(&value, reg, 0x1b, 0x1b, 1);		/* G - 1 */
+	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* H - 1 */
+	set_bits(&value, reg, 0x1d, 0x1d, 0);		/* I - 0 */
+	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
 	write_register(reg, value);
 
 	reg += 4;
 	value = 0;
-	set_bits(&value, reg, 8, 0, 0xf);
-	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0);
-	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0);
-	set_bits(&value, reg, 0x12, 0xc, 0x3f);		/* 63 */
-	set_bits(&value, reg, 0x1c, 0x14, 0x38);	/* 56 */
+	set_bits(&value, reg, 8, 0, 0xf);		/* K - 15 */
+	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
+	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0); /* M - 0 */
+	set_bits(&value, reg, 0x12, 0xc, 0x3f);		/* N - 63 */
+	set_bits(&value, reg, 0x1c, 0x14, 0x38);	/* O - 56 */
 	write_register(reg, value);
 
 	reg = 0x1001c;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 3);
-	set_bits(&value, reg, 0xb, 4, 0xe);		/* 14 */
-	set_bits(&value, reg, 0x16, 0xc, 0xf3);		/* 243 */
-	set_bits(&value, reg, 0x1b, 0x18, 2);
-	set_bits(&value, reg, 0x1c, 0x1c, 1);
+	set_bits(&value, reg, 2, 0, 3);			/* P - 3 */
+	set_bits(&value, reg, 0xb, 4, 0xe);		/* Q - 14 */
+	set_bits(&value, reg, 0x16, 0xc, 0xf3);		/* R - 243 */
+	set_bits(&value, reg, 0x1b, 0x18, 2);		/* S - 2 */
+	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* T - 1 */
 	write_register(reg, value);
 
 	reg += 4;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 4);
-	set_bits(&value, reg, 0xb, 4, 0xd);
-	set_bits(&value, reg, 0x16, 0xc, 0xf3);		/* 243 */
-	set_bits(&value, reg, 0x1b, 0x18, 3);
+	set_bits(&value, reg, 2, 0, 4);			/* U - 4 */
+	set_bits(&value, reg, 0xb, 4, 0xd);		/* V - 13 */
+	set_bits(&value, reg, 0x16, 0xc, 0xf3);		/* W - 243 */
+	set_bits(&value, reg, 0x1b, 0x18, 3);		/* X - 3 */
 	write_register(reg, value);
 
 	reg = 0x10028;
 	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);
-	set_bits(&value, reg, 0x18, 0x18, 1);
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* BB - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* CC - 1 */
 	write_register(reg, value);
 	
 	reg -= 4;
 	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);
-	set_bits(&value, reg, 0x18, 0x18, 1);
-	set_bits(&value, reg, 0x1f, 0x1c, 4);
+	set_bits(&value, reg, 0x15, 0, 5);		/* Y - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* Z - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* AA - 4 */
 	write_register(reg, value);
 }
 
@@ -339,56 +389,56 @@ void set_sync_720x480p()
 	unsigned long value = 0;
 	long reg = 0x10014;
 
-	set_bits(&value, reg, 0, 0, 0);
-	set_bits(&value, reg, 1, 1, 0);
-	set_bits(&value, reg, 2, 2, 1);
-	set_bits(&value, reg, 3, 3, 1);
-	set_bits(&value, reg, 0xf, 6, 0xf4);		/* 244 */
-	set_bits(&value, reg, 0x1a, 0x10, 0x2d0);	/* 720 */
-	set_bits(&value, reg, 0x1b, 0x1b, 1);
-	set_bits(&value, reg, 0x1c, 0x1c, 1);
-	set_bits(&value, reg, 0x1d, 0x1d, 0);
-	set_bits(&value, reg, 0x1e, 0x1e, 0);
+	set_bits(&value, reg, 0, 0, 0);			/* A - 0 */
+	set_bits(&value, reg, 1, 1, 0);			/* B - 0 */
+	set_bits(&value, reg, 2, 2, 1);			/* C - 1 */
+	set_bits(&value, reg, 3, 3, 1);			/* D - 1 */
+	set_bits(&value, reg, 0xf, 6, 0xf4);		/* E - 244 */
+	set_bits(&value, reg, 0x1a, 0x10, 0x2d0);	/* F - 720 */
+	set_bits(&value, reg, 0x1b, 0x1b, 1);		/* G - 1 */
+	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* H - 1 */
+	set_bits(&value, reg, 0x1d, 0x1d, 0);		/* I - 0 */
+	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
 	write_register(reg, value);
 
 	reg += 4;
 	value = 0;
-	set_bits(&value, reg, 8, 0, 0xe);
-	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0);
-	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0);
-	set_bits(&value, reg, 0x12, 0xc, 0x3f);		/* 63 */
-	set_bits(&value, reg, 0x1c, 0x14, 0x39);	/* 56 */
+	set_bits(&value, reg, 8, 0, 0xe);		/* K - 14 */
+	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
+	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0); /* M - 0 */
+	set_bits(&value, reg, 0x12, 0xc, 0x3f);		/* N - 63 */
+	set_bits(&value, reg, 0x1c, 0x14, 0x39);	/* O - 56 */
 	write_register(reg, value);
 
 	reg = 0x1001c;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 6);
-	set_bits(&value, reg, 0xb, 4, 0x1e);		/* 14 */
-	set_bits(&value, reg, 0x16, 0xc, 0x1e3);	/* 483 */
-	set_bits(&value, reg, 0x1b, 0x18, 6);
-	set_bits(&value, reg, 0x1c, 0x1c, 0);
+	set_bits(&value, reg, 2, 0, 6);			/* P - 6 */
+	set_bits(&value, reg, 0xb, 4, 0x1e);		/* Q - 14 */
+	set_bits(&value, reg, 0x16, 0xc, 0x1e3);	/* R - 483 */
+	set_bits(&value, reg, 0x1b, 0x18, 6);		/* S - 6 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* T - 0 */
 	write_register(reg, value);
 
 	reg += 4;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 0);
-	set_bits(&value, reg, 0xb, 4, 0);
-	set_bits(&value, reg, 0x16, 0xc, 0);	/* 243 */
-	set_bits(&value, reg, 0x1b, 0x18, 0);
-	set_bits(&value, reg, 0x1c, 0x1c, 0);
+	set_bits(&value, reg, 2, 0, 0);			/* U - 0 */
+	set_bits(&value, reg, 0xb, 4, 0);		/* V - 0 */
+	set_bits(&value, reg, 0x16, 0xc, 0);		/* W - 0 */
+	set_bits(&value, reg, 0x1b, 0x18, 0);		/* X - 0 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* Y - 0 */
 	write_register(reg, value);
 
 	reg = 0x10028;
 	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);
-	set_bits(&value, reg, 0x18, 0x18, 1);
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* CC - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* DD - 1 */
 	write_register(reg, value);
 	
 	reg -= 4;
 	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);
-	set_bits(&value, reg, 0x18, 0x18, 1);
-	set_bits(&value, reg, 0x1f, 0x1c, 4);
+	set_bits(&value, reg, 0x15, 0, 5);		/* Z - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* AA - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* BB - 4 */
 	write_register(reg, value);
 }
 
@@ -397,104 +447,114 @@ void set_sync_1920x1080i()
 	unsigned long value = 0;
 	long reg = 0x10014;
 
-	set_bits(&value, reg, 0, 0, 0);
-	set_bits(&value, reg, 1, 1, 1);
-	set_bits(&value, reg, 2, 2, 1);
-	set_bits(&value, reg, 3, 3, 0);
-	set_bits(&value, reg, 0xf, 6, 0x368);		/* 872 */
-	set_bits(&value, reg, 0x1a, 0x10, 0x780);	/* 1920 */
-	set_bits(&value, reg, 0x1b, 0x1b, 1);
-	set_bits(&value, reg, 0x1c, 0x1c, 1);
-	set_bits(&value, reg, 0x1d, 0x1d, 0);
-	set_bits(&value, reg, 0x1e, 0x1e, 0);
+	set_bits(&value, reg, 0, 0, 0);			/* A - 0 */
+	set_bits(&value, reg, 1, 1, 1);			/* B - 1 */
+	set_bits(&value, reg, 2, 2, 1);			/* C - 1 */
+	set_bits(&value, reg, 3, 3, 0);			/* D - 0 */
+	set_bits(&value, reg, 0xf, 6, 0x368);		/* E - 872 */
+	set_bits(&value, reg, 0x1a, 0x10, 0x780);	/* F - 1920 */
+	set_bits(&value, reg, 0x1b, 0x1b, 1);		/* G - 1 */
+	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* H - 1 */
+	set_bits(&value, reg, 0x1d, 0x1d, 0);		/* I - 0 */
+	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
 	write_register(reg, value);
 
-	reg += 4;
+	reg = 0x10018;
 	value = 0;
-	set_bits(&value, reg, 8, 0, 0x2c);		/* 44 */
-	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0);
-	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0);
-	set_bits(&value, reg, 0x12, 0xc, 0x58);		/* 88 */
-	set_bits(&value, reg, 0x1c, 0x14, 0x8c);	/* 140 */
+	set_bits(&value, reg, 8, 0, 0x2c);		/* K - 44 */
+	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
+	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0); /* M - 0 */
+	set_bits(&value, reg, 0x12, 0xc, 0x58);		/* N - 88 */
+	set_bits(&value, reg, 0x1c, 0x14, 0x8c);	/* O - 140 */
 	write_register(reg, value);
 
 	reg = 0x1001c;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 5);
-	set_bits(&value, reg, 0xb, 4, 0xf);		/* 15 */
-	set_bits(&value, reg, 0x16, 0xc, 0x21c);	/* 540 */
-	set_bits(&value, reg, 0x1b, 0x18, 2);
-	set_bits(&value, reg, 0x1c, 0x1c, 0);
+	set_bits(&value, reg, 2, 0, 5);			/* P - 5 */
+	set_bits(&value, reg, 0xb, 4, 0xf);		/* Q - 15 */
+	set_bits(&value, reg, 0x16, 0xc, 0x21c);	/* R - 540 */
+	set_bits(&value, reg, 0x1b, 0x18, 2);		/* S - 2 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* T - 0 */
 	write_register(reg, value);
 	
-	reg += 4;
+	reg = 0x10020;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 5);
-	set_bits(&value, reg, 0xb, 4, 0x10);
-	set_bits(&value, reg, 0x16, 0xc, 0x21c);	/* 540 */
-	set_bits(&value, reg, 0x1b, 0x18, 2);
+	set_bits(&value, reg, 2, 0, 5);			/* U - 5 */
+	set_bits(&value, reg, 0xb, 4, 0x10);		/* V - 16 */
+	set_bits(&value, reg, 0x16, 0xc, 0x21c);	/* W - 540 */
+	set_bits(&value, reg, 0x1b, 0x18, 2);		/* X - 2 */
 	write_register(reg, value);
 
 	reg = 0x10028;
 	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);
-	set_bits(&value, reg, 0x18, 0x18, 1);
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* BB - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* CC - 1 */
 	write_register(reg, value);
 	
-	reg -= 4;
+	reg = 0x10024;
 	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);
-	set_bits(&value, reg, 0x18, 0x18, 1);
-	set_bits(&value, reg, 0x1f, 0x1c, 4);
+	set_bits(&value, reg, 0x15, 0, 5);		/* Y - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* Z - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* AA - 4 */
 	write_register(reg, value);
 }
 
 void set_sync_1024x768p()
 {
 	unsigned long value = 0;
-	long reg = 0x10014;
-
-	set_bits(&value, reg, 0, 0, 0);
-	set_bits(&value, reg, 1, 1, 1);
-	set_bits(&value, reg, 2, 2, 1);
-	set_bits(&value, reg, 3, 3, 1);
-	set_bits(&value, reg, 0xf, 6, 0x21c);		/* 540 */
-	set_bits(&value, reg, 0x1a, 0x10, 0x400);	/* 1024 */
-	set_bits(&value, reg, 0x1b, 0x1b, 1);
-	set_bits(&value, reg, 0x1c, 0x1c, 1);
-	set_bits(&value, reg, 0x1d, 0x1d, 0);
-	set_bits(&value, reg, 0x1e, 0x1e, 0);
+	long reg;
+	
+	reg = 0x10014;
+	set_bits(&value, reg, 0, 0, 0);			/* A - 0 */
+	set_bits(&value, reg, 1, 1, 1);			/* B - 1 */
+	set_bits(&value, reg, 2, 2, 1);			/* C - 1 */
+	set_bits(&value, reg, 3, 3, 1);			/* D - 1 */
+	set_bits(&value, reg, 0xf, 6, 0x21c);		/* E - 540 */
+	set_bits(&value, reg, 0x1a, 0x10, 0x400);	/* F - 1024 */
+	set_bits(&value, reg, 0x1b, 0x1b, 1);		/* G - 1 */
+	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* H - 1 */
+	set_bits(&value, reg, 0x1d, 0x1d, 0);		/* I - 0 */
+	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
 	write_register(reg, value);
 
-	reg += 4;
+	reg = 10018;
 	value = 0;
-	set_bits(&value, reg, 8, 0, 0x19);		/* 31 */
-	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0);
-	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0);
-	set_bits(&value, reg, 0x12, 0xc, 0x7f);		/* 127 */
-	set_bits(&value, reg, 0x1c, 0x14, 0xa0);	/* 160 */
+	set_bits(&value, reg, 8, 0, 0x19);		/* K - 31 */
+	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
+	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0); /* M - 0 */
+	set_bits(&value, reg, 0x12, 0xc, 0x7f);		/* N - 127 */
+	set_bits(&value, reg, 0x1c, 0x14, 0xa0);	/* O - 160 */
 	write_register(reg, value);
 
 	reg = 0x1001c;
 	value = 0;
-	set_bits(&value, reg, 2, 0, 6);
-	set_bits(&value, reg, 0xb, 4, 0x1d);		/* 29 */
-	set_bits(&value, reg, 0x16, 0xc, 0x300);	/* 768 */
-	set_bits(&value, reg, 0x1b, 0x18, 3);
-	set_bits(&value, reg, 0x1c, 0x1c, 0);
+	set_bits(&value, reg, 2, 0, 6);			/* P - 6 */
+	set_bits(&value, reg, 0xb, 4, 0x1d);		/* Q - 29 */
+	set_bits(&value, reg, 0x16, 0xc, 0x300);	/* R - 768 */
+	set_bits(&value, reg, 0x1b, 0x18, 3);		/* S - 3 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* T - 0 */
+	write_register(reg, value);
+
+	reg = 0x10020;
+	value = 0;
+	set_bits(&value, reg, 2, 0, 0);			/* U - 0 */
+	set_bits(&value, reg, 0xb, 4, 0);		/* V - 0 */
+	set_bits(&value, reg, 0x16, 0xc, 0);		/* W - 0 */
+	set_bits(&value, reg, 0x1b, 0x18, 0);		/* X - 0 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* Y - 0 */
 	write_register(reg, value);
 	
 	reg = 0x10028;
 	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);
-	set_bits(&value, reg, 0x18, 0x18, 1);
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* CC - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* DD - 1 */
 	write_register(reg, value);
 	
-	reg -= 4;
+	reg = 0x10024;
 	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);
-	set_bits(&value, reg, 0x18, 0x18, 1);
-	set_bits(&value, reg, 0x1f, 0x1c, 4);
+	set_bits(&value, reg, 0x15, 0, 5);		/* Z - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* AA - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* BB - 4 */
 	write_register(reg, value);
 }
 
