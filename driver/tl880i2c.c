@@ -212,10 +212,6 @@ void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *
 		return;
 	}
 
-	printk(KERN_DEBUG "tl880: tl880_call_i2c_clients:\n");
-	printk(KERN_DEBUG "tl880:\ttl880dev: 0x%08lx (card number %i)\n", (unsigned long) tl880dev, tl880dev->id);
-	printk(KERN_DEBUG "tl880:\ti2cbuses: 0x%08lx\n", (unsigned long)tl880dev->i2cbuses);
-
 	for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
 		for(i = 0; i < I2C_CLIENTS_MAX; i++) {
 			if (!tl880dev->i2cbuses[j].i2c_clients[i]) {
