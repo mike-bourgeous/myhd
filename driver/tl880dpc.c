@@ -265,6 +265,37 @@ void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
 	}
 }
 
+#if 0
+void tl880_dpc_field0(struct tl880_dev *tl880dev)
+{
+	dpc_eof0_count++;
+
+	/*
+	CDma = (cJanus->0)->0x110;
+	*/
+
+	if(0 /* CDma::VopOn(); */) {
+		return;
+	}
+
+	eax = cJanus->0x10388;
+	if((cJanus->0x10388)->0x26c == 0) {
+		goto loc_2c0bf;
+	}
+
+	eax = cJanus->0;
+	ecx = (cJanus->0)->0x110;
+	if((cJanus->0x10388)->0xbb0 == 1) {
+		/* CDma::VopIsrEven(); */
+		return;
+	} else {
+loc_2c0bf:
+loc_2c0c7:
+		/* CDma::VopIsrOdd(); */
+	}
+}
+#endif
+
 int tl880_dpc_int(struct tl880_dev *tl880dev)
 {
 	tl880dev->dpc_count++;
@@ -276,7 +307,7 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 
 
 	if(tl880dev->dpc_type & 4) {
-		/* isr_VideoSync(); */
+		tl880_dpc_video_sync(tl880dev);
 	}
 
 	if(tl880dev->dpc_type & 0x20) {
