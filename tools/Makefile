@@ -15,6 +15,8 @@ all:
 
 	gcc -O2 -Wall cursor.c -o cursor -ggdb3 -I../driver/
 
+	gcc -O2 -Wall rgb2ypbpr.c -o rgb2ypbpr -ggdb3
+
 	chmod +x testdpcint.sh
 
 clean:

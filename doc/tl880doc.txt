@@ -568,6 +568,15 @@ register 10084 changes OSD image(?) - something like "sdram offset" - used in
 
 
 Registers 10140-10180 are written with Y'PbPr values in OSDProperty::SetProperty
+	These control the color palette used for the cursor.
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|nnnnnnnn	Pb (blue axis chroma) (0-0xff)
+	00000000|00000000|nnnnnnnn|00000000	Pr (red axis chroma) (0-0xff)
+	00000000|nnnnnnnn|00000000|00000000	Y (luma) (0-0xff)
+	0nnnnnnn|00000000|00000000|00000000	Alpha (0-0x7f)
 
 DPC2 10180-10184
 10180 and 10184 do some weird stuff..  10180 seems to possibly be a register 

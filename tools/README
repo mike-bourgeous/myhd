@@ -61,6 +61,10 @@ striperam
 cursor
 	Uploads and displays a simple cursor on the TL880 screen.
 
+rgb2ypbpr
+	Converts an RGB[A] value to an AYPbPr value for use with registers
+	10140-1017c (the cursor color palette).
+
 testdpcint.sh
 	Enables video output and activates DPC interrupts to test the DPC
 	interrupt handler.  You need to compile all the other tools first to use

@@ -1,7 +1,13 @@
+2003-10-04	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Improved cursor test tool (incl. color palette support).
+
 2003-10-03	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added cursor test to tools/.  Rock on!
 	* Change memfd to regfd in example tool.
+	* Added some more info about OSD color registers to tl880doc.txt.
+	* Added rgb2ypbpr tool.
 
 2003-10-02	Mike Bourgeous		<nitrogen@slimetech.com>
 
