@@ -209,6 +209,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				return 1;
 				break;
 			case 6:
+				write_regbits(tl880dev, 0x10194, 0xe, 0xe, 1);
 				write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
 				return 1;
 				break;

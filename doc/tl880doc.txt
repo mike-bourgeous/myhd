@@ -9,7 +9,7 @@ regarding the origin of this work and any derivatives.
 All numbers are in hexadecimal, except for bit descriptions (binary).
 -------------------------------
 
-HIF 0-14
+HIF 0-14 - Hardware interface
 
 0	last queued interrupt type
 4	interrupt type enable mask
@@ -660,7 +660,7 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 27814 last queued tsd interrupt
 
-MIF 28000, 28020-280dc
+MIF 28000, 28020-280dc - Memory interface
 
 28040-2807c used in cJanus::PipMifBufSetting
 

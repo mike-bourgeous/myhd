@@ -1,3 +1,13 @@
+2003-09-15	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added extra information about CDma.
+	* Added tl880_set_dpc_clock.
+
+2003-09-13	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* At least one DPC interrupt type now works.
+	* Added names to two register regions in tl880doc.txt
+
 2003-09-12	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added interrupt handler for VPIP and started DPC handler.

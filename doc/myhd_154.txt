@@ -127,6 +127,21 @@ struct SOverlaySurface
 dword[0x6c] may be pointer to next surface in linked list
 
 
+class CDma
+----------
+function CDma::VopOn returns 1 if aux video is enabled (reg 10000 bit 4)
+function CDma::Init(x,y):
+	KStreamAdapter::GetDmaBuffer
+	KStreamAdapter::GetPhysicalAddress
+	cJanus::InitAuxVideo
+	CDma::DmaRelatedWSettings
+
+CDma+60 may be xres for capture
+CDma+64 may be yres for capture
+CDma+6c may be xres for preview
+CDma+70 may be yres for preview
+
+
 OSD FUNCTIONS
 -------------
 .text:0002dfc8 cJanus::InitOSDContext() - zeros out 12 (0xb) dwords at gpJanus+16814
@@ -147,8 +162,6 @@ OSD FUNCTIONS
 .text:0003a430 deinitializeOSDMemory()
 .text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN)
 .text:0003a596 deallocateOSDMemory(ulong)
-
-function CDMA::VopOn returns 1 if aux video is enabled (reg 10000 bit 4)
 
 
 cJanus Functions

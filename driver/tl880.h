@@ -278,6 +278,8 @@ void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 
 /* tl880dpc.c */
 void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
+unsigned long tl880_calc_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
+void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 interlace);
 void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
 int tl880_dpc_int(struct tl880_dev *tl880dev);
 
