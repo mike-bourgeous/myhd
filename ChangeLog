@@ -1,3 +1,12 @@
+2003-09-09	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Tidied up driver/tl880demux.c a bit.
+	* Added new functions from tl880{demux,dma}.c to tl880.h.
+
+2003-09-08	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added information on TL850InterruptVectorString to doc/myhd_154.txt.
+
 2003-09-06	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added driver/tl880demux.c for demux functions.

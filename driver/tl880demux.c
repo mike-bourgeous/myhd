@@ -46,7 +46,6 @@ struct demux_dev {
 	unsigned long field_74;
 };
 
-extern unsigned long dma_bitmask;
 unsigned long dev_bitmask = 0;
 unsigned char demux_inited = 0;
 unsigned int demux_pcr_pid = 0;
@@ -64,7 +63,7 @@ unsigned long tl880_demux_init(struct tl880_dev *tl880dev)
 	unsigned long i;	/* crc: esi */
 	int bit;		/* crc: ecx */
 	unsigned long reg;
-	unsigned long retval;
+	/* unsigned long retval; */
 
 	//Demux_stop();
 
@@ -163,10 +162,7 @@ unsigned long tl880_demux_init(struct tl880_dev *tl880dev)
 
 	write_register(tl880dev, 0x27810, 0x5000);
 
-	retval = read_register(tl880dev, 0x27814);
-	retval &= 0xf;
-
-	tsd_last_queued_interrupt = retval;
+	tsd_last_queued_interrupt = read_register(tl880dev, 0x27814) & 0xf;
 	/* SetTL850Interrupt(0x144, tsdIsq) */
 
 	/* SetTL850Interrupt(0x14a, tsdCommandExecIsr) */
@@ -175,22 +171,8 @@ unsigned long tl880_demux_init(struct tl880_dev *tl880dev)
 		write_register(tl880dev, 0x26804, 0);
 		write_register(tl880dev, 0x26800, 6);
 		
-loc_145fa:
-		retval = read_register(tl880dev, 0x26804);
-		
-		if(retval) {
-			goto loc_1460f;
-		}
-		
-		retval = read_register(tl880dev, 0x26800);
-		
-		if(retval != 5) {
-			goto loc_145fa;
-		}
-		
-loc_1460f:
-		retval = read_register(tl880dev, 0x26804);
-		
+		/* Wait on these registers (yes the while loop is empty) */
+		while(read_register(tl880dev, 0x26804) == 0 && read_register(tl880dev, 0x26800) != 5);
 	} while(read_register(tl880dev, 0x26804) != 1);
 
 	write_register(tl880dev, 0x26800, 0);

@@ -250,8 +250,12 @@ void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
 /* tl880modes.c */
 
 /* tl880demux.c */
+unsigned long tl880_demux_init(struct tl880_dev *tl880dev);
 
 /* tl880dma.c */
+unsigned int tl880_aux_dma_allocate();
+void tl880_aux_dma_free(unsigned int dma);
+extern unsigned long dma_bitmask;
 
 #endif /* __KERNEL__ */
 

@@ -152,3 +152,8 @@ cSemaphore Functions
 Wait() takes a 64-bit int
 Signal() takes a long and a uint
 
+
+Interrupt Functions
+-------------------
+TL850InterruptVectorString(uint) - Returns a string description of an ISR by #
+	

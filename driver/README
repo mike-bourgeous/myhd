@@ -26,6 +26,8 @@ faster than the bit-banging interface, but might not be as reliable, and
 produces different results with some tests.  To compile this version of the
 module, run "make newi2c" instead of just "make" on the command line.
 
+** newi2c is broken and will be removed **
+
 I2C support (tl880i2c.c) is mostly complete.  There are several I2C interfaces
 provided, which are selected by card revision.  Load the i2c-dev and
 i2c-algo-bit modules before loading this module.  The MyHD has devices on all
