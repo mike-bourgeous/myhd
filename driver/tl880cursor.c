@@ -149,9 +149,10 @@ void tl880_delete_cursor_list(struct tl880_dev *tl880dev)
 
 struct SOverlaySurface *tl880_find_cursor(struct tl880_dev *tl880dev, unsigned long addr)
 {
-	struct SOverlaySurface *eax = g_cursor_list;
-	unsigned long ecx;
+	struct SOverlaySurface *listp = g_cursor_list;
 
+	/*
+	unsigned long ecx;
 loc_3b35b:
 	if(!eax) {
 		goto loc_3b36d;
@@ -170,6 +171,20 @@ loc_3b36d:
 	
 locret_3b36f:
 	return eax;
+
+	*/
+
+	/* Walk the list */
+	while(listp) {
+		/* If there's a match, return it */
+		if(listp->field_50 == addr) {
+			return listp;
+		}
+		listp = listp->next;
+	}
+
+	/* If no match, return NULL */
+	return NULL;
 }
 
 
