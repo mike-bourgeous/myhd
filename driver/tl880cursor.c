@@ -108,43 +108,42 @@ void tl880_delete_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cur
 {
 	struct SOverlaySurface *listp = g_cursor_list;
 
-	if(CHECK_NULL(tl880dev) || CHECK_NULL(cursor)) {
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(cursor) || CHECK_NULL_W(g_cursor_list)) {
 		return;
 	}
 
 	if(cursor == g_cursor_list) {
 		g_cursor_list = cursor->next;
-		goto loc_3b31f;
-	}
-
-	if(!listp) {
-		return;
-	}
-
+	} else {
+		/*
 loc_3b308:
-	if(listp->next == cursor) {
-		goto loc_3b315;
-	}
-
-	listp = listp->next;
-	if(listp) {
-		goto loc_3b308;
-	}
-
+		if(listp->next == cursor) {
+			goto loc_3b315;
+		}
+		
+		listp = listp->next;
+		if(listp) {
+			goto loc_3b308;
+		}
+		*/
+		
+		while(listp && listp->next != cursor) {
+			listp = listp->next;
+		}
+		
 loc_3b315:
-	if(!listp) {
-		return;
+		if(!listp) {
+			return;
+		}
+		
+		listp->next = cursor->next;
 	}
 
-	listp->next = cursor->next;
-
-loc_3b31f:
-	cursor->next = NULL;
 	if(cursor->field_8) {
 		/* deallocateOSDMemory(cursor->field_8); */
+		cursor->field_8 = 0;
 	}
 
-	cursor->field_8 = 0;
 	kfree(cursor);
 
 	return;

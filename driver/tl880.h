@@ -74,7 +74,9 @@
 #define TL880_CARD_ZERO			0
 
 /* debug */
-#define CHECK_NULL(a) ( (a) ? (printk(KERN_ERR "tl880: non-NULL %s in %s\n", #a, __FUNCTION__), (0)) : (printk(KERN_ERR "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
+#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
+#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
+
 
 
 /*** Driver types ***/
