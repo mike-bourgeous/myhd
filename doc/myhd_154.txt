@@ -96,6 +96,8 @@ definitely set a breakpoint in code that uses getSDRAMoffset (3a5e4)
 
 struct tagContext
 -----------------
+dword[0264] may be horizontal resolution
+dword[0268] may be vertical resolution
 dword[0350] may be repeat_first_field flag
 dword[0370-037c] have something to do with caption buffers
 

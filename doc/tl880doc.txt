@@ -37,6 +37,16 @@ BLT (Blitter?) 4000-405c
 
 5800 DPC PLL constant
 
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000xxx	Disable sync if set(?)
+	00000000|00000000|00000000|00001000	Divide by two?
+	00000000|00000000|00000000|00nn0000	c - 0: off/double, 1/2: on, 3: half speed
+	00000000|00000000|000nnnnn|00000000	b - 0: normal, 2: half, 6: quarter
+						e: eighth, 1e: sixteenth (sometimes)
+	000000nn|nnnnnnnn|00000000|00000000	a: base
+
 MCE 6000-603c
 
 6008 is MCE interrupt mask
@@ -57,16 +67,16 @@ HPIP 8000-8020
 
 register 10000 is display options bitfield:
 
-fedcba98 76543210
-00000000 00000001	Top/bottom field or top/bottom buffer
-00000000 00000010	Image display enable (BVDO)
-00000000 00000100	OSD display enable
-00000000 00001000	Cursor display enable(?)
-00000000 00010000	Aux (i.e. video card overlay) enable
-00000000 00100000	Sync enable/external display enable (not sure)
-00000000 01000000	This does something to the color.
-00000001 00000000	Color bars
-00000100 00000000	Y'PbPr color
+	fedcba98 76543210
+	00000000 00000001	Top/bottom field or top/bottom buffer
+	00000000 00000010	Image display enable (BVDO)
+	00000000 00000100	OSD display enable
+	00000000 00001000	Cursor display enable(?)
+	00000000 00010000	Aux (i.e. video card overlay) enable
+	00000000 00100000	Sync enable/external display enable (not sure)
+	00000000 01000000	This does something to the color.
+	00000001 00000000	Color bars
+	00000100 00000000	Y'PbPr color
 
 register 10004 is a status register for the video generator (?)
 
@@ -76,6 +86,75 @@ register 10004 is a status register for the video generator (?)
 	00000100 isr_VideoSync (vertical retrace?)
 	00100000 IntDpcEof0 (end of top field?)
 	01000000 IntDpcEof1 (end of bottom field?)
+
+10014-10028: Sync registers: see tools/dpc/dpcaux.c
+
+10014 DPC sync register 1
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	A
+	00000000|00000000|00000000|00000010	B
+	00000000|00000000|00000000|00000100	C
+	00000000|00000000|00000000|00001000	D - Progressive Scan
+	00000000|00000000|nnnnnnnn|nn000000	E
+	00000nnn|nnnnnnnn|00000000|00000000	F - Horizontal Size
+	00001000|00000000|00000000|00000000	G
+	00010000|00000000|00000000|00000000	H
+	00100000|00000000|00000000|00000000	I
+	01000000|00000000|00000000|00000000	J
+	
+10018 DPC sync register 2
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|0000000n|nnnnnnnn	K
+	00000000|00000000|00000010|00000000	L - Invert Hsync
+	00000000|00000000|00000100|00000000	M - Invert Vsync
+	00000000|00000nnn|nnnn0000|00000000	N
+	000nnnnn|nnnn0000|00000000|00000000	O
+
+1001c DPC sync register 3 (top field?)
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000nnn	P - 1
+	00000000|00000000|0000nnnn|nnnn0000	Q - 1
+	00000000|0nnnnnnn|nnnn0000|00000000	R - Vertical Size 1
+	0000nnnn|00000000|00000000|00000000	S - 1
+	00010000|00000000|00000000|00000000	T - 1
+
+10020 DPC sync register 4 (bottom field?)
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000nnn	U - 2
+	00000000|00000000|0000nnnn|nnnn0000	V - 2
+	00000000|0nnnnnnn|nnnn0000|00000000	W - Vertical Size 2
+	0000nnnn|00000000|00000000|00000000	X - 2
+	00010000|00000000|00000000|00000000	Y - 2
+
+10024 DPC sync register 6
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00nnnnnn|nnnnnnnn|nnnnnnnn	Z
+	00000001|00000000|00000000|00000000	AA
+	nnnn0000|00000000|00000000|00000000	BB
+
+10028 DPC sync register 5
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|0000nnnn|nnnnnnnn	CC
+	00000001|00000000|00000000|00000000	DD
+
 
 register 10048 is DispBufReg(?) or NtscDispFrame?
 
@@ -114,6 +193,8 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 
 20000 tsd firmware start
+
+26800 and 26804 used in Demux_stop
 
 27814 last queued tsd interrupt
 
