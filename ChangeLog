@@ -1,6 +1,7 @@
 2003-09-30	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_get_osdmem_offset() to tl880cursor.c.
+	* Fixed misinformation in myhd_154.txt about getSDRAMoffset.
 
 2003-09-29	Mike Bourgeous		<nitrogen@slimetech.com>
 

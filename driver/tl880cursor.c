@@ -50,7 +50,7 @@ struct SOverlaySurface {
 
 unsigned long _g_idTracker = 0;
 
-void tl880_add_cursor(struct SOverlaySurface *surface);
+void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surface);
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
 
 
@@ -113,7 +113,7 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 		return NULL;
 	}
 
-	tl880_add_cursor(new_surface);
+	tl880_add_cursor(tl880dev, new_surface);
 
 	return new_surface;
 }
@@ -144,7 +144,7 @@ void tl880_show_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surfa
 
 struct SOverlaySurface *g_cursor_list = NULL;
 
-void tl880_add_cursor(struct SOverlaySurface *surface)
+void tl880_add_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surface)
 {
 	if(!surface) {
 		printk(KERN_ERR "tl880: NULL surface in tl880_add_cursor\n");
@@ -170,7 +170,7 @@ unsigned long _g_idTracker_0 = 0;
 struct OSDmemory *_g_head = NULL;
 
 /* This function merges any consecutive free areas to a single area */
-int tl880_compact_osdmem()
+int tl880_compact_osdmem(struct tl880_dev *tl880dev)
 {
 	struct OSDmemory *listp1 = _g_head, *listp2;
 
@@ -208,7 +208,7 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 		//initializeOSDMemory(sBoardInfo.osd_address, sBoardInfo.virt_addr);
 	}
 
-	tl880_compact_osdmem();
+	tl880_compact_osdmem(tl880dev);
 
 	/* Search for an inactive block of the correct size */
 	listp1 = _g_head;
@@ -262,46 +262,34 @@ unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned lon
 	return 0;
 }
 
-unsigned long tl880_get_osdmem_offset(unsigned long id)
+unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long id)
 {
-	unsigned long eax;
-	struct OSDmemory *ecx;
-	ecx = _g_head;
+	struct OSDmemory *listp;
+	listp = _g_head;
 
 loc_3a5ea:
-	if(!ecx) {
-		goto loc_3a61a;
+	if(!listp) {
+		return -1;
 	}
 
-	eax = ecx->id;
-	if((eax & 0xfff00000) != 0x52300000) {
-		goto loc_3a61a;
+	if((listp->id & 0xfff00000) != 0x52300000) {
+		printk(KERN_ERR "tl880: invalid ID in tl880_get_osdmem_offset: 0x%08lx (should be 0x523xxxxx)\n", listp->id);
+		return -1;
 	}
 
-	if(ecx->active == 0) {
+	if(listp->active == 0) {
 		goto loc_3a60e;
 	}
 
-	eax = ecx->virt_addr;
-	eax += ecx->field_0;
-	if(eax == id) {
-		 goto loc_3a613;
+	if(listp->virt_addr + listp->field_0 == id) {
+		goto loc_3a613;
+loc_3a613:
+		return listp->phys_addr + listp->field_0;
 	}
 
 loc_3a60e:
-	ecx = ecx->next;
+	listp = listp->next;
 	goto loc_3a5ea;
-
-loc_3a613:
-	eax = ecx->phys_addr;
-	eax += ecx->field_0;
-	goto locret_3a61d;
-	
-loc_3a61a:
-	return -1;
-
-locret_3a61d:
-	return eax;
 }
 
 
