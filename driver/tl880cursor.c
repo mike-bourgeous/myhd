@@ -170,10 +170,11 @@ struct OSDmemory *_g_head = NULL;
 /* This function merges any consecutive free areas to a single area */
 int tl880_compact_desc_list()
 {
-	struct OSDmemory *esi, *eax;
+	struct OSDmemory *listp1 = _g_head, *listp2;
 
-	esi = _g_head;
+	listp1 = _g_head;
 
+	/*
 loc_3a2a9:
 	if(!esi || !(eax = esi->next)) {
 		return 1;
@@ -189,6 +190,20 @@ loc_3a2a9:
 	kfree(eax);
 
 	goto loc_3a2a9;
+	*/
+
+	while(listp1 && listp1->next) {
+		listp2 = listp1->next;
+		if(!listp1->active && !listp2->active) {
+			listp1->size += listp2->size;
+			listp1->next = listp2->next;
+			kfree(listp2);
+		} else {
+			listp1 = listp2;
+		}
+	}
+
+	return 1;
 }
 
 unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
