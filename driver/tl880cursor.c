@@ -167,10 +167,13 @@ unsigned long _g_idTracker_0 = 0;
 
 struct OSDmemory *_g_head = NULL;
 
-unsigned long allocateOSDMemory_Aligned(unsigned long size, unsigned long align)
+unsigned long tl880_allocate_osd_memory(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
 	struct OSDmemory *listp1, *listp2;
 	unsigned long ecx, edx, edi, retval;
+	unsigned long alignsize = align - 1;
+	unsigned long mask = ~alignsize;
+	unsigned long finalsize = size + alignsize;
 	
 	listp1 = _g_head;
 
@@ -182,49 +185,65 @@ unsigned long allocateOSDMemory_Aligned(unsigned long size, unsigned long align)
 
 	edi = size + align - 1;
 
+	/* Search for an inactive block of the correct size */
+	listp1 = _g_head;
+	while(listp1 != NULL) {
+		if(!listp1->active && listp1->field_c == finalsize) {
+			listp1->active = 1;
+			retval = (alignsize + listp1->field_4) & mask;
+			listp1->field_0 = retval - listp1->field_4;
+			
+			return retval;
+		}
+		listp1 = listp1->next;
+	}
+
+	/*
 loc_3a4a5:
-	if(listp1 == 0) {
+	if(listp1 == NULL) {
 		goto loc_3a4c4;
 	}
 
-	if(listp1->active != 0) {
+	if(listp1->active) {
 		goto loc_3a4b3;
+loc_3a4b3:
+		listp1 = listp1->next;
+		goto loc_3a4a5;
 	}
 
 	if(listp1->field_c == size + align - 1) {
 		goto loc_3a4b8;
-	}
-
-loc_3a4b3:
-	listp1 = listp1->next;
-	goto loc_3a4a5;
-
 loc_3a4b8:
-	listp1->active = 1;
-	goto loc_3a56b;
+		listp1->active = 1;
+		goto loc_3a56b;
+	}
+	*/
 
 loc_3a4c4:
 	listp2 = _g_head;
 	listp1 = _g_head;
 
+	/*
 	if(!_g_head) {
 		goto loc_3a4e0;
 	}
 
 loc_3a4cf:
-	if(listp1->active != 0) {
+	if(listp1->active || listp1->field_c <= finalsize) {
 		goto loc_3a4d9;
+loc_3a4d9:
+		listp1 = listp1->next;
+		if(listp1) {
+			goto loc_3a4cf;
+		}
+		goto loc_3a4e0;
 	}
 
 	if(listp1->field_c > (size + align - 1)) {
 		goto loc_3a4fd;
 	}
+	*/
 
-loc_3a4d9:
-	listp1 = listp1->next;
-	if(listp1) {
-		goto loc_3a4cf;
-	}
 
 loc_3a4e0:
 	edx = 0;
