@@ -1,3 +1,8 @@
+2003-08-23	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Fixed comment in WinTV-HD firmware extract script.
+	* Changed 8020 to 8024 in the HPIP range in tl880doc.txt.
+
 2003-08-18	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added information on more registers.

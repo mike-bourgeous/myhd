@@ -1,5 +1,5 @@
 #!/bin/bash
-# Extracts firmware from version 1.54 Win9x driver for the MyHD card
+# Extracts firmware from version 2120114 driver for the WinTV-HD card
 # Mike Bourgeous, 2003
 
 let MCUINSN_OFFSET=0x3BA88

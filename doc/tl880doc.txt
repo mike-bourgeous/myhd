@@ -329,7 +329,7 @@ VPIP 7000-7030
 	00000000|0nnnnnnn|nnnn0000|00000000
 	10000000|00000000|00000000|00000000
 
-HPIP 8000-8020
+HPIP 8000-8024
 
 8000 bit zero - start/stop HPIP
      used in cJanus::HpipSetting
@@ -386,25 +386,18 @@ DPC 10000-10200
 
 register 10000 is display options bitfield:
 
-	fedcba98 76543210
-	00000000 00000001	Top/bottom field or top/bottom buffer
-	00000000 00000010	Image display enable (BVDO)
-	00000000 00000100	OSD display enable
-	00000000 00001000	Cursor display enable(?)
-	00000000 00010000	Aux (i.e. video card overlay) enable
-	00000000 00100000	Sync enable/external display enable (not sure)
-	00000000 01000000	This does something to the color.
-	00000001 00000000	Color bars
-	00000100 00000000	Y'PbPr color
-
-10004 is a status register for the video generator (?)
-      used in isr_VideoSync_Tv
-      probably read-only
-
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000100	Read in isr_VideoSync_Tv
+	00000000|00000000|00000000|00000001	Top/bottom field or top/bottom buffer
+	00000000|00000000|00000000|00000010	Image display enable (BVDO)
+	00000000|00000000|00000000|00000100	OSD display enable
+	00000000|00000000|00000000|00001000	Cursor display enable(?)
+	00000000|00000000|00000000|00010000	Aux (i.e. video card overlay) enable
+	00000000|00000000|00000000|00100000	Sync enable/external display enable (not sure)
+	00000000|00000000|00000000|01000000	This does something to the color.
+	00000000|00000000|00000001|00000000	Color bars
+	00000000|00000000|00000100|00000000	Y'PbPr color (needs other settings too)
 
 
 10008 DPC interrupt mask bitfield
@@ -581,6 +574,7 @@ register	sync value	dump value
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
+	00000000|00000000|00000100|00000000	Video passthrough
 	00000000|00000001|00000000|00000000	SDA Read 1
 	00000000|00000010|00000000|00000000	SDA Write 1
 	00000000|00000100|00000000|00000000	SCL Write 1, SCL Read 1
