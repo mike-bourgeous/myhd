@@ -1,3 +1,7 @@
+2003-08-16	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added information on more registers.
+
 2003-08-14	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_set_dpc_pll_const function to driver/tl880init.c

@@ -21,19 +21,37 @@ interrupt the processor, preventing anything else from happening.  Without any d
 fed to the TSD, reading from register 27814 after the first TSD interrupt will 
 cause it to stop interrupting.
 
+8 is possibly interrupt type for 0xc (?)
+c is some kind of interrupt mask
+
 VSC 1000-1028
 
 1008 is VSC interrupt mask
+100c is last queued VSC interrupt
 
 APU (Audio Processing Unit) 3000-307c
 
 3004 bit 2 -- stereo/mono NTSC audio
 
 3014 is APU interrupt mask
+3018 is last queued APU interrupt
 
 3028 may be ntsc recording offset in sdram
 
+3034 APU_IAU_IBA_REG - written with _IAU_BASE
+3038 APU_IAU_IRA_REG - written with _IAU_BASE + 0x77fc
+303c APU_IAU_IEA_REG - written with _IAU_BASE
+	_IAU_BASE is 0x7800 bytes memory allocated with yGetTL850Memory
+
 BLT (Blitter?) 4000-405c
+
+4010 is BLT interrupt mask
+
+4014 is last queued BLT interrupt
+
+5000 SysPllEq
+
+5400 MifPllEq
 
 5800 DPC PLL constant
 
@@ -49,11 +67,27 @@ BLT (Blitter?) 4000-405c
 
 MCE 6000-603c
 
+6000,6004 used in cJanus::GetTocRdPtr, cJanus::ResetMce
+
 6008 is MCE interrupt mask
+600c is MCE interrupt type
+
+6014 used in isr_StartCodeSearch, cJanus::SearchHdrWithPacing
+
+6018 is a bitfield used in cJanus::SearchHdrWithPacing
+
+6024 used in InitVldShiftAmt
+
+6034 used in cJanus::GetTocRdPtr, cJanus::ResetMce
+
+6038 used in cJanus::ResetMce
+
+603c used in cJanus::ChannelChangeStep2
 
 VPIP 7000-7030
 
 7004 is VPIP interrupt mask
+7008 is VPIP interrupt type
 
 700c is used in DeinterlaceTop
 
@@ -62,6 +96,7 @@ HPIP 8000-8020
 8000 bit zero - start/stop HPIP
 
 8008 is HPIP interrupt mask
+800c is HPIP interrupt type
 
 8010 HpipBufReg(?)
 
@@ -86,6 +121,9 @@ register 10004 is a status register for the video generator (?)
 	00000100 isr_VideoSync (vertical retrace?)
 	00100000 IntDpcEof0 (end of top field?)
 	01000000 IntDpcEof1 (end of bottom field?)
+
+	bit 9 may be preview client/aux video?
+	bit 0xa may be capture client/aux video?
 
 10014-10028: Sync registers: see tools/dpc/dpcaux.c
 
@@ -155,8 +193,14 @@ register 10004 is a status register for the video generator (?)
 	00000000|00000000|0000nnnn|nnnnnnnn	CC
 	00000001|00000000|00000000|00000000	DD
 
+10040 bottom two bits used in DoProgressiveFrame as a bitfield, apparently some
+kind of register selection for 10068,1006c
 
 register 10048 is DispBufReg(?) or NtscDispFrame?
+
+10068,1006c used in DoProgressiveFrame with g_vsCtlReg
+
+10070 used at end of DoProgressiveFrame
 
 register 10080 to 100AC are the OSD context
 
@@ -164,7 +208,21 @@ register 10080 changes palettes(?)
 register 10084 changes OSD image(?) - something like "sdram offset" - used in
 	overlay display lists
 
+100c0 
+	
+	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
+
+100c0, 100cc, 100d4, 100d8 - auxSetVertScaler
+
+100c4 - auxSetPictureOrigin
+
+100c8, 100d0 - auxSetHrzScaler
+
+
+
 DPC2 10180-10184
+10180 and 10184 do some weird stuff..  10180 seems to possibly be a register 
+select/status, and 10184 is register/status content.
 
 MyHD: to turn on external display:
 
@@ -179,26 +237,65 @@ register	sync value	dump value
 10198	GPIO output	i2c output
 1019C	GPIO input	i2c input (see i2c.txt)
 
-Registers 10180-101A0 are written with YPbPr values in OSDProperty::SetProperty
+Registers 10180-101a0 are written with YPbPr values in OSDProperty::SetProperty
 
 Zeros for bi-level (VGA) sync, something else for tri-level sync:
-101A0
-101A4
-101A8
+101a0
+101a4
+101a8
 
 18000 mcu firmware start
-1C000 mcu data start
+1c000 mcu data start
 
-1C2F0 bit zero - startmcu
+1c2f0 bit zero - startmcu
 
+1c2f4 MCU interrupt mask
+
+1c304 is interrupt mask of some type (?)
+
+1d800,1d804 used in cJanus::RestartMce, cJanus::ResetMcu
+
+1d810 is MCU status (?)
 
 20000 tsd firmware start
 
-26800 and 26804 used in Demux_stop
+24000-25800 used in demux_init
+
+24040 used in Demux_tsdStart/Stop
+
+24048 is an interrupt mask of some type, maybe TSD (?)
+
+24060-24078 used in Demux_UpdatePCR
+
+240a4 used in Demux_commandTableWrite
+
+247e8 plus some offset is used in SetChannelWritePtr
+
+24be8 plus some offset is used in SetPesChannelWritePtr
+
+24d68.. used in InitPSI
+
+25718-25728,25750,25754 used in _auxLdDscMbox (called in VopLoadDescriptor)
+
+25728 is auxTstDscrMboxEmpty
+
+2573c is auxTstCurLineCnt
+
+25740 used in _auxEnable/DisableDscInt, may be an interrupt mask
+
+25744 used in auxSetAuxReset
+
+25768-257e8 Demux command table?
+
+26800 and 26804 used in Demux_stop and demux_init
+
+27810 written with _setValue in Demux_UpdatePCR
 
 27814 last queued tsd interrupt
 
 MIF 28000, 28020-280dc
+
+280dc written with 0x31415926 in cJanus::RestartMce
 
 
 Some of the values sometimes written to a few registers:

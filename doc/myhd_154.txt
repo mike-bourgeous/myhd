@@ -88,6 +88,8 @@ cJanus+16814 is OSD context (48 bytes)
 cJanus+1686c is memory start address?
 cJanus+16870 is memory end address?
 
+cJanus[16870]+cJanus[16874] is passed to clear_sdram with a size of 16MB
+
 memory is 0x186000 bytes long?
 
 
