@@ -26,8 +26,16 @@ c is some kind of interrupt mask
 
 VSC 1000-1028
 
-1000 is SetVSCCtrl
+1000 used in SetVSCCtrl
      bit zero set to 1 in EnableVSC
+     used in VBICaptureStream::OnSetState
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000000	VSC Enable (?)
+	00000000|00000000|00000000|00000010
+	00000000|00000000|00000000|00000100
 
 1008 is VSC interrupt mask
 100c is last queued VSC interrupt
@@ -189,7 +197,7 @@ MCE 6000-603c
 
 VPIP 7000-7030
 
-7000 used in cJanus::VpipSetting
+7000 used in cJanus::VpipSetting, cJanus::StartVpip
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -204,7 +212,7 @@ VPIP 7000-7030
 	00000000|00000000|00nn0000|00000000
 	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
 	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
-	00000000|00nnnnnn|00000000|00000000	3f in cJanus::VpipSetting
+	00000000|00nnnnnn|00000000|00000000	3f in cJanus::VpipSetting, cJanus[10f94][d8] in cJanus::StartVpip
 	00000000|01000000|00000000|00000000	0 in cJanus::VpipSetting (field order?)
 
 7004 is VPIP interrupt mask
@@ -212,7 +220,8 @@ VPIP 7000-7030
 
 7008 is VPIP interrupt type
 
-700c is used in DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting
+700c is used in DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting,
+     cJanus::UpdateVpipBufReg
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -237,6 +246,8 @@ VPIP 7000-7030
 	--------+--------+--------+--------
 	00000000|00000000|0000nnnn|nnnn0000
 
+701c used in cJanus::StartVpip (cJanus[10f94][10])
+
 7020 used in cJanus::VpipSetting
 
 	11111111|11111111|00000000|00000000
@@ -248,8 +259,14 @@ VPIP 7000-7030
 
 7024,7028 passed to cJanus::LoadFilterCoeffs in cJanus::VpipSetting
 
-702c used in cJanus::StartVpip
+702c used in cJanus::StartVpip(2)
+     always seems to be written first or'd with 0x80000000 (bit 0x1f), then without
 
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|0nnnnnnn|nnnn0000|00000000
+	10000000|00000000|00000000|00000000
 
 HPIP 8000-8020
 
@@ -416,6 +433,13 @@ register 10080 changes palettes(?)
 register 10084 changes OSD image(?) - something like "sdram offset" - used in
 	overlay display lists
 
+10094 used in showOverlays
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|nnnnnnnn|00000000	0x80 in showOverlays
+
 100c0 
 	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
 	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
@@ -425,6 +449,32 @@ register 10084 changes OSD image(?) - something like "sdram offset" - used in
 100c4 - auxSetPictureOrigin
 
 100c8, 100d0 - auxSetHrzScaler
+
+10100 used in showCursor
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	000000nn|nnnnnnnn|nnnnnnnn|nnnn0000
+
+10104 used in setCursorPosition
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000nnn|nnnnnnnn	Axis 1 (X?)
+	00000nnn|nnnnnnnn|00000000|00000000	Axis 2 (Y?)
+
+10108 used in showCursor
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|nnnnnnnn
+	00000000|nnnnnnnn|00000000|00000000
+	000000nn|00000000|00000000|00000000
+	
+
 
 Registers 10140-10180 are written with Y'PbPr values in OSDProperty::SetProperty
 
@@ -444,6 +494,25 @@ register	sync value	dump value
 10194	GPIO output enable
 10198	GPIO output	i2c output
 1019C	GPIO input	i2c input (see i2c.txt)
+
+
+10198 used in GPIO, I2C, cNxtVSB::NxtCheckChannel
+
+
+	         MyHD MDP-110 GPIO
+		 -----------------
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000001|00000000|00000000	SDA Read 1
+	00000000|00000010|00000000|00000000	SDA Write 1
+	00000000|00000100|00000000|00000000	SCL Write 1, SCL Read 1
+	00000000|00001000|00000000|00000000	cNxtVsb::NxtCheckChannel
+	00000000|01000000|00000000|00000000	SDA Write 2, SDA Read 2
+	00000000|10000000|00000000|00000000	SCL Write 2, SCL Read 2
+	00000100|00000000|00000000|00000000	SCL Write 0, SCL Read 0
+	00001000|00000000|00000000|00000000	SDA Write 0, SDA Read 0
+	
 
 GPIO also controls sampling clock
 

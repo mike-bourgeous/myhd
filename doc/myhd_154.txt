@@ -59,6 +59,13 @@ cJanus+0 may be a struct tagContext?
 
 cJanus+0b9c may be _last_p_picture_cnt
 
+cJanus+10f94 is a pointer to some other structure
+
+	[cJanus+10f94]+0 may be something to do with row count
+	[cJanus+10f94]+4 may be something to do with field count
+
+cJanus+10f98 set to 1 in cJanus::VpipHandler
+
 cJanus+11010 is sys pll eq (?)
 
 cJanus+15b58 is channel change semaphore
@@ -100,8 +107,15 @@ struct tagContext
 -----------------
 dword[0264] may be horizontal resolution
 dword[0268] may be vertical resolution
+dword[034c] may be field order for non-DVD playback
 dword[0350] may be repeat_first_field flag
 dword[0370-037c] have something to do with caption buffers
+
+
+struct SOverlaySurface
+----------------------
+dword[0x6c] may be pointer to next surface in linked list
+
 
 OSD FUNCTIONS
 -------------
