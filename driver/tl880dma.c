@@ -74,6 +74,7 @@ void tl880_aux_dma_free(unsigned int dma)
 }
 
 struct tl880_dma_info {
+	/* field_0: bus address plus current writing offset */
 	unsigned long field_0;		/* ex: 1f54a280 */
 	unsigned long field_4;		/* ex: 0000000c */
 	unsigned long field_8;		/* ex: 00005000 */

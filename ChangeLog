@@ -1,3 +1,11 @@
+2003-09-16	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added tl880_mode_def struct.
+	* Split DPC stuff into its own header.
+	* Started mode table.
+	* Split register stuff into its own header.
+	* Added mode set function.
+
 2003-09-15	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added extra information about CDma.

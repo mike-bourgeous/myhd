@@ -73,43 +73,6 @@
 #define TL880_CARD_JANUS		1
 #define TL880_CARD_ZERO			0
 
-/* Known register ranges on the TL880 chip */
-#define HIF_REG_MIN		0x0
-#define HIF_REG_MAX		0x20
-#define HIF_REG_CNT		(HIF_REG_MAX - HIF_REG_MIN)
-
-#define VSC_REG_MIN		0x1000
-#define VSC_REG_MAX		0x1030
-#define VSC_REG_CNT		(VSC_REG_MAX - VSC_REG_MIN)
-
-#define APU_REG_MIN		0x3000
-#define APU_REG_MAX		0x3080
-#define APU_REG_CNT		(APU_REG_MAX - APU_REG_MIN)
-
-#define BLT_REG_MIN		0x4000
-#define BLT_REG_MAX		0x4060
-#define BLT_REG_CNT		(BLT_REG_MAX - BLT_REG_MIN)
-
-#define MCE_REG_MIN		0x6000
-#define MCE_REG_MAX		0x6040
-#define MCE_REG_CNT		(MCE_REG_MAX - MCE_REG_MIN)
-
-#define VPIP_REG_MIN		0x7000
-#define VPIP_REG_MAX		0x7030
-#define VPIP_REG_CNT		(VPIP_REG_MAX - VPIP_REG_MIN)
-
-#define HPIP_REG_MIN		0x4000
-#define HPIP_REG_MAX		0x4060
-#define HPIP_REG_CNT		(HPIP_REG_MAX - HPIP_REG_MIN)
-
-#define DPC_REG_MIN		0x10000
-#define DPC_REG_MAX		0x10200
-#define DPC_REG_CNT		(DPC_REG_MAX - DPC_REG_MIN)
-
-#define MIF_REG_MIN		0x28000
-#define MIF_REG_MAX		0x280e0
-#define MIF_REG_CNT		(MIF_REG_MAX - MIF_REG_MIN)
-
 
 /*** Driver types ***/
 struct tl880_dev;
@@ -199,23 +162,7 @@ struct tl880_dev {
 
 #endif /* __KERNEL__ */
 
-/* 
- * Read register IOCTL - register is read from parameter, then the value read
- * is written back to the parameter.  Single unsigned long.
- */
-#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned long *)
-
-/*
- * Write register IOCTL - register is read from parameter[0], the value to
- * write is read from parameter[1].  Array [2] unsigned long.
- */
-#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned long *)
-
-/*
- * VIP state IOCTL - parameter is a pointer to VIP state int (0 off, 1 on, 2
- * special?)
- */
-#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned long *)
+/*** Userspace definitions such as ioctls ***/
 
 #ifdef __KERNEL__
 
@@ -224,12 +171,6 @@ struct tl880_dev {
 /*** Driver functions ***/
 /* tl880util.c */
 void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue);
-
-/* tl880reg.c */
-unsigned long read_register(struct tl880_dev *tl880dev, unsigned long reg);
-void write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigned long value);
-unsigned long read_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit);
-void write_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit, unsigned long value);
 
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);
@@ -280,16 +221,6 @@ void tl880_ntsc_audio_dpc(struct tl880_dev *tl880dev);
 void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev);
 void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 
-/* tl880dpc.c */
-void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
-unsigned long tl880_calc_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c);
-void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 interlace);
-void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
-int tl880_dpc_int(struct tl880_dev *tl880dev);
-
-
-/* tl880modes.c */
-
 /* tl880demux.c */
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);
 
@@ -299,6 +230,13 @@ void tl880_aux_dma_free(unsigned int dma);
 extern unsigned long dma_bitmask;
 
 #endif /* __KERNEL__ */
+
+
+/*** Driver local includes ***/
+
+#include "tl880reg.h"
+#include "tl880dpc.h"
+
 
 #endif /* _TL880_H_ */
 

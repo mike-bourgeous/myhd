@@ -17,49 +17,94 @@ typedef struct {
 	unsigned char a:1;
 	unsigned char b:1;
 	unsigned char c:1;
-	unsigned char d:1;
+	unsigned char d:1;	/* prog_scan */
 	unsigned short e:10;
-	unsigned short f:11;
+	unsigned short f:11;	/* xres */
 	unsigned char g:1;
 	unsigned char h:1;
 	unsigned char i:1;
 	unsigned char j:1;
 
 	/* 0x10018 */
-	unsigned short k:9;
-	unsigned char l:1;
-	unsigned char m:1;
-	unsigned char n:7;
-	unsigned short o:9;
+	unsigned short k:9;	/* h_backporch */
+	unsigned char l:1;	/* inv_hsync */
+	unsigned char m:1;	/* inv_vsync */
+	unsigned char n:7;	/* h_synclen */
+	unsigned short o:9;	/* h_frontporch */
 
-	/* 0x1001c */
-	unsigned char p:3;
-	unsigned char q:8;
-	unsigned short r:11;
-	unsigned char s:4;
-	unsigned char t:1;
+	/* 0x1001c - first field */
+	unsigned char p:3;	/* v_synclen_0 */
+	unsigned char q:8;	/* v_frontporch_0 */
+	unsigned short r:11;	/* yres_0 */
+	unsigned char s:4;	/* v_backporch_0 */
+	unsigned char t:1;	/* ntsc_flag */
 
-	/* 0x10020 */
-	unsigned char u:3;
-	unsigned char v:8;
-	unsigned short w:11;
-	unsigned char x:4;
+	/* 0x10020 - second field */
+	unsigned char u:3;	/* v_synclen_1 */
+	unsigned char v:8;	/* v_frontporch_1 */
+	unsigned short w:11;	/* yres_1 */
+	unsigned char x:4;	/* v_backporch_1 */
 
-#if 0
-	reg = 0x10028;
-	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);		/* CC - 40 */
-	set_bits(&value, reg, 0x18, 0x18, 1);		/* DD - 1 */
-	write_register(reg, value);
-	
-	reg = 0x10024;
-	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);		/* Z - 5 */
-	set_bits(&value, reg, 0x18, 0x18, 1);		/* AA - 1 */
-	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* BB - 4 */
-	write_register(reg, value);
-#endif
+	/* 0x10024 */
+	unsigned long y:22;
+	unsigned char z:1;
+	unsigned char aa:4;
+
+	/* 0x10028 */
+	unsigned short bb:12;
+	unsigned char cc:1;
+
+	/* 0x5800 */
+	unsigned long dd;
+
 } mode_def_letters;
+
+typedef struct {
+	/* 0x10014 */
+	unsigned char a:1;
+	unsigned char b:1;
+	unsigned char c:1;
+	unsigned char prog_scan:1;	/* prog_scan */
+	unsigned short e:10;
+	unsigned short xres:11;		/* xres */
+	unsigned char g:1;
+	unsigned char h:1;
+	unsigned char i:1;
+	unsigned char j:1;
+
+	/* 0x10018 */
+	unsigned short h_backporch:9;	/* h_backporch */
+	unsigned char inv_hsync:1;	/* inv_hsync */
+	unsigned char inv_vsync:1;	/* inv_vsync */
+	unsigned char h_synclen:7;	/* h_synclen */
+	unsigned short h_frontporch:9;	/* h_frontporch */
+
+	/* 0x1001c - first field */
+	unsigned char v_synclen_0:3;	/* v_synclen_0 */
+	unsigned char v_frontporch_0:8;	/* v_frontporch_0 */
+	unsigned short yres_0:11;	/* yres_0 */
+	unsigned char v_backporch_0:4;	/* v_backporch_0 */
+	unsigned char ntsc_flag:1;	/* ntsc_flag */
+
+	/* 0x10020 - second field */
+	unsigned char v_synclen_1:3;	/* v_synclen_1 */
+	unsigned char v_frontporch_1:8;	/* v_frontporch_1 */
+	unsigned short yres_1:11;	/* yres_1 */
+	unsigned char v_backporch_1:4;	/* v_backporch_1 */
+
+	/* 0x10024 */
+	unsigned long y:22;
+	unsigned char z:1;
+	unsigned char aa:4;
+
+	/* 0x10028 */
+	unsigned short bb:12;
+	unsigned char cc:1;
+
+	/* 0x5800 */
+	unsigned long dd;
+
+} mode_def;
 
 
 static int memfd = 0;
@@ -541,20 +586,19 @@ void set_sync_1024x768p()
 	set_bits(&value, reg, 0xb, 4, 0);		/* V - 0 */
 	set_bits(&value, reg, 0x16, 0xc, 0);		/* W - 0 */
 	set_bits(&value, reg, 0x1b, 0x18, 0);		/* X - 0 */
-	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* Y - 0 */
 	write_register(reg, value);
 	
 	reg = 0x10028;
 	value = 0;
-	set_bits(&value, reg, 0xb, 0, 0x28);		/* CC - 40 */
-	set_bits(&value, reg, 0x18, 0x18, 1);		/* DD - 1 */
+	set_bits(&value, reg, 0xb, 0, 0x28);		/* BB - 40 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* CC - 1 */
 	write_register(reg, value);
 	
 	reg = 0x10024;
 	value = 0;
-	set_bits(&value, reg, 0x15, 0, 5);		/* Z - 5 */
-	set_bits(&value, reg, 0x18, 0x18, 1);		/* AA - 1 */
-	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* BB - 4 */
+	set_bits(&value, reg, 0x15, 0, 5);		/* Y - 5 */
+	set_bits(&value, reg, 0x18, 0x18, 1);		/* Z - 1 */
+	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* AA - 4 */
 	write_register(reg, value);
 }
 

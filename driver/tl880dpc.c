@@ -5,14 +5,15 @@
  */
 #include "tl880.h"
 
-void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c)
-{
-	write_register(tl880dev, 0x5800, (((((a & 0x3ff) << 8) | (b & 0x1f)) << 4) | (c & 3)) << 4);
-}
-
-unsigned long tl880_calc_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c)
+unsigned long tl880_calc_dpc_pll_const(unsigned long a, unsigned char b, unsigned char c)
 {
 	return (((((a & 0x3ff) << 8) | (b & 0x1f)) << 4) | (c & 3)) << 4;
+}
+
+
+void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c)
+{
+	write_register(tl880dev, 0x5800, tl880_calc_dpc_pll_const(a, b, c));
 }
 
 
@@ -28,6 +29,8 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 int
 
 	switch(xres) {
 		case 1024:
+			/* This value makes 1024x768p exactly 60Hz 48.3kHz */
+			/* write_register(tl880dev, 0x5800, 0x00160320); */
 			val = 0x01151bb0;
 			break;
 		case 1440:
@@ -39,7 +42,7 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 int
 				val = 0x98280;
 				var_4 = 0;
 			} else {
-				val = tl880_calc_dpc_pll_const(tl880dev, 0x14, 2, 0);
+				val = tl880_calc_dpc_pll_const(0x14, 2, 0);
 			}
 			break;
 	}
@@ -58,41 +61,14 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, u32 xres, u32 yres, s32 int
 	write_register(tl880dev, 0x5d14, 0);
 	tl880_set_gpio(tl880dev, 6, var_4);
 }
-	
-			
 
 
-/* XXX: This function is not finished! */
 void tl880_init_dpc_pll(struct tl880_dev *tl880dev)
 {
 	int i;
 	
 	write_register(tl880dev, 0x10014, 0x80000000);
 
-#if 0
-	/* set_dpc_clock and set_dpc_pll_const are now implemented */
-	/* set_dpc_clock */
-	{
-		/* write_register(tl880dev, 0x5800, 0x60070); */
-		/* set_dpc_pll_const(0x14, 2, 1) */
-		{
-			int arg0 = 0x14, arg4 = 0x2, arg8 = 0x1;
-
-			arg0 &= 0x3ff;
-			arg0 <<= 8;
-			arg4 &= 0x1f;
-			arg0 += arg4;
-			arg0 <<= 4;
-			arg8 &= 3;
-			arg0 += arg8;
-			arg0 <<= 4;
-			//write_register(tl880dev, 0x5800, arg0);
-			/* This value makes 1024x768p exactly 60Hz 48.3kHz */
-			write_register(tl880dev, 0x5800, 0x00160320);
-		}
-		write_register(tl880dev, 0x5d14, 0x0);
-	}
-#endif
 	tl880_set_dpc_clock(tl880dev, 1024, 768, 0);
 
 	for(i = 0; i < 10; i++) {
@@ -101,6 +77,79 @@ void tl880_init_dpc_pll(struct tl880_dev *tl880dev)
 
 	write_register(tl880dev, 0x10014, 0);
 }
+
+
+void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
+{
+	unsigned long reg;
+	unsigned long savereg;
+	unsigned long value = 0;
+
+	if(!tl880dev || !mode) {
+		printk(KERN_ERR "tl880: NULL value passed to tl880_set_mode\n");
+		return;
+	}
+
+	savereg = read_register(tl880dev, 0x10000);
+	write_register(tl880dev, 0x10000, 0x80);
+
+	reg = 0x10014;
+	set_bits(&value, reg, 0, 0, mode->a);
+	set_bits(&value, reg, 1, 1, mode->b);
+	set_bits(&value, reg, 2, 2, mode->c);
+	set_bits(&value, reg, 3, 3, mode->prog_scan);
+	set_bits(&value, reg, 0xf, 6, mode->e);
+	set_bits(&value, reg, 0x1a, 0x10, mode->xres);
+	set_bits(&value, reg, 0x1b, 0x1b, mode->g);
+	set_bits(&value, reg, 0x1c, 0x1c, mode->h);
+	set_bits(&value, reg, 0x1d, 0x1d, mode->i);
+	set_bits(&value, reg, 0x1e, 0x1e, mode->j);
+	write_register(tl880dev, reg, value);
+
+	reg = 10018;
+	value = 0;
+	set_bits(&value, reg, 8, 0, mode->h_backporch); 
+	set_bits(&value, reg, 9, 9, mode->inv_hsync);
+	set_bits(&value, reg, 0xa, 0xa, mode->inv_vsync);
+	set_bits(&value, reg, 0x12, 0xc, mode->h_synclen);
+	set_bits(&value, reg, 0x1c, 0x14, mode->h_frontporch);
+	write_register(tl880dev, reg, value);
+
+	reg = 0x1001c;
+	value = 0;
+	set_bits(&value, reg, 2, 0, mode->v_synclen_0);
+	set_bits(&value, reg, 0xb, 4, mode->v_frontporch_0);
+	set_bits(&value, reg, 0x16, 0xc, mode->yres_0);
+	set_bits(&value, reg, 0x1b, 0x18, mode->v_backporch_0);
+	set_bits(&value, reg, 0x1c, 0x1c, mode->ntsc_flag);
+	write_register(tl880dev, reg, value);
+
+	reg = 0x10020;
+	value = 0;
+	set_bits(&value, reg, 2, 0, mode->v_synclen_1);
+	set_bits(&value, reg, 0xb, 4, mode->v_frontporch_1);
+	set_bits(&value, reg, 0x16, 0xc, mode->yres_1);
+	set_bits(&value, reg, 0x1b, 0x18, mode->v_backporch_1);
+	write_register(tl880dev, reg, value);
+	
+	reg = 0x10028;
+	value = 0;
+	set_bits(&value, reg, 0xb, 0, mode->bb);
+	set_bits(&value, reg, 0x18, 0x18, mode->cc);
+	write_register(tl880dev, reg, value);
+	
+	reg = 0x10024;
+	value = 0;
+	set_bits(&value, reg, 0x15, 0, mode->y);
+	set_bits(&value, reg, 0x18, 0x18, mode->z);
+	set_bits(&value, reg, 0x1f, 0x1c, mode->aa);
+	write_register(tl880dev, reg, value);
+
+	write_register(tl880dev, 0x5800, mode->dd);
+
+	write_register(tl880dev, 0x10000, savereg);
+}
+
 
 void tl880_dpc_video_sync_dvd(struct tl880_dev *tl880dev)
 {
@@ -350,6 +399,9 @@ void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
 void tl880_dpc_field0(struct tl880_dev *tl880dev)
 {
 	static unsigned long dpc_eof0_count = 0;
+	static unsigned long last_jiffies = 0;
+	unsigned long this_jiffies;
+
 	dpc_eof0_count++;
 
 	/*
@@ -375,12 +427,16 @@ void tl880_dpc_field0(struct tl880_dev *tl880dev)
 		/* CDma::VopIsrOdd(); */
 	}
 
-	printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu\n", dpc_eof0_count);
+	this_jiffies = jiffies;
+	printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu, time ~%lums\n", dpc_eof0_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	last_jiffies = this_jiffies;
 }
 
 void tl880_dpc_field1(struct tl880_dev *tl880dev)
 {
 	static unsigned long dpc_eof1_count = 0;
+	static unsigned long last_jiffies = 0;
+	unsigned long this_jiffies;
 
 	dpc_eof1_count++;
 
@@ -392,7 +448,9 @@ void tl880_dpc_field1(struct tl880_dev *tl880dev)
 	/* ecx = (cJanus->0)->0x110; */
 	/* CDma::VopIsrEven(); */
 
-	printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu\n", dpc_eof1_count);
+	this_jiffies = jiffies;
+	printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu, time ~%lums\n", dpc_eof1_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	last_jiffies = this_jiffies;
 }
 
 int tl880_dpc_int(struct tl880_dev *tl880dev)
