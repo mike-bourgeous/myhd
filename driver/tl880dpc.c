@@ -173,20 +173,17 @@ void tl880_dpc_video_sync_dvd(struct tl880_dev *tl880dev)
 	val ^= 1;
 	
 	if(read_regbits(tl880dev, 0x10004, 2, 2)) {
-		goto loc_294c6;
+		if(val == 3 || val == 1) {
+			write_regbits(tl880dev, 0x10000, 0, 0, 1);
+		} else {
+			write_regbits(tl880dev, 0x10000, 0, 0, 0);
+		}
+		
+		var_10 = 1;
+		
+		goto loc_29511;
 	}
-	
-	if(val == 3 || val == 1) {
-		write_regbits(tl880dev, 0x10000, 0, 0, 1);
-	} else {
-		write_regbits(tl880dev, 0x10000, 0, 0, 0);
-	}
-	
-	var_10 = 1;
 
-	goto loc_29511;
-
-loc_294c6:
 	if(val == 3 || val == 1) {
 		write_regbits(tl880dev, 0x10000, 0, 0, 0);
 	} else {
@@ -207,92 +204,66 @@ loc_294ea:
 	write_regbits(tl880dev, 0x10000, 0, 0, field_select);
 
 	if(field_select == 0) {
-		goto loc_294e1;
+		/* goto loc_294e1; */
+		var_10 = 0;
+		
+		goto loc_295c9;
 	}
 
 	var_10 = 1;
 
 loc_29511:
 	/* ebp = &(cJanus->0xf4); */
-	if(0 /* cJanus->0xf4 == 0 || cJanus->0xf8 == 0 */) {
-		goto loc_29589;
+	if(0 /* cJanus->0xf4 != 0 && cJanus->0xf8 != 0 */) {
+		/* StartMcu(); */
+		
+		//cJanus->0xf4 = 0;
+		if(0 /* (cJanus->0x10388)->0x27c != 0 */) {
+			if(0 /* (cJanus->0x10388)->0x284 != 0 */) {
+				/* StartVpip(cJanus->0x10388) */
+				
+				/*
+				(cJanus->0x10388)->0xb70 = 0;
+				*/
+			}
+		} else {
+			if(0 /* (cJanus->0x10388)->0x284 != 0 */) {
+				/*
+				(cJanus->0x10388)->0xb70 = 1;
+				*/
+			}
+		}
+		
+		if(0 /* (cJanus->0x10388)->0xd4 == 3 */) {
+			/* (cJanus->0x10388)->0xb68 = 2; */
+		} else {
+			/* (cJanus->0x10388)->0xb68 += 1; */
+		}
+		
+		delay_cnt = 0;
+		return;
 	}
 
-	/* StartMcu() */
-
-	//cJanus->0xf4 = 0;
-	if(0 /* (cJanus->0x10388)->0x27c == 0 */) {
-		goto loc_29551;
-	}
-	if(0 /* (cJanus->0x10388)->0x284 == 0 */) {
-		goto loc_29563;
-	}
-
-	/* StartVpip(cJanus->0x10388) */
+	if(delay_cnt <= 0) {
+		/* ebp = &(cJanus->0x10377); */
+		if(0 /* cJanus->0x10377 != 0 */) /* byte */ {
+			/* EnableBVDO() */
+			
+			//(cJanus->0x10377)->0 = 0; /* byte */
+		}
 	
-	/*
-	(cJanus->0x10388)->0xb70 = 0;
-	*/
-
-	goto loc_29563;
-
-loc_29551:
-	if(0 /* (cJanus->0x10388)->0x284 == 0 */) {
-		goto loc_29563;
+		/* ebp = &(cJanus->0x10364); */
+		if(0 /* cJanus->0x10364 != 0 */) /* byte */ {
+			/* EnableAux() */
+			
+			//(cJanus->0x10364) = 0; /* byte */
+		}
+	} else {
+		delay_cnt--;
 	}
-
-	/*
-	(cJanus->0x10388)->0xb70 = 1;
-	*/
-
-loc_29563:
-	if(0 /* (cJanus->0x10388)->0xd4 != 3 */) {
-		goto loc_29578;
-	}
-
-	/* (cJanus->0x10388)->0xb68 = 2; */
-	goto loc_2957e;
-
-loc_29578:
-	/* (cJanus->0x10388)->0xb68 += 1; */
-
-loc_2957e:
-	delay_cnt = 0;
-	/* goto loc_296b7; */
-	return;
-
-loc_29589:
-	if(delay_cnt > 0) {
-		goto loc_295c3;
-	}
-
-	/* ebp = &(cJanus->0x10377); */
-	if(0 /* cJanus->0x10377 == 0 */) /* byte */ {
-		goto loc_295a9;
-	}
-
-	/* EnableBVDO() */
-
-	//(cJanus->0x10377)->0 = 0; /* byte */
-
-loc_295a9:
-	/* ebp = &(cJanus->0x10364); */
-	if(1 /* cJanus->0x10364 == 0 */) /* byte */ {
-		goto loc_295c9;
-	}
-
-	/* EnableAux() */
-
-	//(cJanus->0x10364) = 0; /* byte */
-
-	goto loc_295c9;
-
-loc_295c3:
-	delay_cnt--;
 
 loc_295c9:
 	if(0 /* (cJanus->0x10388)->0xb6c == 0 || cJanus->0xf8 != 0 */) {
-		/* goto loc_296b7; */
 		return;
 	}
 
@@ -300,72 +271,48 @@ loc_295c9:
 	ecx = (cJanus->0x10388)->0xba0;
 	eax = &((cJanus->0x10388)->0xba0);
 	*/
-	if(0 /* (cJanus->0x10388)->0xba0 <= 0 */) {
-		goto loc_295f9;
-	}
-	/*
-	ecx -= 1;
-	[eax] = ecx;
-	*/
-	/*
-	(cJanus->0x10388)->0xba0 -= 1;
-	*/
-
-	/* goto loc_296b7; */
-	return;
-
-loc_295f9:
-	if(1 /* (cJanus->0x10388)->0x27c == 0 */) {
-		goto loc_29653;
-	}
-
-	if(0 /*DpcSync(&(cJanus->0x10388), var_10)*/) {
-		/* goto loc_296b7; */
+	if(0 /* (cJanus->0x10388)->0xba0 > 0 */) {
+		/*
+		ecx -= 1;
+		[eax] = ecx;
+		*/
+		/*
+		(cJanus->0x10388)->0xba0 -= 1;
+		*/
+		
 		return;
 	}
 
-	/* UpdateDispBufReg((cJanus->0x10388)->0x1d4, (cJanus->0x10388)->0x1d8); */
-
-	if(0 /* (cJanus->0x10388)->0x284 == 0 */) {
-		goto loc_29698;
+	if(1 /* (cJanus->0x10388)->0x27c != 0 */) {
+		if(0 /*DpcSync(&(cJanus->0x10388), var_10)*/) {
+			return;
+		}
+		
+		/* UpdateDispBufReg((cJanus->0x10388)->0x1d4, (cJanus->0x10388)->0x1d8); */
+		
+		if(0 /* (cJanus->0x10388)->0x284 != 0 && (cJanus->0x10388)->0xb70 != 0 */) {
+			/* UpdateVpipBufReg(&(cJanus->0x10388)); */
+			
+			/* StartVpip(&(cJanus->0x10388)); */
+			
+			/*
+			(cJanus->0x10388)->0 = 0;
+			*/
+		}
+	} else {
+		if(0 /* (cJanus->0x10388)->0x28c != 0 && (cJanus->0x10388)->0x284 != 0 */) {
+			if(0 /* DeinterlaceSync(&(cJanus->0x10388), var_10); */) {
+				return;
+			}
+		} else {
+			if(0 /* DpcSync(&(cJanus->0x10388), var_10) */) {
+				return;
+			}
+			
+			/* UpdateDispBufReg((cJanus->0x10388)->0x1d4, (cJanus->0x10388)->0x1d8); */
+		}
 	}
 
-	if(0 /* (cJanus->0x10388)->0xb70 == 0 */) {
-		goto loc_29698;
-	}
-
-	/* UpdateVpipBufReg(&(cJanus->0x10388)); */
-
-	/* StartVpip(&(cJanus->0x10388)); */
-
-	/*
-	(cJanus->0x10388)->0 = 0;
-	*/
-
-	goto loc_29698;
-
-loc_29653:
-	if(0 /* (cJanus->0x10388)->0x28c == 0 || (cJanus->0x10388)->0x284 == 0 */) {
-		goto loc_29675;
-	}
-
-	if(0 /* DeinterlaceSync(&(cJanus->0x10388), var_10); */) {
-		/* goto loc_296b7; */
-		return;
-	}
-
-	goto loc_29698;
-
-loc_29675:
-
-	if(0 /* DpcSync(&(cJanus->0x10388), var_10) */) {
-		/* goto loc_296b7; */
-		return;
-	}
-
-	/* UpdateDispBufReg((cJanus->0x10388)->0x1d4, (cJanus->0x10388)->0x1d8); */
-
-loc_29698:
 	/* eax = devGetSTCRaw(); // Demux_GetSTC() */
 
 	/*
@@ -381,8 +328,6 @@ loc_29698:
 
 	/* This is to make gcc shut up: */
 	var_10 = 0;
-
-/* loc_296b7: */
 }
 
 void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
