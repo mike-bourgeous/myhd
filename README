@@ -19,9 +19,9 @@ code is also good.
 Remember that this driver has no video capture capability.  The kernel module
 creates three devices per TL880 card in /dev/tl880 to allow all users to mmap
 the memory regions of the TL880, or use the ioctl interface to control the card.
-The tools are then used to upload the firmware, set external sync, and turn on
-color bars.  That's all that the driver can do so far.  There is also I2C bus
-support.
+The tools are then used to upload the firmware, set external sync, turn on color
+bars, and display a mouse cursor.  That's all that the driver can do so far.
+There is also I2C bus support.
 
 To test the I2C bus(es), you will need the lm_sensors package.  Load the
 i2c-dev, i2c-algo-bit, and tl880.o kernel modules, then run i2cdetect for each
