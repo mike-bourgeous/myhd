@@ -120,3 +120,6 @@ OSD FUNCTIONS
 .text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN)
 .text:0003a596 deallocateOSDMemory(ulong)
 
+function CDMA::VopOn returns 1 if aux video is enabled (reg 10000 bit 4)
+
+

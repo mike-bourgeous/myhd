@@ -23,9 +23,13 @@ cause it to stop interrupting.
 
 VSC 1000-1028
 
+1008 is VSC interrupt mask
+
 APU (Audio Processing Unit) 3000-307c
 
 3004 bit 2 -- stereo/mono NTSC audio
+
+3014 is APU interrupt mask
 
 3028 may be ntsc recording offset in sdram
 
@@ -35,16 +39,30 @@ BLT (Blitter?) 4000-405c
 
 MCE 6000-603c
 
+6008 is MCE interrupt mask
+
 VPIP 7000-7030
+
+7004 is VPIP interrupt mask
+
+700c is used in DeinterlaceTop
 
 HPIP 8000-8020
 
+8000 bit zero - start/stop HPIP
+
+8008 is HPIP interrupt mask
+
+8010 HpipBufReg(?)
+
 register 10000 is display options bitfield:
 
+fedcba98 76543210
 00000000 00000001	Top/bottom field or top/bottom buffer
-00000000 00000010	Image display enable
+00000000 00000010	Image display enable (BVDO)
 00000000 00000100	OSD display enable
-00000000 00010000	Aux enable?
+00000000 00001000	Cursor display enable(?)
+00000000 00010000	Aux (i.e. video card overlay) enable
 00000000 00100000	Sync enable/external display enable (not sure)
 00000000 01000000	This does something to the color.
 00000001 00000000	Color bars
@@ -53,7 +71,7 @@ register 10000 is display options bitfield:
 register 10004 is a status register for the video generator (?)
 
 10008 DPC interrupt mask bitfield
-1000c DPC interrupt type bitfield
+1000C DPC interrupt type bitfield
 
 	00000100 isr_VideoSync (vertical retrace?)
 	00100000 IntDpcEof0 (end of top field?)
@@ -63,11 +81,13 @@ register 10048 is DispBufReg(?) or NtscDispFrame?
 
 register 10080 to 100AC are the OSD context
 
-register 10084 is something like "sdram offset" - used in overlay display lists
-
-to turn on the display:
+register 10080 changes palettes(?)
+register 10084 changes OSD image(?) - something like "sdram offset" - used in
+	overlay display lists
 
 DPC2 10180-10184
+
+MyHD: to turn on external display:
 
 register	sync value	dump value
 --------	----------	----------
@@ -75,8 +95,8 @@ register	sync value	dump value
 10194		0x00000400	0x000eff00
 10198		0x00000400	0x000e5d00
 
-10190	GPIO output
-10194	GPIO enable
+10190	GPIO enable
+10194	GPIO output enable
 10198	GPIO output	i2c output
 1019C	GPIO input	i2c input (see i2c.txt)
 
@@ -89,6 +109,10 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 18000 mcu firmware start
 1C000 mcu data start
+
+1C2F0 bit zero - startmcu
+
+
 20000 tsd firmware start
 
 27814 last queued tsd interrupt
