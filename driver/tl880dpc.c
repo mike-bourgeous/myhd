@@ -398,6 +398,12 @@ void tl880_dpc_field1(struct tl880_dev *tl880dev)
 
 int tl880_dpc_int(struct tl880_dev *tl880dev)
 {
+	static unsigned long first_jiffies = 0;
+
+	if(!first_jiffies) {
+		first_jiffies = jiffies;
+	}
+
 	tl880dev->dpc_count++;
 
 	tl880dev->dpc_type = read_register(tl880dev, 0x1000c) & read_register(tl880dev, 0x10008);
@@ -422,6 +428,8 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 	/* Since this interrupt isn't fully handled yet, disable it after a while */
 	if(tl880dev->dpc_count >= 600) {
 		write_register(tl880dev, 0x10008, 0);
+		printk(KERN_DEBUG "tl880: ~%i dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
+		/* mathematically the 1000's cancel out, but I use them to get around integer precision limits */
 	}
 
 	return 0;

@@ -1,6 +1,8 @@
 2003-09-21	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Updated README files.
+	* Fix bug in tools/dpc/dpcsync.c (10018->0x10018).
+	* Added DPC interrupt rate calculation.
 
 2003-09-20	Mike Bourgeous		<nitrogen@slimetech.com>
 

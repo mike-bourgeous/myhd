@@ -375,8 +375,10 @@ void set_aux_1440x1080i(int srcw, int srch, int full)
 void set_sync_720x480i()
 {
 	unsigned long value = 0;
-	long reg = 0x10014;
-
+	unsigned long reg;
+	
+	
+	reg = 0x10014;
 	set_bits(&value, reg, 0, 0, 0);			/* A - 0 */
 	set_bits(&value, reg, 1, 1, 0);			/* B - 0 */
 	set_bits(&value, reg, 2, 2, 1);			/* C - 1 */
@@ -389,7 +391,7 @@ void set_sync_720x480i()
 	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
 	write_register(reg, value);
 
-	reg += 4;
+	reg = 0x10018;
 	value = 0;
 	set_bits(&value, reg, 8, 0, 0xf);		/* K - 15 */
 	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
@@ -404,10 +406,10 @@ void set_sync_720x480i()
 	set_bits(&value, reg, 0xb, 4, 0xe);		/* Q - 14 */
 	set_bits(&value, reg, 0x16, 0xc, 0xf3);		/* R - 243 */
 	set_bits(&value, reg, 0x1b, 0x18, 2);		/* S - 2 */
-	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* T - 1 */
+	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* T - 1 */
 	write_register(reg, value);
 
-	reg += 4;
+	reg = 0x10020;
 	value = 0;
 	set_bits(&value, reg, 2, 0, 4);			/* U - 4 */
 	set_bits(&value, reg, 0xb, 4, 0xd);		/* V - 13 */
@@ -421,7 +423,7 @@ void set_sync_720x480i()
 	set_bits(&value, reg, 0x18, 0x18, 1);		/* CC - 1 */
 	write_register(reg, value);
 	
-	reg -= 4;
+	reg = 0x10024;
 	value = 0;
 	set_bits(&value, reg, 0x15, 0, 5);		/* Y - 5 */
 	set_bits(&value, reg, 0x18, 0x18, 1);		/* Z - 1 */
@@ -560,15 +562,17 @@ void set_sync_1024x768p()
 	set_bits(&value, reg, 0x1c, 0x1c, 1);		/* H - 1 */
 	set_bits(&value, reg, 0x1d, 0x1d, 0);		/* I - 0 */
 	set_bits(&value, reg, 0x1e, 0x1e, 0);		/* J - 0 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 
-	reg = 10018;
+	reg = 0x10018;
 	value = 0;
 	set_bits(&value, reg, 8, 0, 0x19);		/* K - 31 */
 	set_bits(&value, reg, 9, 9, invert_hsync ? 1 : 0); /* L - 0 */
 	set_bits(&value, reg, 0xa, 0xa, invert_vsync ? 1 : 0); /* M - 0 */
 	set_bits(&value, reg, 0x12, 0xc, 0x7f);		/* N - 127 */
 	set_bits(&value, reg, 0x1c, 0x14, 0xa0);	/* O - 160 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 
 	reg = 0x1001c;
@@ -578,6 +582,7 @@ void set_sync_1024x768p()
 	set_bits(&value, reg, 0x16, 0xc, 0x300);	/* R - 768 */
 	set_bits(&value, reg, 0x1b, 0x18, 3);		/* S - 3 */
 	set_bits(&value, reg, 0x1c, 0x1c, 0);		/* T - 0 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 
 	reg = 0x10020;
@@ -586,12 +591,14 @@ void set_sync_1024x768p()
 	set_bits(&value, reg, 0xb, 4, 0);		/* V - 0 */
 	set_bits(&value, reg, 0x16, 0xc, 0);		/* W - 0 */
 	set_bits(&value, reg, 0x1b, 0x18, 0);		/* X - 0 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 	
 	reg = 0x10028;
 	value = 0;
 	set_bits(&value, reg, 0xb, 0, 0x28);		/* BB - 40 */
 	set_bits(&value, reg, 0x18, 0x18, 1);		/* CC - 1 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 	
 	reg = 0x10024;
@@ -599,6 +606,7 @@ void set_sync_1024x768p()
 	set_bits(&value, reg, 0x15, 0, 5);		/* Y - 5 */
 	set_bits(&value, reg, 0x18, 0x18, 1);		/* Z - 1 */
 	set_bits(&value, reg, 0x1f, 0x1c, 4);		/* AA - 4 */
+	printf("1024x768p register %05lx: 0x%08lx\n", reg, value);
 	write_register(reg, value);
 }
 
@@ -613,9 +621,14 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	if(map_regspace()) {
+		fprintf(stderr, "Unable to map register space\n");
 		return -1;
 	}
 	aux_reset();
+	/*
+	set_sync_720x480i();
+	set_aux_720x480i(1920, 1080, 1);
+	*/
 	set_sync_1024x768p();
 	set_aux_1024x768p(1920, 1080, 1);
 	write_register(0x10000, 0x132);
