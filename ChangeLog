@@ -1,6 +1,8 @@
-2003-08-16	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-15	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added information on more registers.
+	* Added more information to tl880doc.txt about sync generator (such as
+	  names of some of the fields).
 
 2003-08-14	Mike Bourgeous		<nitrogen@slimetech.com>
 

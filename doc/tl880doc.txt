@@ -148,50 +148,51 @@ register 10004 is a status register for the video generator (?)
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|0000000n|nnnnnnnn	K
+	00000000|00000000|0000000n|nnnnnnnn	K - Horizontal Back Porch
 	00000000|00000000|00000010|00000000	L - Invert Hsync
 	00000000|00000000|00000100|00000000	M - Invert Vsync
-	00000000|00000nnn|nnnn0000|00000000	N
-	000nnnnn|nnnn0000|00000000|00000000	O
+	00000000|00000nnn|nnnn0000|00000000	N - Horizontal Sync Length
+	000nnnnn|nnnn0000|00000000|00000000	O - Horizontal Front Porch
 
-1001c DPC sync register 3 (top field?)
+1001c DPC sync register 3 (top field, progressive scan)
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000nnn	P - 1
-	00000000|00000000|0000nnnn|nnnn0000	Q - 1
+	00000000|00000000|00000000|00000nnn	P - Vertical Sync Length 1
+	00000000|00000000|0000nnnn|nnnn0000	Q - Vertical Front Porch 1
 	00000000|0nnnnnnn|nnnn0000|00000000	R - Vertical Size 1
-	0000nnnn|00000000|00000000|00000000	S - 1
+	0000nnnn|00000000|00000000|00000000	S - Vertical Back Porch 1
 	00010000|00000000|00000000|00000000	T - 1
 
-10020 DPC sync register 4 (bottom field?)
+10020 DPC sync register 4 (bottom field)
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000nnn	U - 2
-	00000000|00000000|0000nnnn|nnnn0000	V - 2
+	00000000|00000000|00000000|00000nnn	U - Vertical Sync Length 2
+	00000000|00000000|0000nnnn|nnnn0000	V - Vertical Front Porch 2
 	00000000|0nnnnnnn|nnnn0000|00000000	W - Vertical Size 2
-	0000nnnn|00000000|00000000|00000000	X - 2
-	00010000|00000000|00000000|00000000	Y - 2
+	0000nnnn|00000000|00000000|00000000	X - Vertical Back Porch 2
 
 10024 DPC sync register 6
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00nnnnnn|nnnnnnnn|nnnnnnnn	Z
-	00000001|00000000|00000000|00000000	AA
-	nnnn0000|00000000|00000000|00000000	BB
+	00000000|00nnnnnn|nnnnnnnn|nnnnnnnn	Y
+	00000001|00000000|00000000|00000000	Z
+	nnnn0000|00000000|00000000|00000000	AA
 
 10028 DPC sync register 5
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|0000nnnn|nnnnnnnn	CC
-	00000001|00000000|00000000|00000000	DD
+	00000000|00000000|0000nnnn|nnnnnnnn	BB
+	00000001|00000000|00000000|00000000	CC
+
+  0x5800 is DD
 
 10040 bottom two bits used in DoProgressiveFrame as a bitfield, apparently some
 kind of register selection for 10068,1006c
@@ -209,7 +210,7 @@ register 10084 changes OSD image(?) - something like "sdram offset" - used in
 	overlay display lists
 
 100c0 
-	
+	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
 	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
 
 100c0, 100cc, 100d4, 100d8 - auxSetVertScaler
