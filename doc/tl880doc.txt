@@ -2,8 +2,9 @@ TL880 Register Map and Chip/Card Doc (incomplete and disorganized)
 2003, Mike Bourgeous
 -------------------------------
 No warranty on accuracy or fitness for any purpose is made of this data.
-This data is placed into the public domain with the exception that if this data is
-used in any way, credit must be given to those who took the time to create it.
+This data may be freely redistributed in any form so long as credit is given to
+those who took the time to create it, and no misrepresentation is made
+regarding the origin of this work and any derivatives.
 
 All numbers are in hexadecimal, except for bit descriptions (binary).
 -------------------------------
