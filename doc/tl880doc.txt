@@ -270,7 +270,7 @@ VPIP 7000-7030
 	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
 	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
 	00000000|00nnnnnn|00000000|00000000	3f in cJanus::VpipSetting, cJanus[10f94][d8] in cJanus::StartVpip
-	00000000|01000000|00000000|00000000	0 in cJanus::VpipSetting (field order?)
+	00000000|01000000|00000000|00000000	0 in cJanus::VpipSetting, toggled in VpipHandler (field order/active field?)
 
 7004 is VPIP interrupt mask
      bit zero set to 1 in cJanus::VpipSetting

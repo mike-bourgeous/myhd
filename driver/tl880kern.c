@@ -419,8 +419,43 @@ struct tl880_dev *tl880_create_dev()
 	
 	/** Interrupt **/
 	tl880dev->irq = 0;
-	tl880dev->int_count = 0;
+
+	tl880dev->int_mask = 0;
 	tl880dev->int_type = 0;
+	tl880dev->int_count = 0;
+
+	tl880dev->vsc_mask = 0;
+	tl880dev->vsc_type = 0;
+	tl880dev->vsc_count = 0;
+	
+	tl880dev->apu_mask = 0;
+	tl880dev->apu_type = 0;
+	tl880dev->apu_count = 0;
+	
+	tl880dev->blt_mask = 0;
+	tl880dev->blt_type = 0;
+	tl880dev->blt_count = 0;
+	
+	tl880dev->mce_mask = 0;
+	tl880dev->mce_type = 0;
+	tl880dev->mce_count = 0;
+	
+	tl880dev->vpip_mask = 0;
+	tl880dev->vpip_type = 0;
+	tl880dev->vpip_count = 0;
+	
+	tl880dev->hpip_mask = 0;
+	tl880dev->hpip_type = 0;
+	tl880dev->hpip_count = 0;
+	
+	tl880dev->dpc_mask = 0;
+	tl880dev->dpc_type = 0;
+	tl880dev->dpc_count = 0;
+	
+	tl880dev->tsd_mask = 0;
+	tl880dev->tsd_type = 0;
+	tl880dev->tsd_count = 0;
+	
 	INIT_TQUEUE(&tl880dev->bh, tl880_bh, tl880dev);
 	/*
 	tl880dev->bh.list = NULL;

@@ -1,3 +1,10 @@
+2003-09-12	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added interrupt handler for VPIP and started DPC handler.
+	* Bottom half only queued for tasks that will take a long time.
+	* Added some more cJanus info to myhd_154.txt.
+	* Added additional info to one of the VPIP bitfields.
+
 2003-09-11	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added interrupt count variables to struct tl880_dev.

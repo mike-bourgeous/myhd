@@ -59,7 +59,7 @@ cJanus+0 may be a struct tagContext?
 
 cJanus+0b9c may be _last_p_picture_cnt
 
-cJanus+10388 is a pointer to some kind of struct used in VpipIntHandler
+cJanus+10388 is a pointer to tagContext used in VpipIntHandler and elsewhere
 	
 	if [cJanus+10388]+284 == 0 then don't run VpipHandler
 
