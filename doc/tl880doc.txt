@@ -26,22 +26,100 @@ c is some kind of interrupt mask
 
 VSC 1000-1028
 
+1000 is SetVSCCtrl
+     bit zero set to 1 in EnableVSC
+
 1008 is VSC interrupt mask
 100c is last queued VSC interrupt
 
+1010 is VSC MIF
+     is used in cJanus::RotateVscCapFrame bits 0xb-0x8,0x3-0x0
+
+1014 is written with 0x61777 in cJanus::StartNtsc
+     is SetVSCScaler
+1018 is written with 0x2d002d0 in cJanus::StartNtsc
+
 APU (Audio Processing Unit) 3000-307c
 
+3000 used in cJanus::InitNtscAudio
+     set to zero in cJanus::DisableAPU
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	0 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|00000010	0 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|00000100	0 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|000nn000	0 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|0nn00000	0 in cJanus::InitNtscAudio
+	00000000|00000000|0000000n|n0000000	0 in cJanus::InitNtscAudio
+	00000000|00000000|00000nn0|00000000	0 in cJanus::InitNtscAudio
+	00000000|00000000|10000000|00000000	0 in cJanus::InitNtscAudio
+	00000000|000000nn|00000000|00000000	!gMspI2sMaster in cJanus::InitNtscAudio
+	00000000|0000nn00|00000000|00000000	!gMspI2sMaster in cJanus::InitNtscAudio
+	00000000|00nn0000|00000000|00000000	0 in cJanus::InitNtscAudio
+	00000000|nn000000|00000000|00000000	0 in cJanus::InitNtscAudio
+	000000nn|00000000|00000000|00000000	1 in cJanus::InitNtscAudio
+
 3004 bit 2 -- stereo/mono NTSC audio
+     set to zero in cJanus::InitNtscAudio
+     set to zero in cJanus::DisableAPU
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|0nnnnnn0	3 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|10000000	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000001|00000000	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000nn0|00000000	1 in cJanus::InitNtscAudio
+
+3008 used in cJanus::InitNtscAudio
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|000nn000	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000000|0nn00000	1 in cJanus::InitNtscAudio
+	00000000|00000000|00000nnn|00000000	0 in cJanus::InitNtscAudio
+	00000000|00000000|0nnn0000|00000000	1 in cJanus::InitNtscAudio
+
+300c,3010 written with 0x3000000
 
 3014 is APU interrupt mask
 3018 is last queued APU interrupt
 
+3020 written with 0x1000 in cJanus::InitNtscAudio
+     used in cJanus::NtscAudioDpc
+
+3024 written with 0x10fe0 in cJanus::InitNtscAudio
+     used in cJanus::NtscAudioDpc
+
 3028 may be ntsc recording offset in sdram
+     is used in cJanus::RotateVscCapFrame
+     is used in cJanus::InitNtscAudio (0x1000 + gpJanus+167d8 myhd1.54)
+
+302c written with 0x1000 in cJanus::InitNtscAudio
+
+3030 written with 0x9000 in cJanus::InitNtscAudio
+     used in cJanus::NtscAudioDpc
 
 3034 APU_IAU_IBA_REG - written with _IAU_BASE
 3038 APU_IAU_IRA_REG - written with _IAU_BASE + 0x77fc
 303c APU_IAU_IEA_REG - written with _IAU_BASE
 	_IAU_BASE is 0x7800 bytes memory allocated with yGetTL850Memory
+
+305c written with 0xc30000c3 in cJanus::InitNtscAudio
+
+3060-3068 written with 0x0 in cJanus::InitNtscAudio
+
+306c written with 0xc30000c3 in cJanus::InitNtscAudio
+
+3070-3078 written with 0x0 in cJanus::InitNtscAudio
+
+307c written with 0xc30000c3 in cJanus::InitNtscAudio
+
 
 BLT (Blitter?) 4000-405c
 
@@ -67,7 +145,11 @@ BLT (Blitter?) 4000-405c
 
 MCE 6000-603c
 
-6000,6004 used in cJanus::GetTocRdPtr, cJanus::ResetMce
+6000,6004 used in cJanus::GetTocRdPtr, cJanus::ResetMce, cJanus::UpdateMce, cJanus::InitMce
+
+6000 bit 0x0-0x0 written with 1 in cJanus::InitMceToc
+     bits 0xa-0x9 and 0x8-0x8 written with write_regbits in UpdateMce
+     written with 0xc000 (bits 0xe, 0xf) in cJanus::InitMce
 
 6008 is MCE interrupt mask
 600c is MCE interrupt type
@@ -77,28 +159,152 @@ MCE 6000-603c
 6018 is a bitfield used in cJanus::SearchHdrWithPacing
 
 6024 used in InitVldShiftAmt
+     bits 0x4-0x0 written with 0 in cJanus::InitMceToc
 
-6034 used in cJanus::GetTocRdPtr, cJanus::ResetMce
+602c used in LoadQuantTable; write 0x400 then table values?
 
-6038 used in cJanus::ResetMce
+6030 written with values or'd together
 
-603c used in cJanus::ChannelChangeStep2
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	tagContext[0xec]
+	00000000|00000000|00000000|00000010	tagContext[0xe8]
+	00000000|00000000|00000000|00000100	tagContext[0xe4]
+	00000000|00000000|00000000|00001000	tagContext[0xdc]
+	00000000|00000000|00000000|00nn0000	tagContext[0xd0]
+	00000000|00000000|00000000|nn000000	tagContext[0xd4]
+	00000000|00000000|00000nnn|00000000	tagContext[0x94]
+	00000000|00000000|nnnnn000|00000000	tagContext[0xe0]
+	00000000|0000nnnn|00000000|00000000	tagContext[0xcc]
+	00000000|nnnn0000|00000000|00000000	tagContext[0xc8]
+	0000nnnn|00000000|00000000|00000000	tagContext[0xc4]
+	nnnn0000|00000000|00000000|00000000	tagContext[0xc0]
+
+6034 used in cJanus::GetTocRdPtr, cJanus::ResetMce, cJanus::InitMceToc
+
+6038 used in cJanus::ResetMce, cJanus::InitMceToc
+
+603c used in cJanus::ChannelChangeStep2, cJanus::InitMceToc
 
 VPIP 7000-7030
 
+7000 used in cJanus::VpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|000000nn
+	00000000|00000000|00000000|0000nn00
+	00000000|00000000|00000000|00010000	1 in cJanus::VpipSetting
+	00000000|00000000|00000000|00100000	0 in cJanus::VpipSetting
+	00000000|00000000|00000000|01000000	0 in cJanus::VpipSetting
+	00000000|00000000|00000000|10000000	0 in cJanus::VpipSetting
+	00000000|00000000|0000nnnn|00000000	3 in cJanus::VpipSetting
+	00000000|00000000|00nn0000|00000000
+	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
+	00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting
+	00000000|00nnnnnn|00000000|00000000	3f in cJanus::VpipSetting
+	00000000|01000000|00000000|00000000	0 in cJanus::VpipSetting (field order?)
+
 7004 is VPIP interrupt mask
+     bit zero set to 1 in cJanus::VpipSetting
+
 7008 is VPIP interrupt type
 
-700c is used in DeinterlaceTop
+700c is used in DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn
+	00000000|00000000|0000nnnn|00000000
+	00000000|0000nnnn|00000000|00000000
+	0000nnnn|00000000|00000000|00000000
+
+7010 used in cJanus::VpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|0000nnnn|nnnnn000	0 in cJanus::VpipSetting
+	0000nnnn|nnnnn000|00000000|00000000	0 in cJanus::VpipSetting
+
+7018 used in cJanus::VpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|0000nnnn|nnnn0000
+
+7020 used in cJanus::VpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn	Vertical scaling ratio (1080/540 or /720)?
+	00000000|000nnnnn|nnnnnn00|00000000
+	nnnnnnnn|nnn00000|00000000|00000000
+
+7024,7028 passed to cJanus::LoadFilterCoeffs in cJanus::VpipSetting
+
+702c used in cJanus::StartVpip
+
 
 HPIP 8000-8020
 
 8000 bit zero - start/stop HPIP
+     used in cJanus::HpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000001	HPIP enable
+	00000000|00000000|00000000|00000010	0 in cJanus::HpipSetting
+	00000000|00000000|00000000|00000100	0 in cJanus::HpipSetting
 
 8008 is HPIP interrupt mask
 800c is HPIP interrupt type
 
 8010 HpipBufReg(?)
+     used in cJanus::HpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn	tagContext[0x1a4]
+	00000000|00000000|000nnnnn|00000000	tagContext[0x1a8]
+
+8014 used in cJanus::HpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0nnnnnnn	tagContext[0x254]/16
+	00000000|00000000|0nnnnnnn|00000000
+	00000000|0nnnnnnn|00000000|00000000
+	0nnnnnnn|00000000|00000000|00000000	
+
+8018 used in cJanus::HpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0nnnnnnn	tagContext[0x254]+15/16 or +31/32
+
+801c used in cJanus::HpipSetting
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn
+	00000000|000nnnnn|nnnnnn00|00000000
+	nnnnnnnn|nnn00000|00000000|00000000
+
+8020,8024 passed to cJanus::LoadFilterCoeffs in cJanus::HpipSetting
+
+
+DPC 10000-10200
 
 register 10000 is display options bitfield:
 
@@ -197,7 +403,8 @@ register 10004 is a status register for the video generator (?)
 10040 bottom two bits used in DoProgressiveFrame as a bitfield, apparently some
 kind of register selection for 10068,1006c
 
-register 10048 is DispBufReg(?) or NtscDispFrame?
+10048 is DispBufReg(?) or NtscDispFrame?
+      bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
 
 10068,1006c used in DoProgressiveFrame with g_vsCtlReg
 
@@ -219,7 +426,7 @@ register 10084 changes OSD image(?) - something like "sdram offset" - used in
 
 100c8, 100d0 - auxSetHrzScaler
 
-
+Registers 10140-10180 are written with Y'PbPr values in OSDProperty::SetProperty
 
 DPC2 10180-10184
 10180 and 10184 do some weird stuff..  10180 seems to possibly be a register 
@@ -238,7 +445,7 @@ register	sync value	dump value
 10198	GPIO output	i2c output
 1019C	GPIO input	i2c input (see i2c.txt)
 
-Registers 10180-101a0 are written with YPbPr values in OSDProperty::SetProperty
+GPIO also controls sampling clock
 
 Zeros for bi-level (VGA) sync, something else for tri-level sync:
 101a0
@@ -248,13 +455,17 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 18000 mcu firmware start
 1c000 mcu data start
 
+1c2c0-1c2cc, 1c2d4-1c2ec used in UpdateMce
+
 1c2f0 bit zero - startmcu
 
 1c2f4 MCU interrupt mask
 
+1c2fc-1c300 used in UpdateMce
+
 1c304 is interrupt mask of some type (?)
 
-1d800,1d804 used in cJanus::RestartMce, cJanus::ResetMcu
+1d800,1d804 used in cJanus::RestartMce, cJanus::UpdateMce, cJanus::ResetMcu
 
 1d810 is MCU status (?)
 
@@ -291,10 +502,13 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 26800 and 26804 used in Demux_stop and demux_init
 
 27810 written with _setValue in Demux_UpdatePCR
+      written with 0xa000 in cJanus::SetNtscAudioClock
 
 27814 last queued tsd interrupt
 
 MIF 28000, 28020-280dc
+
+28040-2807c used in cJanus::PipMifBufSetting
 
 280dc written with 0x31415926 in cJanus::RestartMce
 
