@@ -172,7 +172,8 @@ OSD FUNCTIONS
 .text:00031934 WriteOSDBlock(ulong, uchar*, ulong, ulong, ulong, int)
 .text:0003a2de initializeOSDMemory(ulong, ulong)
 .text:0003a430 deinitializeOSDMemory()
-.text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN)
+.text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN) - Gets OSD memory on card and adds an entry to a linked list
+.text:0003a5e4 getSDRAMoffset(ulong) - searches memory linked list for given tag and returns card RAM offset of entry
 .text:0003a596 deallocateOSDMemory(ulong)
 
 

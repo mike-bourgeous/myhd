@@ -1,3 +1,8 @@
+2003-09-23	Mike Bourgeous		<nitrogen@slimetech.com>
+
+	* Added more OSD info to tl880doc.txt.
+	* Added tl880cursor.c to driver/.
+
 2003-09-21	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Updated README files.
