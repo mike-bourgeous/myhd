@@ -586,6 +586,17 @@ register	sync value	dump value
 	
 
 GPIO also controls sampling clock
+SetGPIO used in (MyHD):
+	DebugProperty::SetProperty (line 2)
+	cJanus::SetDpcClock (line 6)
+	SetSamplingClock (line 9 or line 8)
+	cJanus::BoardInitialize (line 0 and line 6, line 5)
+	JanusProperty::SetProperty (line 2)
+	cJanus::SetVIP (line 4, line 3)
+	cNxtVSB::NxtCheckChannel (line 0)
+
+ReadGPIO used in (MyHD):
+	JanusPropety::GetProperty (line 2)
 
 Zeros for bi-level (VGA) sync, something else for tri-level sync:
 101a0
