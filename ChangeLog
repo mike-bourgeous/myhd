@@ -1,6 +1,7 @@
 2003-10-01	Mike Bourgeous		<nitrogen@slimetech.com>
 
 	* Added tl880_deallocate_osdmem().
+	* Added tl880_init_osdmem().
 
 2003-09-30	Mike Bourgeous		<nitrogen@slimetech.com>
 

@@ -33,6 +33,85 @@ int tl880_compact_osdmem(struct tl880_dev *tl880dev)
 	return 1;
 }
 
+#if 0
+int tl880_init_osdmem(struct tl880_dev *tl880dev, unsigned long addr, unsigned long size)
+{
+	edi = 0;
+
+	if(_g_head) {
+		tl880_deinit_osdmem(tl880dev);
+	}
+
+loc_3a2ee:
+	if(!(_g_head = kmalloc(0x1c, 1))) {
+		return 0;
+	}
+
+loc_3a305:
+	eax->field_0 = 0;
+	eax = _g_head;
+	eax->field_4 = 0;
+	eax = _g_head;
+	eax->field_8 = 0;
+	eax = _g_head;
+	eax->field_c = 0;
+	eax = _g_head;
+	eax->field_10 = 0;
+	eax = _g_idTracker_0;
+	ecx = _g_head;
+	eax++;
+	_g_idTracker_0 = eax;
+	eax &= 0xfffff;
+	eax |= 0x52300000;
+	ecx->field_14 = eax;
+	eax = _g_head;
+	eax->field_18 = 0;
+
+	if(!m_pkmOSD) {
+		eax = gpJanus;
+		esi = cJanus->field_16870;
+		esi += cJanus->field_8;
+		if(!(eax = __imp__ExAllocatePoolWithTag(0, 8, ' mdW'))) {
+			eax = 0;
+		} else {
+			ecx = gpJanus;
+			ecx = eax;
+			KMemory::KMemory(esi, cJanus->field_16874, 0);
+		}
+	} else {
+		goto loc_3a39e;
+	}
+
+loc_3a38f:
+	if(!(m_pkmOSD = eax)) {
+		_DbgBreakPoint();
+	}
+
+loc_3a39e:
+	ecx = m_pkmOSD;
+	eax = m_pkmOSD.MapToUserSpace();
+	
+	ecx = gpJanus;
+
+	sBoardInfo.virtual_address = eax;
+	edx = cJanus->field_16874;
+	sBoardInfo.memory_length = edx;
+	ecx = ecx->field_16870;
+	sBoardInfo.physical_address = ecx;
+	ecx = _g_head;
+	sBoardInfo.field_c = 0x80;
+	_g_head->field_4 = eax;
+	eax = _g_head;
+	ecx = sBoardInfo.physical_address;
+	_g_head->field_8 = ecx;
+	eax = _g_head;
+	ecx = sBoardInfo.memory_length;
+	_g_head->field_c = ecx;
+
+	return 1;
+}
+#endif	
+
 unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long size, unsigned long align)
 {
 	struct OSDmemory *listp1, *newmem;
@@ -129,39 +208,17 @@ int tl880_deallocate_osdmem(struct tl880_dev *tl880dev, unsigned long addr)
 {
 	struct OSDmemory *listp = _g_head;
 
-	if(!_g_head) {
-		return 0;
-	}
-
-	/*
-loc_3a5aa:
-	if(listp->virt_addr + listp->field_0 != addr) {
-		if((listp->id & 0xfff00000) != 0x52300000) {
-			return 0;
+	/* Walk the list */
+	while((listp != NULL) && ((listp->id & 0xfff00000) == 0x52300000)) {
+		/* If the address matches, set the block inactive */
+		if(listp->virt_addr + listp->field_0 == addr) {
+			listp->active = 0;
+			listp->field_0 = 0;
+			return 1;
 		}
-		
-		listp = listp->next;
-		
-		if(listp) {
-			goto loc_3a5aa;
-		}
-	}
-	*/
-
-	while((listp != NULL) && ((listp->id & 0xfff00000) == 0x52300000) && ((listp->virt_addr + listp->field_0) != addr)) {
 		listp = listp->next;
 	}
-	if(!listp) {
-		return 0;
-	}
 
-	if((listp->id & 0xfff00000) != 0x52300000) {
-		return 0;
-	}
-
-	listp->active = 0;
-	listp->field_0 = 0;
-
-	return 1;
+	return 0;
 }
 

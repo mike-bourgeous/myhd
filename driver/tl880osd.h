@@ -85,6 +85,7 @@ extern struct OSDmemory *_g_head;
 int tl880_compact_osdmem(struct tl880_dev *tl880dev);
 unsigned long tl880_allocate_osdmem(struct tl880_dev *tl880dev, unsigned long size, unsigned long align);
 unsigned long tl880_get_osdmem_offset(struct tl880_dev *tl880dev, unsigned long addr);
+int tl880_deallocate_osdmem(struct tl880_dev *tl880dev, unsigned long addr);
 
 /* tl880cursor.c */
 

@@ -58,7 +58,7 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 	}
 
 	if((new_surface->field_c = tl880_get_osdmem_offset(tl880dev, new_surface->field_8)) == -1) {
-		/* deallocateOSDMemory(new_surface->field_8); */
+		tl880_deallocate_osdmem(tl880dev, new_surface->field_8);
 		kfree(new_surface);
 		return NULL;
 	}
@@ -127,7 +127,7 @@ void tl880_delete_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *cur
 	}
 
 	if(cursor->field_8) {
-		/* deallocateOSDMemory(cursor->field_8); */
+		tl880_deallocate_osdmem(tl880dev, cursor->field_8);
 		cursor->field_8 = 0;
 	}
 
