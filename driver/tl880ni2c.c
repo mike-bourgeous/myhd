@@ -346,7 +346,7 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 
 	printk(KERN_DEBUG "tl880: initializing i2c\n");
 
-	switch(tl880dev->board_type) {
+	switch(tl880dev->card_type) {
 		case TL880_CARD_HIPIX:
 			tl880dev->minbus = 5;
 			tl880dev->maxbus = 5;
@@ -495,7 +495,7 @@ int do_i2c_write(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, 
 	int i;
 	
 	/*
-	if(board_type == MDP110B) {
+	if(card_type == MDP110B) {
 		if(addr & 0xf8 == 0xc0) {
 			i2c_port = 2;
 		} else {
@@ -680,7 +680,7 @@ int do_i2c_read(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, u
 	int i;
 	
 	/*
-	if(board_type == MDP110B) {
+	if(card_type == MDP110B) {
 		if(addr & 0xf8 == 0xc0) {
 			i2c_port = 2;
 		} else {

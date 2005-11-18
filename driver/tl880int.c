@@ -77,11 +77,12 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 	return 0;
 }
 
-void __init tl880_bh(void *dev_id)
+void __init tl880_bh(unsigned long tl880_id)
 {
-	struct tl880_dev *tl880dev = (struct tl880_dev*)dev_id;
+	struct tl880_dev *tl880dev;
 
-	if(!dev_id) {
+	if(!(tl880dev = find_tl880(tl880_id))) {
+		printk(KERN_ERR "tl880: bottom half given invalid card id: %lu\n", tl880_id);
 		return;
 	}
 	
@@ -169,10 +170,12 @@ void __init tl880_bh(void *dev_id)
 	write_register(tl880dev, 4, tl880dev->int_mask);
 }
 
-void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
+irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 {
 	struct tl880_dev *tl880dev = (struct tl880_dev*)dev_id;
 	unsigned long int_type, int_mask;
+
+	printk(KERN_DEBUG "tl880: top half\n");
 
 	int_type = read_register(tl880dev, 0);
 	int_mask = read_register(tl880dev, 4);
@@ -182,20 +185,22 @@ void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 
 	/* If no bits in type and mask match, then the interrupt was for some other device */
 	if(!(int_type & int_mask)) {
-		return;
+		printk(KERN_DEBUG "tl880: received someone else's interrupt\n");
+		write_register(tl880dev, 4, int_mask);
+		return IRQ_NONE;
 	}
 
 	/* If this card is already processing an interrupt, return with interrupts disabled */
 	if(tl880dev->int_type) {
 		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx\n", tl880dev->int_type);
-		return;
+		return IRQ_HANDLED;
 	}
 
 	tl880dev->int_mask = int_mask;
 	tl880dev->int_type = int_type & int_mask;
 
 	/* 
-	 * TODO: only schedule bh for tasks that take too long to do in interrupt time.
+	 * TODO: only schedule worker for tasks that take too long to do in interrupt time.
 	 */
 
 	if(tl880dev->int_type & 0x80) {
@@ -258,23 +263,40 @@ void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 	}
 	
 	if(tl880dev->int_type) {
-		/* Queue the bottom half if necessary */
-		queue_task(&tl880dev->bh, &tq_immediate);
+		/* Queue the deferred interrupt handler if necessary */
+		/*
+		queue_task(&tl880dev->bh, &tq_immediate)
 		mark_bh(IMMEDIATE_BH);
+		*/
+		/*
+		if(!queue_work(tl880dev->wqueue, &tl880dev->worker)) {
+			printk(KERN_WARNING "tl880: Uh...  Interrupt handler already queued.  Is this bad?\n");
+		}
+		*/
+		tasklet_schedule(&tl880dev->tasklet);
 	} else {
 		/* Re-enable interrupts */
 		write_register(tl880dev, 4, tl880dev->int_mask);
 	}
+
+	return IRQ_HANDLED;
 }
 
 void tl880_disable_interrupts(struct tl880_dev *tl880dev)
 {
+	unsigned long oldmask;
+	
+	/* XXX: Should this handle pending interrupt requests instead? */
 	read_register(tl880dev, 0);
+	oldmask = read_register(tl880dev, 0x4);
 	write_register(tl880dev, 0x4, 0);
 	write_register(tl880dev, 0xc, 0);
 	write_register(tl880dev, 0x6008, 0);
 	write_register(tl880dev, 0x10008, 0);
 	write_register(tl880dev, 0x4010, 0);
 	write_register(tl880dev, 0x1008, 0);
+	
+	printk(KERN_DEBUG "tl880: Disabled interrupts on card %u - old mask was 0x%08lx\n",
+		tl880dev->id, oldmask);
 }
 

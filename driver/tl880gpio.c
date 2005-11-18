@@ -15,7 +15,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 	
 	state = state ? 1 : 0;
 	
-	if(tl880dev->board_type == TL880_CARD_JANUS) {
+	if(tl880dev->card_type == TL880_CARD_JANUS) {
 		switch(gpio_line) {
 			case 0:
 				write_regbits(tl880dev, 0x10198, 8, 8, state);
@@ -101,7 +101,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				return 1;
 				break;
 		}
-	} else if(tl880dev->board_type == TL880_CARD_MYHD_MDP100A) {
+	} else if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		switch(gpio_line) {
 			case 0:
 				write_regbits(tl880dev, 0x10198, 8, 8, state);
@@ -163,8 +163,8 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				return 1;
 				break;
 		}
-	} else if(tl880dev->board_type >= 3 /* TL880_CARD_MDP100 */ && tl880dev->board_type < 0x10 /* First Hauppauge */) {
-		if(tl880dev->board_type == TL880_CARD_MYHD_MDP120) {
+	} else if(tl880dev->card_type >= 3 /* TL880_CARD_MDP100 */ && tl880dev->card_type < 0x10 /* First Hauppauge */) {
+		if(tl880dev->card_type == TL880_CARD_MYHD_MDP120) {
 			printk(KERN_WARNING "tl880: MDP120 GPIO not implemented, using MDP110B GPIO.  May not be correct.\n");
 		}
 		if(gpio_line > 9) {
@@ -252,7 +252,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 		}
 	} else {
 		printk(KERN_WARNING "tl880: Attempt to set GPIO on card for which GPIO routines not yet written\n");
-		printk(KERN_WARNING "tl880: board_type=%i\n", tl880dev->board_type);
+		printk(KERN_WARNING "tl880: card_type=%i\n", tl880dev->card_type);
 	}
 
 	return 1;

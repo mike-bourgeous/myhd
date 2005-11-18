@@ -513,7 +513,10 @@ DPC 10000-10200
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|000000nn
+	00000000|00000000|00000000|00000010	Halves vertical image size?
 	00000000|00000000|00000000|00100000	1 in cJanus::isr_NonSlice_Tv
+	00000000|00000000|00nn0000|00000000	Repeats the left side of the image 
+						multiple times across the screen
 	
 
 10048 is DispBufReg(?) or NtscDispFrame?

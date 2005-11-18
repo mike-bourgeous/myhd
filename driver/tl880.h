@@ -1,7 +1,7 @@
 /* 
  * Driver for TL880-based cards (possibly also TL850)
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2005 Mike Bourgeous <nitrogen@slimetech.com>
  */
 
 #ifndef _TL880_H_
@@ -10,16 +10,18 @@
 #ifdef __KERNEL__
 
 /* Standard includes */
+#include <linux/init.h>
 #include <linux/module.h>
+#include <linux/kernel.h>
 #include <linux/version.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/fs.h>
-#include <linux/kernel.h>
+#include <linux/proc_fs.h>
+#include <linux/cdev.h>
 #include <linux/major.h>
 #include <linux/slab.h>
 #include <linux/mm.h>
-#include <linux/init.h>
 #include <linux/poll.h>
 #include <linux/pci.h>
 #include <linux/signal.h>
@@ -30,26 +32,30 @@
 #include <linux/sched.h>
 #include <asm/types.h>
 #include <linux/types.h>
-#include <linux/wrapper.h>
 #include <linux/interrupt.h>
-#include <linux/tqueue.h>
 #include <asm/uaccess.h>
 #include <linux/vmalloc.h>
 #include <linux/videodev.h>
+#include <linux/i2c.h>
 #include <linux/i2c-algo-bit.h>
-#include "tlaudio/audiochip.h"
-#include "tlaudio/msp3400.h"
-#include "tltuner/tuner.h"
+#include <media/tuner.h>
+#include <media/audiochip.h>
 
 /*** Driver definitions ***/
 
+/* Devices */
+#define DEV_COUNT				64
+#define DEV_MASK				0xfffc	/* Bits of minor number identifying specific TL880 card */
+#define DEV_SHIFT				2	/* Bits to right-shift minor number to get card identifier */
+#define FUNC_MASK				3	/* Card function identifying bits of minor number (i.e. mem/reg/unk) */
+
 /* I2C */
 #define I2C_CLIENTS_MAX				16
-#define I2C_HW_B_TL880				0xdd
+#define I2C_HW_B_TL880				0x1000dd
 
 /* PCI */
 #define PCI_VENDOR_ID_TERALOGIC			0x544c
-#define PCI_DEVICE_ID_TERALOGIC_880		0x350
+#define PCI_DEVICE_ID_TERALOGIC_TL880		0x0350
 
 #define PCI_SUBSYSTEM_VENDOR_ID_MIT		0x17a1
 #define PCI_SUBSYSTEM_DEVICE_ID_MYHD		0x0001
@@ -75,8 +81,8 @@
 #define TL880_CARD_ZERO			0
 
 /* Debug */
-#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
-#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s\n", #a, __FUNCTION__), (1)) )
+#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
+#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
 
 
 
@@ -97,10 +103,12 @@ struct tl880_dev {
 	/** Housekeeping stuff **/
 	struct tl880_dev *next;			/* Linked list pointer */
 	struct pci_dev *pcidev;			/* PCI device structure */
-	int id;					/* Card number */
+	unsigned int id;			/* Card number */
 	unsigned short subsys_vendor_id;	/* Card vendor ID */
 	unsigned short subsys_device_id;	/* Card device ID */
-	unsigned short board_type;		/* Card type identifier */
+	unsigned short card_type;		/* Card type identifier */
+	char name[64];				/* Card model name */
+	struct semaphore *sem;			/* For reentry protection */
 
 	/** Card's I/O and memory space **/
 	void *memspace;				/* Mapped memory space */
@@ -123,8 +131,9 @@ struct tl880_dev {
 	struct tl880_i2c_bus *i2cbuses;		/* Array of I2C buses on this card */
 
 	/** Interrupt stuff **/
-	struct tq_struct bh;			/* Device-specific info for interrupt bottom half */
-	unsigned int irq;			/* Interrupt line */
+	struct tasklet_struct tasklet;		/* Tasklet for interrupt work */
+
+	unsigned char irq;			/* Interrupt line */
 
 	unsigned long int_mask;			/* Global interrupt enable mask */
 	unsigned long int_type;			/* Type of interrupt to service */
@@ -162,8 +171,10 @@ struct tl880_dev {
 	unsigned long tsd_type;			/* Type of TSD interrupt received */
 	unsigned long tsd_count;		/* Number of TSD interrupts */
 
-	/** Devfs stuff **/
-	devfs_handle_t devfs_device;		/* Devfs information */
+	/** Character device stuff **/
+	struct cdev *char_device;		/* Kernel character device handle */
+	unsigned int major;			/* Major number for all tl880 devices (for convenience) */
+	unsigned int minor;			/* First minor number for this card */
 };
 
 #endif /* __KERNEL__ */
@@ -192,10 +203,15 @@ struct tl880_dev {
 #ifdef __KERNEL__
 
 /*** Driver variables ***/
+extern unsigned int debug;
+extern dev_t device_number;
+extern int n_tl880s;
+extern struct tl880_dev *tl880_list;
 
 /*** Driver functions ***/
 /* tl880util.c */
 void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue);
+struct tl880_dev *find_tl880(unsigned long tl880_id);
 
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);
@@ -229,8 +245,8 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, unsigned char state, unsigned char b, int c);
 
 /* tl880int.c */
-void __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs);
-void __init tl880_bh(void *dev_id);
+irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs);
+void __init tl880_bh(unsigned long tl880_id);
 void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 
 /* tl880vip.c */
@@ -250,9 +266,13 @@ void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);
 
 /* tl880dma.c */
-unsigned int tl880_aux_dma_allocate();
+unsigned int tl880_aux_dma_allocate(void);
 void tl880_aux_dma_free(unsigned int dma);
 extern unsigned long dma_bitmask;
+
+/* tl880proc.c */
+int tl880_create_proc_entry(void);
+void tl880_remove_proc_entry(void);
 
 #endif /* __KERNEL__ */
 

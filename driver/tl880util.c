@@ -19,3 +19,17 @@ void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsig
 }
 
 
+/* Find a tl880_dev by card number */
+struct tl880_dev *find_tl880(unsigned long tl880_id)
+{
+	struct tl880_dev *list = tl880_list;
+
+	while(list) {
+		if(list->id == tl880_id) 
+			break;
+	}
+
+	return list;
+}
+
+

@@ -1,4 +1,41 @@
-2003-10-06	Mike Bourgeous		<nitrogen@slimetech.com>
+2005-11-18	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added tl880_{mk,rm}dev scripts to driver/
+
+2005-11-16	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Consolidated the mmap functions and device file operations info.
+
+2005-11-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Fixed minor number calculation for character devices - this was
+	  preventing all tl880 /dev functions from working.
+	* Added name field to tl880_dev.
+	* Minor code cleaning.
+	* Added /proc entry.
+	* Renamed board_type to card_type in tl880_dev.
+	* Fixed freeing of irq (use pcidev->irq instead of tl880dev->irq for
+	  safety - also make sure tl880dev->irq = pcidev->irq).
+	* Fixed /dev accesses - file->private_data is unavailable in cdev, so
+	  we use file->f_dentry->inode to get the minor number and FUNC_MASK
+	  to identify the mmap/ioctl needed.
+
+2005-11-14	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Changed workqueue stuff to use tasklets.
+	* Other 2.6 compile/run fixes.
+	* Added request_module call for i2c-dev.
+	* Changed tl880i2c.c to bind with new i2c drivers (I2C_CLASS_*).
+	* Clean up some old 2.4-specific code.
+
+2005-11-08	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+	
+	* Modified driver/Makefile for kernel 2.6.
+	* Updated driver code to compile on kernel 2.6.
+	* Started rewriting driver to use the kernel's PCI device system
+	  rather than manually probing the PCI bus.
+
+2003-10-06	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added dpc2rand.sh and dpc2dump.sh tools.
 	* Added more information to tl880doc.txt about DPC2 (0x10180,0x10184).
@@ -6,31 +43,31 @@
 	* Added some DPC2 init code to tl880init.c.
 	* Correct DPC2 init code for color conversion matrix in RGB mode.
 
-2003-10-04	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-10-04	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Improved cursor test tool (incl. color palette support).
 	* Added tltuner/ and tlaudio/ directory for kernel modules modified to
 	  work with the TL880 driver.
 
-2003-10-03	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-10-03	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added cursor test to tools/.  Rock on!
 	* Change memfd to regfd in example tool.
 	* Added some more info about OSD color registers to tl880doc.txt.
 	* Added rgb2ypbpr tool.
 
-2003-10-02	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-10-02	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added cursor functions to tl880osd.h.
 	* Added example values for some OSD structs to tl880osd.h.
 
-2003-10-01	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-10-01	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added tl880_deallocate_osdmem().
 	* Added tl880_init_osdmem().
 	* Added some more comments to tl880cursor.c.
 
-2003-09-30	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-30	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added tl880_get_osdmem_offset() to tl880cursor.c.
 	* Fixed misinformation in myhd_154.txt about getSDRAMoffset.
@@ -38,44 +75,44 @@
 	* Added tl880_delete_cursor() function.
 	* Change all *osd_memory to *osdmem.
 
-2003-09-29	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-29	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* More cleanup work on tl880cursor.c.
 	* Added more cJanus info to myhd_154.txt.
 	* Added OSD memory list consolidation function.
 	* Added some TL880 memory info to tl880doc.txt.
 
-2003-09-23	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-23	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added more OSD info to tl880doc.txt.
 	* Added tl880cursor.c to driver/.
 
-2003-09-21	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-21	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Updated README files.
 	* Fix bug in tools/dpc/dpcsync.c (10018->0x10018).
 	* Added DPC interrupt rate calculation.
 
-2003-09-20	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-20	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Better flow in tl880_isr_video_sync_dvd in tl880dpc.c.
 	* Added script to test DPC interrupt in tools/.
 	* Fixed a bug in tl880dpc.c (tl880_set_dpc_clock).
 
-2003-09-19	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-19	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Working on tl880dma.c.  Less fake register usage.  Improve flow.
 
-2003-09-18	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-18	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Working on tl880dma.c.  Improve flow somewhat.
 	* Added comment about GPIO line 2 to tl880gpio.c.
 
-2003-09-17	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-17	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Working on tl880dma.c.
 
-2003-09-16	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-16	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added tl880_mode_def struct.
 	* Split DPC stuff into its own header.
@@ -84,7 +121,7 @@
 	* Added mode set function.
 	* Added more DMA code (still not functional though).
 
-2003-09-15	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-15	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added extra information about CDma.
 	* Added tl880_set_dpc_clock.
@@ -95,12 +132,12 @@
 	* Added some more comments to tl880kern.c.
 	* Fixed potential memory leak if memory mapping failed.
 
-2003-09-13	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-13	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* At least one DPC interrupt type now works.
 	* Added names to two register regions in tl880doc.txt
 
-2003-09-12	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-12	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added interrupt handler for VPIP and started DPC handler.
 	* Bottom half only queued for tasks that will take a long time.
@@ -109,22 +146,22 @@
 	* Added more to DPC handler.
 	* Added more info about tagContext to doc/myhd_154.txt.
 
-2003-09-11	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-11	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added interrupt count variables to struct tl880_dev.
 	* Added variables to struct tl880_dev for all known interrupt types.
 	* Renamed create_tl880 to tl880_create_dev.
 
-2003-09-09	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-09	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Tidied up driver/tl880demux.c a bit.
 	* Added new functions from tl880{demux,dma}.c to tl880.h.
 
-2003-09-08	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-08	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added information on TL850InterruptVectorString to doc/myhd_154.txt.
 
-2003-09-06	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-09-06	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added driver/tl880demux.c for demux functions.
 	* Added information on cSemaphore to doc/myhd_154.txt.
@@ -135,14 +172,14 @@
 	
 	* Added driver/tl880modes.c for a future video mode table.
 
-2003-08-25	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-25	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added HiPix I2C devices to doc/i2c.txt
 	* Added correct HiPix card detection to driver/tl880kern.c
 	* Added driver/tl880dpc.c for functions related to setting video modes
 	  and toggling video output.
 
-2003-08-23	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-23	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Fixed comment in WinTV-HD firmware extract script.
 	* Changed 8020 to 8024 in the HPIP range in tl880doc.txt.
@@ -150,48 +187,48 @@
 	* Fixed a bug regarding I2C client allocation, attachment, and
 	  detachment.
 
-2003-08-18	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-18	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added information on more registers.
 
-2003-08-16	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-16	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added information on more registers.
 
-2003-08-15	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-15	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added information on more registers.
 	* Added more information to tl880doc.txt about sync generator (such as
 	  names of some of the fields).
 
-2003-08-14	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-14	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added tl880_set_dpc_pll_const function to driver/tl880init.c
 	* Created new tool - tools/dpc/setconst.c
 	* Created new tool - tools/dpc/getconst.c
 	* Renamed tools/dpc/dpcaux to tools/dpc/dpcsync
 
-2003-08-11	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-08-11	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added documentation on sync generator registers to tl880doc.txt
 
-2003-07-28	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-07-28	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added more information to doc/myhd_154.txt and doc/tl880doc.txt,
 	  including new memory offsets and a list of some of the register
 	  blocks of the internal TL880 components.
 
-2003-07-24	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-07-24	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added initial MSP34xx support.
 	* Created tl880audio.c (routines to handle audio)
 
-2003-07-20	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-07-20	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added inital tuner support.
 	* Created tl880input.c (routines to switch inputs)
 
-2003-06-25	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-25	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Reworked all I2C support, with excellent results on MyHD (still
 	  needs testing on other cards).
@@ -200,28 +237,28 @@
 	* Swapped SDA/SCL lines on WinTV-HD back to previous values.
 	* Updated I2C documentation (doc/i2c.txt).
 
-2003-06-24	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-24	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added support for HiPix.
 
-2003-06-16	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-16	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Corrected MDP-120 detection.
 
-2003-06-13	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-13	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Changed DPC clock so that 1024x768p is 60.0Hz 48.3kHz exactly.
 
-2003-06-05	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-05	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added randram tool to randomize card memory, in an attempt to get
 	  something to display on the OSD.
 
-2003-06-03	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-06-03	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* MDP-120 should now be detected by name, and I2C may work.
 
-2003-05-30	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-05-30	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* board_type is now correctly set for the WinTV-HD (should make I2C
 	  support one step closer)
@@ -229,20 +266,20 @@
 	* Removed the debuglogs/ directory from the distribution (it will be
 	  made available elsewhere soon)
 
-2003-05-30	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-05-30	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Added I2C support for WinTV-HD (though I don't know if it will work,
 	  as I don't own a WinTV-HD -- read the comments in tl880i2c.c)
 	* Added firmware extract tool for WinTV-HD driver 2.1.20114
 
-2003-05-29	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-05-29	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Optimized I2C code and reordered the bus numbers
 	* Added checks for NULL values in I2C code (though if a null value is
 	  ever given it means there's something seriously amiss with the
 	  kernel far beyond an invalid parameter)
 
-2003-05-16	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-05-16	Mike Bourgeous		<nitrogen at slimetech.com>
 	
 	* Lots of changes made in the last month...
 	* I2C support
@@ -251,7 +288,7 @@
 	* New tool to switch video passthrough mode (videoout)
 	* Driver source code slightly more organized
 
-2003-04-01	Mike Bourgeous		<nitrogen@slimetech.com>
+2003-04-01	Mike Bourgeous		<nitrogen at slimetech.com>
 
 	* Setbits tool behavior changed
 	* Added ioctl for read and write register

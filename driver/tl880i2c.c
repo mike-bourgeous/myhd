@@ -212,6 +212,8 @@ void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *
 		return;
 	}
 
+	printk(KERN_DEBUG "tl880: calling i2c clients on card %u with command %08x\n", tl880dev->id, cmd);
+
 	for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
 		for(i = 0; i < I2C_CLIENTS_MAX; i++) {
 			if (!tl880dev->i2cbuses[j].i2c_clients[i]) {
@@ -231,7 +233,7 @@ static void tl880_i2c_inc_use(struct i2c_adapter *adap)
 		printk(KERN_ERR "tl880: null parameter given to %s\n", __FUNCTION__);
 	}
 
-	MOD_INC_USE_COUNT;
+	// MOD_INC_USE_COUNT;
 }
 
 static void tl880_i2c_dec_use(struct i2c_adapter *adap)
@@ -240,14 +242,35 @@ static void tl880_i2c_dec_use(struct i2c_adapter *adap)
 		printk(KERN_ERR "tl880: null parameter given to %s\n", __FUNCTION__);
 	}
 
-	MOD_DEC_USE_COUNT;
+	// MOD_DEC_USE_COUNT;
 }
 
 static int tl880_i2c_attach_inform(struct i2c_client *client)
 {
+	/*
 	struct tl880_i2c_bus *i2cbus = (struct tl880_i2c_bus *)client->adapter->data;
 	struct tl880_dev *tl880dev = (struct tl880_dev *)i2cbus->dev;
+	*/
+	struct tl880_i2c_bus *i2cbus;
+	struct tl880_dev *tl880dev;
 	int i;
+
+	if(CHECK_NULL(client)) {
+		printk(KERN_ERR "tl880: null parameter given to %s\n", __FUNCTION__);
+		return -EINVAL;
+	}
+
+	/* Get card-specific data */
+	i2cbus = i2c_get_adapdata(client->adapter);
+	if(CHECK_NULL(i2cbus)) {
+		printk(KERN_ERR "tl880: Couldn't get i2cbus pointer from i2c adapter\n");
+		return -EINVAL;
+	}
+	tl880dev = i2cbus->dev;
+	if(CHECK_NULL(tl880dev)) {
+		printk(KERN_ERR "tl880: Couldn't get tl880dev pointer from i2c adapter\n");
+		return -EINVAL;
+	}
 
 	printk(KERN_DEBUG "tl880: i2c client %s attach to bus %i-%i\n", client->name, tl880dev->id, i2cbus->busno);
 	printk(KERN_DEBUG "tl880: driver %s (id %i)\n", client->driver->name, client->driver->id);
@@ -264,9 +287,10 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 	}
 	
 	if(client->driver->id == I2C_DRIVERID_TUNER) {
+		struct tuner *tuner;
 		int tuner_type, cmdval;
 
-		switch(tl880dev->board_type) {
+		switch(tl880dev->card_type) {
 			case TL880_CARD_MYHD_MDP100A:
 			case TL880_CARD_MYHD_MDP100:
 			case TL880_CARD_MYHD_MDP110:
@@ -279,6 +303,21 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 
 		cmdval = 211250 * 16 / 1000; /* US channel 13 */
 		client->driver->command(client, VIDIOCSFREQ, &cmdval);
+		tuner = i2c_get_clientdata(client);
+
+		printk(KERN_INFO "tl880: tuner: type: %u, freq: %u (want %u), has_signal: %i\n",
+				tuner->type, tuner->freq, cmdval,
+				tuner->has_signal ? tuner->has_signal(client) : -1);
+	} else if(client->driver->id == I2C_DRIVERID_MSP3400 || client->driver->id == I2C_DRIVERID_TVAUDIO) {
+		struct video_audio audio_state;
+
+		client->driver->command(client, VIDIOCGAUDIO, &audio_state);
+
+		printk(KERN_INFO "tl880: msp3400: name: %s, channel: %i, flags: 0x%08x\n",
+			audio_state.name, audio_state.audio, audio_state.flags);
+		printk(KERN_INFO "tl880: msp3400: vol: %u, bal: %u, bas: %u, trb: %u\n",
+			audio_state.volume, audio_state.balance,
+			audio_state.bass, audio_state.treble);
 	}
 
 	return 0;
@@ -286,12 +325,29 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 
 static int tl880_i2c_detach_inform(struct i2c_client *client)
 {
+	/*
 	struct tl880_i2c_bus *i2cbus = (struct tl880_i2c_bus *)client->adapter->data;
 	struct tl880_dev *tl880dev = (struct tl880_dev *)i2cbus->dev;
+	*/
+	struct tl880_i2c_bus *i2cbus;
+	struct tl880_dev *tl880dev;
 	int i;
 
-	if(!client) {
+	if(CHECK_NULL(client)) {
 		printk(KERN_ERR "tl880: null parameter given to %s\n", __FUNCTION__);
+		return -EINVAL;
+	}
+
+	/* Get card-specific data */
+	i2cbus = i2c_get_adapdata(client->adapter);
+	if(CHECK_NULL(i2cbus)) {
+		printk(KERN_ERR "tl880: Couldn't get i2cbus pointer from i2c adapter\n");
+		return -EINVAL;
+	}
+	tl880dev = i2cbus->dev;
+	if(CHECK_NULL(tl880dev)) {
+		printk(KERN_ERR "tl880: Couldn't get tl880dev pointer from i2c adapter\n");
+		return -EINVAL;
 	}
 
 	printk(KERN_DEBUG "tl880: i2c client %s detach from bus %i-%i\n", client->name, tl880dev->id, i2cbus->busno);
@@ -319,8 +375,11 @@ static struct i2c_algo_bit_data tl880_i2c_algo_template = {
 static struct i2c_adapter tl880_i2c_adap_template = {
 	name:			"tl880",
 	id:			I2C_HW_B_TL880,
+	class:			I2C_CLASS_TV_ANALOG | I2C_CLASS_TV_DIGITAL,
+	/*
 	inc_use:		tl880_i2c_inc_use,
 	dec_use:		tl880_i2c_dec_use,
+	*/
 	client_register:	tl880_i2c_attach_inform,
 	client_unregister:	tl880_i2c_detach_inform
 };
@@ -336,7 +395,7 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 
 	printk(KERN_DEBUG "tl880: initializing i2c\n");
 
-	switch(tl880dev->board_type) {
+	switch(tl880dev->card_type) {
 		case TL880_CARD_HIPIX:
 			tl880dev->minbus = 5;
 			tl880dev->maxbus = 5;
@@ -381,7 +440,8 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 		snprintf(bus[j].i2c_adap.name+strlen(bus[j].i2c_adap.name), 27, " %i-%i", tl880dev->id, bus[j].busno);
 		
 		bus[j].i2c_algo.data = &bus[j];
-		bus[j].i2c_adap.data = &bus[j];
+		/* bus[j].i2c_adap.data = &bus[j]; */
+		i2c_set_adapdata(&bus[j].i2c_adap, &bus[j]);
 		bus[j].i2c_adap.algo_data = &bus[j].i2c_algo;
 		
 		tl880_i2c_set_scl(&bus[j], 0);

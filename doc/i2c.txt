@@ -1,5 +1,9 @@
 Various TL880 Cards and their I2C Configurations
 
+Note: Some addresses need to be halved/doubled depending on what program you
+use.  Most (if not all) addresses are in the double format (twice the result
+from i2cdetect).
+
 -------------------------------------------------------------------------------
 MyHD
 
