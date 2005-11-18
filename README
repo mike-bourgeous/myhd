@@ -1,16 +1,16 @@
 MyHD driver and utility package  --  http://myhd.sourceforge.net/
-Copyright 2003, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
+Copyright 2003-2005, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
 
 doc/
-	What I know about the chip so far
+	These files describe the known features of the chip
 driver/
 	Kernel module (no video capture yet - simply allows non-root to access
 	the card and enables I2C)
 tools/
 	Use these to "play" with the card and figure out how stuff works.
 
-There are step-by-step instructions how to compile the driver and run some tests
-at http://myhd.sourceforge.net/howtohelp.php.
+There are step-by-step instructions on compiling the driver and running tests at
+http://myhd.sourceforge.net/howtohelp.php.
 
 For more information, please view the mailing list archives.  Also read all the
 README files in this driver distribution (find . -name README).  Reading source
@@ -21,10 +21,10 @@ creates three devices per TL880 card in /dev/tl880 to allow all users to mmap
 the memory regions of the TL880, or use the ioctl interface to control the card.
 The tools are then used to upload the firmware, set external sync, turn on color
 bars, and display a mouse cursor.  That's all that the driver can do so far.
-There is also I2C bus support.
+There is also I2C bus support.  For the latest known bugs, see the web site.
 
 To test the I2C bus(es), you will need the lm_sensors package.  Load the
-i2c-dev, i2c-algo-bit, and tl880.o kernel modules, then run i2cdetect for each
+i2c-dev, i2c-algo-bit, and tl880.ko kernel modules, then run i2cdetect for each
 bus displayed in the kernel message log (each card has a different number of
 buses).  If you have any output beside all XX's, note the address and bus
 number, and run i2cdump [bus] [address].  For example, the NXT2000 on the MyHD

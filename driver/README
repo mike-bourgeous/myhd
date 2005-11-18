@@ -15,7 +15,9 @@ or you want to help with testing.
 
 The driver must be manually loaded as root by using insmod tl880.ko after it is
 compiled.  Compilation is achieved with kbuild, so all standard features of
-kbuild are available.  Use "make" to compile, "make clean" to clean, etc.
+kbuild are available.  Use "make" to compile, "make clean" to clean, etc.  Use
+the tl880_mkdev and tl880_rmdev scripts after loading the module to create and
+remove character devices for each TL880 card in /dev/tl880/.
 
 I2C support (tl880i2c.c) is complete.  There are several I2C interfaces
 provided, which are selected by card revision.  This module will automatically
