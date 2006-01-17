@@ -217,6 +217,8 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	// ConfigVPX();
 	// ConfigMSP();
 	request_module("msp3400");
+	request_module("tuner");
+	request_module("nxt2002");
 	
 	// if(*((char*)cJanus+0x16748) == 1) {
 	// 	SetNtscAudioClock()
@@ -386,12 +388,6 @@ void tl880_init_hipix(struct tl880_dev *tl880dev)
 
 void tl880_init_dev(struct tl880_dev *tl880dev)
 {
-	unsigned long cmdval;
-	unsigned char tunerstatus = 0;
-	int i;
-	
-	printk(KERN_DEBUG "tl880: tl880_init_dev\n");
-	
 	tl880_init_chip(tl880dev);
 
 	/* TODO: Change this to switch on TL880_CARD_* */
@@ -467,10 +463,9 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	write_register(tl880dev, 0x10184, 0x012A0000);
 	write_register(tl880dev, 0x10184, 0x01CB8000);
 
-	printk(KERN_DEBUG "tl880: end of init: 0x10190=0x%08lx\n", read_register(tl880dev, 0x10190));
-	printk(KERN_DEBUG "tl880: end of init: 0x10194=0x%08lx\n", read_register(tl880dev, 0x10194));
-	printk(KERN_DEBUG "tl880: end of init: 0x10198=0x%08lx\n", read_register(tl880dev, 0x10198));
-	printk(KERN_DEBUG "tl880: end of init: 0x1019c=0x%08lx\n", read_register(tl880dev, 0x1019c));
+	printk(KERN_DEBUG "tl880: GPIO at end of init: 0x10190=0x%08lx 0x10194=0x%08lx 0x10198=0x%08lx 0x1019c=0x%08lx\n",
+		read_register(tl880dev, 0x10190), read_register(tl880dev, 0x10194),
+		read_register(tl880dev, 0x10198), read_register(tl880dev, 0x1019c));
 }
 
 

@@ -1,7 +1,16 @@
 2006-01-17	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
-	* Cleaned some code
-	* Removed some old/temporary functions
+	* Cleaned some code.
+	* Removed some old/temporary functions.
+	* Fixed potential infinite loop in find_tl880* functions in tl880util.
+	* Changed some function names from *_tl880 to tl880_*.
+	* Changed tuner set type code to only set PHILIPS_ATSC for MyHD cards.
+	* Removed many unnecessary printk's.
+
+2005-12-10	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Removed obsolete tlaudio/ and tltuner/ directories in driver/.
+	* Changed TUNER_SET_TYPE to TUNER_SET_TYPE_ADDR for new tuner API.
 
 2005-11-18	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

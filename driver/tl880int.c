@@ -175,8 +175,6 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 	struct tl880_dev *tl880dev = (struct tl880_dev*)dev_id;
 	unsigned long int_type, int_mask;
 
-	printk(KERN_DEBUG "tl880: top half\n");
-
 	/* Store the current interrupt mask and type */
 	int_type = read_register(tl880dev, 0);
 	int_mask = read_register(tl880dev, 4);
@@ -194,9 +192,12 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 		return IRQ_NONE;
 	}
 
+	printk(KERN_DEBUG "tl880: Processing interrupt\n");
+
 	/* If this card is already processing an interrupt, return with interrupts disabled */
 	if(tl880dev->int_type) {
 		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx\n", tl880dev->int_type);
+		tl880_disable_interrupts(tl880dev);
 		return IRQ_HANDLED;
 	}
 
@@ -299,8 +300,5 @@ void tl880_disable_interrupts(struct tl880_dev *tl880dev)
 	write_register(tl880dev, 0x10008, 0);
 	write_register(tl880dev, 0x4010, 0);
 	write_register(tl880dev, 0x1008, 0);
-	
-	printk(KERN_DEBUG "tl880: Disabled interrupts on card %u - old mask was 0x%08lx\n",
-		tl880dev->id, oldmask);
 }
 
