@@ -288,18 +288,27 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 	
 	if(client->driver->id == I2C_DRIVERID_TUNER) {
 		struct tuner *tuner;
+		struct tuner_setup tun_setup;
 		int tuner_type, cmdval;
+
+		tun_setup.mode_mask = T_ANALOG_TV | T_DIGITAL_TV;
+		tun_setup.addr = client->addr;
 
 		switch(tl880dev->card_type) {
 			case TL880_CARD_MYHD_MDP100A:
 			case TL880_CARD_MYHD_MDP100:
 			case TL880_CARD_MYHD_MDP110:
 			case TL880_CARD_MYHD_MDP120:
+			case TL880_CARD_MYHD_MDP130:
 			default:
-				tuner_type = TUNER_PHILIPS_ATSC;
+				tun_setup.type = tuner_type = TUNER_PHILIPS_ATSC;
 		}
 		
-		client->driver->command(client, TUNER_SET_TYPE, &tuner_type);
+		/*
+		client->driver->command(client, TUNER_SET_TYPE_ADDR, &tuner_type);
+		*/
+
+		client->driver->command(client, TUNER_SET_TYPE_ADDR, &tun_setup);
 
 		cmdval = 211250 * 16 / 1000; /* US channel 13 */
 		client->driver->command(client, VIDIOCSFREQ, &cmdval);
@@ -404,6 +413,7 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 			tl880dev->minbus = 3;
 			tl880dev->maxbus = 4;
 			break;
+		case TL880_CARD_MYHD_MDP130:
 		case TL880_CARD_MYHD_MDP120:
 		case TL880_CARD_MYHD_MDP110:
 			tl880dev->minbus = 0;

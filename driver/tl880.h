@@ -60,6 +60,7 @@
 #define PCI_SUBSYSTEM_VENDOR_ID_MIT		0x17a1
 #define PCI_SUBSYSTEM_DEVICE_ID_MYHD		0x0001
 #define PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP120	0x0120
+#define PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP130	0x0130
 
 #define PCI_SUBSYSTEM_VENDOR_ID_HAUPPAUGE	0x0070
 #define PCI_SUBSYSTEM_DEVICE_ID_WINTV_HD	0x4600
@@ -73,6 +74,7 @@
 
 #define TL880_CARD_WINTV_HD		0x10
 
+#define TL880_CARD_MYHD_MDP130		6
 #define TL880_CARD_MYHD_MDP120		5
 #define TL880_CARD_MYHD_MDP110		4
 #define TL880_CARD_MYHD_MDP100		3
@@ -134,6 +136,8 @@ struct tl880_dev {
 	struct tasklet_struct tasklet;		/* Tasklet for interrupt work */
 
 	unsigned char irq;			/* Interrupt line */
+
+	int elseint;				/* Do we share an interrupt? */
 
 	unsigned long int_mask;			/* Global interrupt enable mask */
 	unsigned long int_type;			/* Type of interrupt to service */
@@ -212,6 +216,7 @@ extern struct tl880_dev *tl880_list;
 /* tl880util.c */
 void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue);
 struct tl880_dev *find_tl880(unsigned long tl880_id);
+struct tl880_dev *find_tl880_pci(struct pci_dev *dev);
 
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);

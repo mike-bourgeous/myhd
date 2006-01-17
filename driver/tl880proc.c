@@ -14,7 +14,8 @@ static int tl880_proc_read(char *page, char **start, off_t offset, int count, in
 	printk(KERN_DEBUG "tl880: tl880_proc_read called with page=0x%08lx, offset=0x%08lx, count=%i\n",
 		(unsigned long)page, (unsigned long)offset, count);
 
-	sprintf(page, "");
+	/* sprintf(page, ""); */
+	page[0] = '\0';
 
 	while(tl880dev != NULL) {
 		printk(KERN_DEBUG "tl880: adding card %u to /proc/tl880\n", tl880dev->id);

@@ -32,4 +32,24 @@ struct tl880_dev *find_tl880(unsigned long tl880_id)
 	return list;
 }
 
+/* Find a tl880_dev by PCI device ID */
+struct tl880_dev *find_tl880_pci(struct pci_dev *dev)
+{
+	struct tl880_dev *list = tl880_list;
+
+	while(list) {
+		if(list->pcidev == dev) 
+			break;
+	}
+
+	/* Perhaps the pointer doesn't match, but the card is the same */
+	while(list) {
+		if(strcmp(list->pcidev->dev.bus_id, dev->dev.bus_id)) {
+			printk(KERN_DEBUG "tl880: found a match on second pass in find_tl880_pci\n");
+			break;
+		}
+	}
+
+	return list;
+}
 

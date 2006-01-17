@@ -164,7 +164,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				break;
 		}
 	} else if(tl880dev->card_type >= 3 /* TL880_CARD_MDP100 */ && tl880dev->card_type < 0x10 /* First Hauppauge */) {
-		if(tl880dev->card_type == TL880_CARD_MYHD_MDP120) {
+		if(tl880dev->card_type == TL880_CARD_MYHD_MDP120 || tl880dev->card_type == TL880_CARD_MYHD_MDP130) {
 			printk(KERN_WARNING "tl880: MDP120 GPIO not implemented, using MDP110B GPIO.  May not be correct.\n");
 		}
 		if(gpio_line > 9) {

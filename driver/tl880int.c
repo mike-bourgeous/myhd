@@ -177,6 +177,7 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 
 	printk(KERN_DEBUG "tl880: top half\n");
 
+	/* Store the current interrupt mask and type */
 	int_type = read_register(tl880dev, 0);
 	int_mask = read_register(tl880dev, 4);
 
@@ -185,7 +186,10 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 
 	/* If no bits in type and mask match, then the interrupt was for some other device */
 	if(!(int_type & int_mask)) {
-		printk(KERN_DEBUG "tl880: received someone else's interrupt\n");
+		if(tl880dev->elseint == 0) {
+			printk(KERN_DEBUG "tl880: receiving someone else's interrupt(s)\n");
+			tl880dev->elseint = 1;
+		}
 		write_register(tl880dev, 4, int_mask);
 		return IRQ_NONE;
 	}
