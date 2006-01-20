@@ -217,11 +217,6 @@ int main(int argc, char *argv[])
 	for(i = 0; i < 512; i += 4) {
 		int j = i * 2;
 
-		/* memspace[0x1d8000 + i + 0] = cursor[i + 3] & 0xf0; */
-		/* memspace[0x1d8000 + i + 1] = cursor[i + 2] & 0xf0; */
-		/* memspace[0x1d8000 + i + 2] = cursor[i + 1] & 0xf0; */
-		/* memspace[0x1d8000 + i + 3] = cursor[i + 0] & 0xf0; */
-
 		/* Pixels are packed two 4-bit pixels per byte, with each 4-byte set reversed */
 		memspace[0x1d8000 + i + 3] = ((cursor[j + 0] & 0xf) << 4) | (cursor[j + 1] & 0x0f);
 		memspace[0x1d8000 + i + 2] = ((cursor[j + 2] & 0xf) << 4) | (cursor[j + 3] & 0x0f);
@@ -264,8 +259,8 @@ int main(int argc, char *argv[])
 	write_register(0x10100, 0x1d8000);
 
 	printf("Setting cursor size\n");
-	write_regbits(0x10108, 9, 8, 0);
-	write_regbits(0x10108, 0x19, 0x18, 0);
+	write_regbits(0x10108, 9, 8, 2);
+	write_regbits(0x10108, 0x19, 0x18, 2);
 	write_regbits(0x10108, 7, 0, 0);
 	write_regbits(0x10108, 0x17, 0x10, 0);
 

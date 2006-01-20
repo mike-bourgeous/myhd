@@ -61,7 +61,7 @@ struct SOverlaySurface {
 	unsigned long field_0;
 	unsigned long field_4;
 	unsigned long field_8;	// OSD memory
-	unsigned long field_c;	// return value of getSDRAMoffset
+	unsigned long field_c;	// return value of getSDRAMoffset - location of image in card memory?
 	unsigned long field_10;
 	unsigned long field_14; // _SURFACE_DESC->field_4
 	unsigned long field_18; // _SURFACE_DESC->field_8

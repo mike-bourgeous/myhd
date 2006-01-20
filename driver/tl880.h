@@ -202,6 +202,11 @@ struct tl880_dev {
  */
 #define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned long *)
 
+/*
+ * Set cursor position IOCTL - cursor position is packed into unsigned long
+ * as two shorts - i.e. (x & 0xffff) | (y << 16)
+ */
+#define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, unsigned long *)
 
 
 #ifdef __KERNEL__

@@ -103,6 +103,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		return -ENODEV;
 	}
 
+	/*
 	printk(KERN_DEBUG "tl880: IOCTL is for ");
 	switch(iminor(inode) & FUNC_MASK) {
 		case 0:
@@ -119,7 +120,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			break;
 	}
 	printk("on card %u\n", tl880dev->id);
-		
+	*/
 
 	/* Verify the pointer is valid */
 	if(_IOC_DIR(cmd) & _IOC_READ) {
@@ -134,6 +135,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 	}
 	
 	switch (cmd) {
+		/* The do {} while(0); allows the use of very local variables */
 		case TL880IOCREADREG:
 			argl = (unsigned long *)arg;
 			__put_user(read_register(tl880dev, *argl), argl);
@@ -142,7 +144,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			do {
 				unsigned long wrprm[2];
 				argl = (unsigned long *)arg;
-				copy_from_user(wrprm, argl, 8);
+				copy_from_user(wrprm, argl, sizeof(unsigned long) * 2);
 				write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
@@ -150,8 +152,16 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			do {
 				unsigned long vipstate;
 				argl = (unsigned long *)arg;
-				copy_from_user(&vipstate, argl, 4);
+				copy_from_user(&vipstate, argl, sizeof(unsigned long));
 				tl880_set_vip(tl880dev, vipstate);
+			} while(0);
+			break;
+		case TL880IOCSETCURSORPOS:
+			do {
+				unsigned long cursorpos;
+				argl = (unsigned long *)arg;
+				copy_from_user(&cursorpos, argl, sizeof(unsigned long));
+				write_register(tl880dev, 0x10104, cursorpos);
 			} while(0);
 			break;
 		default:
@@ -180,23 +190,19 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 
 	inode = file->f_dentry->d_inode;
 
-	printk(KERN_DEBUG "tl880: mmap called for device (%u, %u), card number %u\n",
-		imajor(inode), iminor(inode), (iminor(inode) & DEV_MASK) / 4);
-
-	
 	/* Determine which card function is requested by minor number */
 	switch(iminor(inode) & FUNC_MASK) {
 		case 0:
-			printk(KERN_DEBUG "tl880: mmap: minor device specifies mem\n");
 			maptype = TL880_MEM;
+			break;
 		case 1:
-			printk(KERN_DEBUG "tl880: mmap: minor device specifies reg\n");
 			maptype = TL880_REG;
+			break;
 		case 2:
-			printk(KERN_DEBUG "tl880: mmap: minor device specifies unk\n");
 			maptype = TL880_UNK;
+			break;
 		default:
-			printk(KERN_WARNING "tl880: invalid minor number - no function exists for %u\n",
+			printk(KERN_WARNING "tl880: mmap: invalid minor number - no function exists for %u\n",
 				iminor(inode) & FUNC_MASK);
 			return -ENODEV;
 	}
@@ -274,12 +280,19 @@ static ssize_t tl880_write(struct file *file, const char *buf,
 
 static int tl880_open(struct inode *inode, struct file *file)
 {
-	/* dev_t i_rdev, struct cdev *i_cdev */
+	if(CHECK_NULL(inode) || CHECK_NULL(file)) {
+		printk(KERN_ERR "tl880: tl880_release given null parameters\n");
+		return 0;
+	}
+
+	/*
 	struct inode *char_inode = file->f_dentry->d_inode;
+
 	printk(KERN_DEBUG "tl880: tl880_open called for device %u, %u, card number %u\n",
 		imajor(char_inode), iminor(char_inode), (iminor(char_inode) & DEV_MASK) / 4);
 	printk(KERN_DEBUG "tl880: tl880_open (checking data) called for device %u, %u, card number %u\n",
 		imajor(inode), iminor(inode), (iminor(inode) & DEV_MASK) / 4);
+	*/
 
 	return 0;
 }
@@ -287,11 +300,18 @@ static int tl880_open(struct inode *inode, struct file *file)
 
 static int tl880_release(struct inode *inode, struct file *file)
 {
+	if(CHECK_NULL(inode) || CHECK_NULL(file)) {
+		printk(KERN_ERR "tl880: tl880_release given null parameters\n");
+		return 0;
+	}
+	
+	/*
 	struct inode *char_inode = file->f_dentry->d_inode;
 	printk(KERN_DEBUG "tl880: tl880_release called for device %u, %u, card number %u\n",
 		imajor(char_inode), iminor(char_inode), (iminor(char_inode) & DEV_MASK) / 4);
 	printk(KERN_DEBUG "tl880: tl880_release (checking data) called for device %u, %u, card number %u\n",
 		imajor(inode), iminor(inode), (iminor(inode) & DEV_MASK) / 4);
+	*/
 
 	return 0;
 }
