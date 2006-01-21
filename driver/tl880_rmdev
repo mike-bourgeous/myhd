@@ -1,0 +1,13 @@
+#!/bin/sh
+# Script for removing tl880 devices
+# (C) 2005 Mike Bourgeous
+
+rm_tldev() {
+	# remove nodes
+	rm -f /dev/${device}/* # /dev/${device}
+
+	return 0
+}
+
+rm_tldev
+

@@ -7,7 +7,7 @@ Replace osdmem stuff with a proven public domain malloc algorithm
 Use CHECK_NULL and CHECK_NULL_W more
 Clean up/organize debugging statements in general
 Interface to existing drivers for ancillary chips, incl. NXT2000
-
+Implement local i2c functions for controlling chips without an external driver
 
 
 

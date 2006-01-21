@@ -1,0 +1,43 @@
+#!/bin/sh
+# Script for making tl880 devices
+# (C) 2005 Mike Bourgeous
+
+mk_tldev() {
+	# Make sure the tl880 module is loaded
+	lsmod | grep tl880 > /dev/null && echo "tl880 loaded" || return -1
+	
+	# Determine whether video group is available
+	grep '^video:' /etc/group > /dev/null && group="video" || group="wheel"
+	
+	# Make sure tl880 directory exists
+	mkdir -p /dev/tl880
+	
+	# Get rid of old devices
+	rm -f /dev/tl880/*
+	
+	# Find major number of device
+	#major=`cat /proc/devices | awk "\\$2==\"$module\" {print \\$1}"`
+	major=`grep tl880 /proc/devices | cut -d ' ' -f 1`
+	echo "major: $major"
+	
+	# Find out how many cards are in the system
+	count=`wc -l /proc/tl880 | cut -d ' ' -f 1`
+	echo "count: $count"
+
+	# Create devices for all cards
+	while [ $count -ne 0 ] ; do
+		count=`expr $count - 1`
+		mknod /dev/tl880/mem$count c $major `expr $count \* 4 + 0`
+		mknod /dev/tl880/reg$count c $major `expr $count \* 4 + 1`
+		mknod /dev/tl880/unk$count c $major `expr $count \* 4 + 2`
+	done
+	
+	# Set ownership and permissions
+	chown :$group /dev/tl880/{mem,reg,unk}*
+	chmod 0660 /dev/tl880/{mem,reg,unk}*
+
+	return 0
+}
+
+mk_tldev
+
