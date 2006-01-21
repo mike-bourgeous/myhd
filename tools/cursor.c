@@ -259,8 +259,8 @@ int main(int argc, char *argv[])
 	write_register(0x10100, 0x1d8000);
 
 	printf("Setting cursor size\n");
-	write_regbits(0x10108, 9, 8, 2);
-	write_regbits(0x10108, 0x19, 0x18, 2);
+	write_regbits(0x10108, 9, 8, 4);
+	write_regbits(0x10108, 0x19, 0x18, 4);
 	write_regbits(0x10108, 7, 0, 0);
 	write_regbits(0x10108, 0x17, 0x10, 0);
 
@@ -275,12 +275,12 @@ int main(int argc, char *argv[])
 		for(x = 0; x < 0x300; x += 4) {
 			write_regbits(0x10104, 0xa, 0, x);
 			write_regbits(0x10104, 0x1a, 0x10, y + (x / 8));
-			usleep(1);
+			usleep(1000);
 		}
 		for(x = 0x300; x > 0; x -= 4) {
 			write_regbits(0x10104, 0xa, 0, x);
 			write_regbits(0x10104, 0x1a, 0x10, y + (0x300 / 8) + ((0x300 - x) / 8));
-			usleep(1);
+			usleep(1000);
 		}
 	}
 

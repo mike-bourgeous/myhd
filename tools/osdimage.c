@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
+#include <string.h>
 #include <time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -142,6 +144,39 @@ unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsig
 }
 
 
+void read_image(char *filename, unsigned char *memspace)
+{
+	FILE *image;
+	struct stat imgstat;
+	int size;
+	
+	if(!filename) {
+		fprintf(stderr, "read_image: NULL filename\n");
+		return;
+	}
+
+	if(!(image = fopen(filename, "rb"))) {
+		fprintf(stderr, "Unable to open %s for reading: %s\n", filename, strerror(errno));
+		return;
+	}
+
+	if(fstat(fileno(image), &imgstat)) {
+		fprintf(stderr, "Unable to stat file %s: %s\n", filename, strerror(errno));
+		fclose(image);
+		return;
+	}
+	
+	size = imgstat.st_size;
+
+	if(size > 0xd8000) {
+		size = 0xd8000;
+	}
+
+	fread(memspace, 1, size, image);
+
+	fclose(image);
+}
+
 
 int main(int argc, char *argv[])
 {
@@ -149,9 +184,9 @@ int main(int argc, char *argv[])
 	unsigned char *memspace;
 	unsigned long *lmspace;
 
-	if(argc != 1) {
-		printf("Draws a cursor on the TL880 screen\n");
-		printf("Usage: %s\n", argv[0]);
+	if(argc != 2) {
+		printf("Attempts to draw an imageon the TL880 OSD\n");
+		printf("Usage: %s raw_image\n", argv[0]);
 		return -1;
 	}
 
@@ -184,21 +219,11 @@ int main(int argc, char *argv[])
 	write_register(0x10084, 0x2d8000);
 	write_register(0x10094, 0x8000);
 
-	printf("Writing colorful data to memory\n");
-	for(i = 0x100000; i < 0x1d8000; i++) {
-		/*
-		if(memspace[i] % 4 == 0) {
-			memspace[i] = 0x7F;
-		} else {
-		*/
-			memspace[i] = (i % 1024) / 4;
-		/*
-		}
-		*/
-	}
+	printf("Writing image data to memory\n");
+	read_image(argv[1], memspace + 0x100000);
 
 	printf("Writing OSD parameters to memory\n");
-	lmspace[0x2d8000 / 4] = 0x1ff00002;
+	lmspace[0x2d8000 / 4] = 0x1ff00001;
 	lmspace[0x2d8004 / 4] = 0x00008000;
 	lmspace[0x2d8008 / 4] = 0x04100000;
 	lmspace[0x2d800c / 4] = 0x0c000000;

@@ -4,7 +4,8 @@
 	* Added memory dump tool.
 	* Added support for mapping any offset to tl880_mmap, to allow
 	  programs like xorg's mmapr and mmapw to access the card.
-	* Figured out some of the OSD stuff and wrote an OSD test tool.
+	* Figured out some of the OSD stuff and wrote OSD test tools.
+	* Added a top-level makefile.
 
 2006-01-19	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

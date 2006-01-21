@@ -74,7 +74,7 @@ third dword at location pointed to by 10084:
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|nnnnnnnn|nnnnnnnn|nnnnnnnn	Memory offset of image?
+	00000000|nnnnnnnn|nnnnnnnn|nnnnnnnn	Memory offset of image
 	0000nn00|00000000|00000000|00000000	Pixel format?
 
 fourth dword at location pointed to by 10084:
