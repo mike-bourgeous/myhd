@@ -72,6 +72,10 @@ osdtest
 	Tests the current knowledge of the TL880 OSD system by turning on the OSD
 	and pointing it at unknown data on the card.  It draws pretty collors.
 
+osdimage
+	Loads raw data from a file and displays it on the OSD.  This does not
+	actually display images (yet).  Give it a shot.
+
 rgb2ypbpr
 	Converts an RGB[A] value to an AYPbPr value for use with registers
 	10140-1017c (the cursor color palette).
@@ -87,6 +91,9 @@ dpc2rand.sh
 dpc2dump.sh
 	Dumps the current DPC2 register state to a shell script using
 	./iocwritereg.
+
+osd.sh
+	Runs osdtest followed by cursor.
 
 vim: tw=80
 
