@@ -62,10 +62,15 @@ striperam
 	Sets part of the TL880 memory to alternating pattern.
 
 cursor
-	Uploads and displays a simple cursor on the TL880 screen.
+	Uploads and displays a simple cursor on the TL880 screen, demonstrating
+	the TL880 chip's alpha blending abilities.
 
 randosd
 	Randomizes the OSD context registers.
+
+osdtest
+	Tests the current knowledge of the TL880 OSD system by turning on the OSD
+	and pointing it at unknown data on the card.  It draws pretty collors.
 
 rgb2ypbpr
 	Converts an RGB[A] value to an AYPbPr value for use with registers

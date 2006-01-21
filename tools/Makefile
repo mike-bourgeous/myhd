@@ -21,11 +21,12 @@ all:
 	gcc -O2 -Wall ioccursor.c -o ioccursor -ggdb3 -I../driver/
 	
 	gcc -O2 -Wall randosd.c -o randosd -ggdb3 -I../driver/
+	gcc -O2 -Wall osdtest.c -o osdtest -ggdb3 -I../driver/
 	
 	chmod +x testdpcint.sh dpc2dump.sh dpc2rand.sh
 
 clean:
 	rm -f randram regload regdump readreg setbits write4reg \
 	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
-	striperam
+	striperam ioccursor randosd osdtest memdump
 

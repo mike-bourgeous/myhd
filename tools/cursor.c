@@ -238,21 +238,21 @@ int main(int argc, char *argv[])
 	}
 	*/
 	write_register(0x10140, rgb2ypbpr(0, 0, 0, 0));
-	write_register(0x10144, rgb2ypbpr(0, 0, 255, 255));
-	write_register(0x10148, rgb2ypbpr(0, 128, 0, 255));
-	write_register(0x1014c, rgb2ypbpr(0, 128, 255, 255));
-	write_register(0x10150, rgb2ypbpr(0, 255, 0, 255));
-	write_register(0x10154, rgb2ypbpr(0, 255, 255, 255));
-	write_register(0x10158, rgb2ypbpr(127, 0, 0, 255));
-	write_register(0x1015c, rgb2ypbpr(127, 0, 255, 255));
-	write_register(0x10160, rgb2ypbpr(127, 128, 0, 255));
-	write_register(0x10164, rgb2ypbpr(127, 128, 255, 255));
-	write_register(0x10168, rgb2ypbpr(127, 255, 0, 255));
-	write_register(0x1016c, rgb2ypbpr(127, 255, 255, 255));
-	write_register(0x10170, rgb2ypbpr(255, 0, 0, 255));
-	write_register(0x10174, rgb2ypbpr(255, 0, 255, 255));
-	write_register(0x10178, rgb2ypbpr(255, 128, 0, 255));
-	write_register(0x1017c, rgb2ypbpr(255, 255, 255, 2255));
+	write_register(0x10144, rgb2ypbpr(0, 0, 255, 96));
+	write_register(0x10148, rgb2ypbpr(0, 128, 0, 96));
+	write_register(0x1014c, rgb2ypbpr(0, 128, 255, 96));
+	write_register(0x10150, rgb2ypbpr(0, 255, 0, 96));
+	write_register(0x10154, rgb2ypbpr(0, 255, 255, 96));
+	write_register(0x10158, rgb2ypbpr(96, 0, 0, 96));
+	write_register(0x1015c, rgb2ypbpr(127, 0, 255, 127));
+	write_register(0x10160, rgb2ypbpr(127, 128, 0, 127));
+	write_register(0x10164, rgb2ypbpr(127, 128, 255, 127));
+	write_register(0x10168, rgb2ypbpr(127, 255, 0, 127));
+	write_register(0x1016c, rgb2ypbpr(127, 255, 255, 127));
+	write_register(0x10170, rgb2ypbpr(255, 0, 0, 160));
+	write_register(0x10174, rgb2ypbpr(255, 0, 255, 160));
+	write_register(0x10178, rgb2ypbpr(255, 128, 0, 160));
+	write_register(0x1017c, rgb2ypbpr(255, 255, 255, 160));
 
 
 	printf("Setting cursor memory offset\n");
@@ -299,6 +299,22 @@ int main(int argc, char *argv[])
 		printf("%i\r", j);
 		usleep(500000);
 	}
+
+	printf("Cycling cursor alpha\n");
+	for(i = 0; i < 5; i++) {
+		for(j = 0; j < 256; j++) {
+			write_register(0x1017c, rgb2ypbpr(255, 255, 255, j));
+			usleep(1000);
+		}
+		for(j = 255; j >= 0; j--) {
+			write_register(0x1017c, rgb2ypbpr(255, 255, 255, j));
+			usleep(1000);
+		}
+	}
+
+
+	write_register(0x1017c, rgb2ypbpr(255, 255, 255, 160));
+
 
 
 	printf("Unmapping memory space\n");

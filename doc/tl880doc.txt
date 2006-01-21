@@ -16,6 +16,80 @@ TL880 Memory
 The first 0x186000 bytes (1.5MB+24KB) of the memory region seem to be TL850Memory.
 The next 0x1000000 bytes (16MB) seem to be OSD memory.
 
+OSD Memory:
+
+	Register 10084 contains a 16-byte aligned offset in card memory.
+When that offset contains appropriate data, the OSD is displayed.  See
+registers 10080 to 100ac for more details on OSD registers.
+
+value of register 1008c and first dword at location pointed to by 10084:
+   (seems to store properties of the OSD source image - width, etc.)
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|000000nn|nnnnnnnn	Seems to control source image
+						height or possibly pitch.  Or,
+						this could be a bitfield for
+						turning on/off various
+						overlays?  Try playing with
+						each hex digit.
+	00000000|0000nnnn|nnnn0000|00000000	Seems to control the width of
+						the displayed image - lower
+						values crop the right part of
+						the OSD image.  0x80 seems to
+						be the full width of the
+						screen, but this changes -
+						possibly based on a scaling
+						bit in another field.
+	00nnnnnn|nnnn0000|00000000|00000000	Seems to control the height of
+						the displayed image - lower
+						values crop the bottom part of
+						the OSD image.  0x200 seems to
+						be the full height of the
+						screen.  Perhaps these values
+						come from some other spot in
+						the display list.
+
+		   
+second dword at location pointed to by 10084:
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn	Values of 4, 8, and c seem to
+						shift the source image.
+	00000000|00000000|0nnnnnnn|nnnn0000	Shifts the destination image
+						horizontally by n pixels -
+						lowest bit is ignored, so only
+						multiples of two pixes have
+						any effect.
+	0000nnnn|nnnnnnnn|00000000|00000000	Shifts the destination image
+						vertically by n pixels.
+	
+third dword at location pointed to by 10084:
+   Seems to control the location and/or parameters of the source image,
+   including pixel format.
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|nnnnnnnn|nnnnnnnn|nnnnnnnn	Memory offset of image?
+	0000nn00|00000000|00000000|00000000	Pixel format?
+
+fourth dword at location pointed to by 10084:
+   Seems to control other source image parameters, including width scaling
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	0000nn00|00000000|00000000|00000000	Scaling factor?  Sometimes
+						this must be set to a non-zero
+						value to display an image on
+						the OSD.  This is confusing.
+						I like to set it to 01 binary.
+
+
 
 TL880 Registers
 ---------------
@@ -533,9 +607,19 @@ registers 10080 to 100AC are the OSD context
 register 10080 changes palettes(?)
 register 10084 changes OSD image(?) - something like "sdram offset" - used in
 	overlay display lists - written with return value of getSDRAMoffset in
-	in showOverlays
+	in showOverlays - card ignores lowest four bits
+
+registers 1008c and 10090 seem to take turns being zero and some value
+	example: 1008c = eb848609 when 10090 = 0,
+		 1008c = 0 when 10090 = 014e0882
+		 when eb848609 is stored in bigendian format at the
+		 offset in card memory pointed to by register 10084
+		 writing to that offset causes the displayed osd image
+		 to stretch or shrink
+		 
 
 10094 used in showOverlays
+	some bits seem to affect the brightness of the overlay
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210

@@ -181,6 +181,7 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 	struct tl880_dev *tl880dev;
 	struct inode *inode;
 	enum { TL880_MEM, TL880_REG, TL880_UNK } maptype;
+	unsigned long offset;
 
 
 	/* Make sure all the expected data is present */
@@ -189,6 +190,7 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 	}
 
 	inode = file->f_dentry->d_inode;
+	offset = vma->vm_pgoff << PAGE_SHIFT;
 
 	/* Determine which card function is requested by minor number */
 	switch(iminor(inode) & FUNC_MASK) {
@@ -209,8 +211,11 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 
 	/* Only allow mapping at the beginning of the file */
 	if(vma->vm_pgoff) {
+	/*
 		printk(KERN_WARNING "tl880: only map at start of file (not 0x%08lx)\n", vma->vm_pgoff << PAGE_SHIFT);
 		return -EINVAL;
+	*/
+		printk(KERN_DEBUG "tl880: mapping at offset 0x%08lx\n", offset);
 	}
 
 	tl880dev = find_tl880(iminor(inode) / 4);
@@ -225,16 +230,16 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 			/* Won't happen */
 			printk(KERN_WARNING "tl880: maptype invalid in tl880_mmap - defaulting to mem\n");
 		case TL880_MEM:
-			start = tl880dev->memphys & PAGE_MASK;
-			length = PAGE_ALIGN((tl880dev->memphys & ~PAGE_MASK) + tl880dev->memlen);
+			start = (tl880dev->memphys & PAGE_MASK) + offset;
+			length = PAGE_ALIGN((tl880dev->memphys & ~PAGE_MASK) + tl880dev->memlen - offset);
 			break;
 		case TL880_REG:
-			start = tl880dev->regphys & PAGE_MASK;
-			length = PAGE_ALIGN((tl880dev->regphys & ~PAGE_MASK) + tl880dev->reglen);
+			start = (tl880dev->regphys & PAGE_MASK) + offset;
+			length = PAGE_ALIGN((tl880dev->regphys & ~PAGE_MASK) + tl880dev->reglen - offset);
 			break;
 		case TL880_UNK:
-			start = tl880dev->unkphys & PAGE_MASK;
-			length = PAGE_ALIGN((tl880dev->unkphys & ~PAGE_MASK) + tl880dev->unklen);
+			start = (tl880dev->unkphys & PAGE_MASK) + offset;
+			length = PAGE_ALIGN((tl880dev->unkphys & ~PAGE_MASK) + tl880dev->unklen - offset);
 			break;
 	}
 

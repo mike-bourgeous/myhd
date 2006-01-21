@@ -31,7 +31,14 @@ int main(int argc, char *argv[])
 
 	printf("Writing stripe values\n");
 	for(i = 0; i < 0x800000; i++) {
+		/*
 		memspace[i] = (i % 2) * 0xf0;
+		*/
+		if(memspace[i] % 4 == 0) {
+			memspace[i] = 0x7F;
+		} else {
+			memspace[i] = i % 256;
+		}
 	}
 
 	fprintf(stderr, "\n");
