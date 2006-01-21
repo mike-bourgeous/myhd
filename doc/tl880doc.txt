@@ -528,11 +528,12 @@ DPC 10000-10200
 
 10070 used at end of DoProgressiveFrame
 
-register 10080 to 100AC are the OSD context
+registers 10080 to 100AC are the OSD context
 
 register 10080 changes palettes(?)
 register 10084 changes OSD image(?) - something like "sdram offset" - used in
-	overlay display lists
+	overlay display lists - written with return value of getSDRAMoffset in
+	in showOverlays
 
 10094 used in showOverlays
 
@@ -652,6 +653,8 @@ register	sync value	dump value
 
 10198 used in GPIO, I2C, cNxtVSB::NxtCheckChannel
 
+bit 0x13 is set to zero then one to reset the Nxt2000 in NxtCheckChannel
+
 
 	         MyHD MDP-110 GPIO
 		 -----------------
@@ -677,7 +680,7 @@ SetGPIO used in (MyHD):
 	cJanus::BoardInitialize (line 0 and line 6, line 5)
 	JanusProperty::SetProperty (line 2)
 	cJanus::SetVIP (line 4, line 3)
-	cNxtVSB::NxtCheckChannel (line 0)
+	cNxtVSB::NxtCheckChannel (line 0) - "Resetting Chips" - 0 then 1
 
 ReadGPIO used in (MyHD):
 	JanusPropety::GetProperty (line 2)

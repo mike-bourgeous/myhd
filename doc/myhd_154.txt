@@ -55,6 +55,8 @@ In win2k card registers usually mapped to baab7000
 cJanus class layout:
 Use "e gpJanus+offset" to edit the cJanus class in SoftICE
 
+Note: __thiscall functions have the this pointer in ecx.
+
 cJanus+0 may be a struct tagContext?
 
 cJanus+0b9c may be _last_p_picture_cnt
@@ -123,7 +125,7 @@ dword[0284] == 0 then don't run VpipHandler
 dword[034c] may be field order for non-DVD playback
 dword[0350] may be repeat_first_field flag
 dword[0370-037c] have something to do with caption buffers
-dword[0ba8] may be display aspect ratio
+dword[0ba8] may be display aspect ratio - is tagContext an array?
 dword[0bb0] may be current field
 
 
@@ -172,7 +174,7 @@ OSD FUNCTIONS
 		
 .text:000313a2 OSDProperty::GetProperty(struct _HW_STREAM_REQUEST_BLOCK *)
 .text:00031472 OSDProperty::SetProperty(struct _HW_STREAM_REQUEST_BLOCK *)
-.text:0003192a OSDProperty::NumProperties() - returns 0x15
+.text:0003192a OSDProperty::NumProperties() - returns 0x15 (21)
 .text:0003192e OSDProperty::PropertyList - returns KSPROPERTY_ITEM
 		*OSDProperty::m_OSDPropItm (.text:00012d50)
 .text:00031934 WriteOSDBlock(ulong, uchar*, ulong, ulong, ulong, int)
@@ -181,6 +183,11 @@ OSD FUNCTIONS
 .text:0003a474 allocateOSDMemory_Aligned(ulong, enum EALIGN) - Gets OSD memory on card and adds an entry to a linked list
 .text:0003a5e4 getSDRAMoffset(ulong) - searches memory linked list for given address and returns card RAM offset of entry
 .text:0003a596 deallocateOSDMemory(ulong)
+
+.text:0003aaac composeDLEntry(SOverlaySurface * const, void * const, int)
+.text:0003ab88 showOverlays(int)
+.text:0003ac78 installDisplayList(void)
+
 
 
 cJanus Functions

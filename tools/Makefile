@@ -3,6 +3,7 @@ all:
 	gcc -O2 -Wall striperam.c -o striperam -ggdb3
 	gcc -O2 -Wall regload.c -o regload -ggdb3
 	gcc -O2 -Wall regdump.c -o regdump -ggdb3
+	gcc -O2 -Wall memdump.c -o memdump -ggdb3
 	
 	gcc -O2 -Wall readreg.c -o readreg -ggdb3
 	gcc -O2 -Wall writereg.c -o writereg -ggdb3
@@ -18,6 +19,8 @@ all:
 	gcc -O2 -Wall rgb2ypbpr.c -o rgb2ypbpr -ggdb3
 	
 	gcc -O2 -Wall ioccursor.c -o ioccursor -ggdb3 -I../driver/
+	
+	gcc -O2 -Wall randosd.c -o randosd -ggdb3 -I../driver/
 	
 	chmod +x testdpcint.sh dpc2dump.sh dpc2rand.sh
 

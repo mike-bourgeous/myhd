@@ -22,6 +22,9 @@ regdump
 	register space is either unused or redundant; hexdump can be used to
 	filter out the redundant areas and produce an ascii file for human
 	consumption.
+
+memdump
+	Dumps the 16MB memory region of the TL880 to a file.
 	
 readreg
 	Reads the value of a register and prints it to stdout.  Parameter is in
@@ -60,6 +63,9 @@ striperam
 
 cursor
 	Uploads and displays a simple cursor on the TL880 screen.
+
+randosd
+	Randomizes the OSD context registers.
 
 rgb2ypbpr
 	Converts an RGB[A] value to an AYPbPr value for use with registers
