@@ -170,10 +170,18 @@ void __init tl880_bh(unsigned long tl880_id)
 	write_register(tl880dev, 4, tl880dev->int_mask);
 }
 
+
+/* Interrupt handler */
 irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 {
-	struct tl880_dev *tl880dev = (struct tl880_dev*)dev_id;
+	struct tl880_dev *tl880dev;
 	unsigned long int_type, int_mask;
+
+	if(CHECK_NULL(dev_id)) {
+		return IRQ_NONE;
+	}
+
+	tl880dev = (struct tl880_dev *)dev_id;
 
 	/* Store the current interrupt mask and type */
 	int_type = read_register(tl880dev, 0);
@@ -188,7 +196,7 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 			printk(KERN_DEBUG "tl880: receiving someone else's interrupt(s)\n");
 			tl880dev->elseint = 1;
 		}
-		write_register(tl880dev, 4, int_mask);
+		/* write_register(tl880dev, 4, int_mask); */
 		return IRQ_NONE;
 	}
 

@@ -145,7 +145,7 @@ unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsig
 
 int main(int argc, char *argv[])
 {
-	int memfd, i;
+	int memfd, i, j;
 	unsigned char *memspace;
 	unsigned long *lmspace;
 
@@ -179,28 +179,49 @@ int main(int argc, char *argv[])
 		write_register(i, 0x0);
 	}
 
+	printf("Turning on OSD\n");
+	write_regbits(0x10000, 2, 2, 1);
+
 	printf("Setting OSD memory offset and other OSD parameters\n");
 	write_register(0x10080, 0x0);
 	write_register(0x10084, 0x2d8000);
 	write_register(0x10094, 0x8000);
 
 	printf("Writing colorful data to memory\n");
-	for(i = 0x100000; i < 0x1d8000; i++) {
+	for(i = 0x000000; i < 0x1d8000; i += 0x2000) {
 		/*
 		if(memspace[i] % 4 == 0) {
 			memspace[i] = 0x7F;
 		} else {
 		*/
-			memspace[i] = (i % 1024) / 4;
+			/* memspace[i] = (i % 1024) / 4; */
 		/*
 		}
 		*/
+		/*
+		memspace[i] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF000000) >> 24;
+		memspace[i + 1] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF0000) >> 16;
+		memspace[i + 2] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF00) >> 8;
+		memspace[i + 3] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF);
+		*/
+		for(j = 0; j < 0x1000; j += 4) {
+			/*
+			lmspace[(i + j) / 4] = rgb2ypbpr(128, 0, 255, 255);
+			*/
+			lmspace[(i + j) / 4] = 0xff7000ff;
+		}
+		for(j = 0x1000; j < 0x2000; j += 4) {
+			/*
+			lmspace[(i + j) / 4] = rgb2ypbpr(0, 0, 0, 255);
+			*/
+			lmspace[(i + j) / 4] = 0x7f00ffff;
+		}
 	}
 
 	printf("Writing OSD parameters to memory\n");
-	lmspace[0x2d8000 / 4] = 0x1ff00002;
+	lmspace[0x2d8000 / 4] = 0x1ff00001;
 	lmspace[0x2d8004 / 4] = 0x00008000;
-	lmspace[0x2d8008 / 4] = 0x04100000;
+	lmspace[0x2d8008 / 4] = 0x00100000;
 	lmspace[0x2d800c / 4] = 0x0c000000;
 	
 

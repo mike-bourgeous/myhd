@@ -524,6 +524,7 @@ static struct tl880_dev *tl880_create_dev(void)
 	return tl880dev;
 }
 
+/* Free the memory used by a tl880_dev struct */
 static void tl880_delete_dev(struct tl880_dev *tl880dev)
 {
 	/* Make sure the driver is really loaded */
@@ -534,6 +535,12 @@ static void tl880_delete_dev(struct tl880_dev *tl880dev)
 
 	/* Free the device information structure */
 	kfree(tl880dev);
+}
+
+/* Dummy interrupt handler */
+static irqreturn_t __init tl880_irq_noop(int irq, void *dev_id, struct pt_regs *regs)
+{
+	return IRQ_HANDLED;
 }
 
 /* Set up data specific to each TL880 card in the system */
@@ -556,6 +563,15 @@ static int tl880_configure(struct pci_dev *dev)
 		printk(KERN_ERR "tl880: could not create tl880 device struct; out of memory\n");
 		return -ENOMEM;
 	}
+
+	/* Initialize housekeeping values */
+	tl880dev->pcidev = dev;
+	tl880dev->id = n_tl880s;
+	tl880dev->subsys_vendor_id = dev->subsystem_vendor;
+	tl880dev->subsys_device_id = dev->subsystem_device;
+
+	/* Enable bus master setting (just in case?) */
+	pci_set_master(dev);
 	
 	/* Verify 32-bit DMA */
 	if((result = pci_set_dma_mask(dev, 0xffffffff))) {
@@ -564,26 +580,6 @@ static int tl880_configure(struct pci_dev *dev)
 		return result;
 	}
 
-	/* Get IRQ number and set IRQ handler */
-	tl880dev->irq = dev->irq;
-
-	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
-		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
-	}
-
-	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
-	if((result = request_irq(dev->irq, tl880_irq, SA_SHIRQ, "tl880", tl880dev)) < 0) {
-		printk(KERN_ERR "tl880: could not set irq handler for irq %i\n", dev->irq);
-		tl880_delete_dev(tl880dev);
-		return result;
-	}
-
-	/* Initialize housekeeping values */
-	tl880dev->pcidev = dev;
-	tl880dev->id = n_tl880s;
-	tl880dev->subsys_vendor_id = dev->subsystem_vendor;
-	tl880dev->subsys_device_id = dev->subsystem_device;
-
 	/* Map and store memory region (bar0) */
 	tl880dev->memspace = ioremap(pci_resource_start(dev, 0), pci_resource_len(dev, 0));
 	tl880dev->memphys = pci_resource_start(dev, 0);
@@ -591,6 +587,7 @@ static int tl880_configure(struct pci_dev *dev)
 	if(!tl880dev->memlen) {
 		printk(KERN_ERR "tl880: card %i mem has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
+		tl880_delete_dev(tl880dev);
 		return -ENODEV;
 	}
 
@@ -601,6 +598,7 @@ static int tl880_configure(struct pci_dev *dev)
 	if(!tl880dev->reglen) {
 		printk(KERN_ERR "tl880: card %i register space has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
+		tl880_delete_dev(tl880dev);
 		return -ENODEV;
 	}
 
@@ -611,6 +609,7 @@ static int tl880_configure(struct pci_dev *dev)
 	if(!tl880dev->unklen) {
 		printk(KERN_ERR "tl880: Card %i unknown space has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
+		tl880_delete_dev(tl880dev);
 		return -ENODEV;
 	}
 
@@ -639,10 +638,34 @@ static int tl880_configure(struct pci_dev *dev)
 			tl_major, tl880dev->minor);
 	}
 
+	/* Get IRQ number and set IRQ handler */
+	tl880dev->irq = dev->irq;
+
+	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
+		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
+	}
+
 	/* Disable interrupts, detect specific card revision, init card */
 	tl880_disable_interrupts(tl880dev);
 	tl880_detect_card(tl880dev);
 	tl880_init_dev(tl880dev);
+
+	/* Store driver handle in pci_dev struct */
+	pci_set_drvdata(tl880dev->pcidev, tl880dev);
+	
+	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
+
+	printk(KERN_DEBUG "tl880: calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+		tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev);
+	/*
+	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev)) < 0) {
+	*/
+	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT, "tl880", NULL)) != 0) {
+		printk(KERN_ERR "tl880: could not set irq handler for irq %i\n", tl880dev->pcidev->irq);
+		tl880_unconfigure(tl880dev);
+		tl880_delete_dev(tl880dev);
+		return result;
+	}
 
 	if(list) {
 		/* Look for the end of the linked list */
@@ -682,7 +705,10 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 
 	tl880_deinit_i2c(tl880dev);
 
+	/*
 	free_irq(tl880dev->pcidev->irq, tl880dev);
+	*/
+	free_irq(tl880dev->pcidev->irq, NULL);
 
 	/* Kill the tasklet */
 	tasklet_kill(&tl880dev->tasklet);
@@ -709,8 +735,9 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 	}
 
 	/* Inform the kernel that this device is no longer in use */
-	pci_dev_put(tl880dev->pcidev);
+	/* pci_dev_put(tl880dev->pcidev);
 	tl880dev->pcidev = NULL;
+	*/
 
 	/* Return the next card in the linked list and free this one */
 	next = tl880dev->next;

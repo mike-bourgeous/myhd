@@ -1,3 +1,8 @@
+2006-01-25	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Rearranged a few initialization tasks in tl880kern.c.
+	* Started trying to fix interrupts.
+
 2006-01-21	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added OSD register randomization tool.

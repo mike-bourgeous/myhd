@@ -34,11 +34,14 @@ int main(int argc, char *argv[])
 		/*
 		memspace[i] = (i % 2) * 0xf0;
 		*/
+		/*
 		if(memspace[i] % 4 == 0) {
 			memspace[i] = 0x7F;
 		} else {
-			memspace[i] = i % 256;
+			memspace[i] = (i % 512) / 2;
 		}
+		*/
+		memspace[i] = (i % 4) * 0xff;
 	}
 
 	fprintf(stderr, "\n");

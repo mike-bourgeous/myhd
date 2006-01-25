@@ -83,7 +83,7 @@ rgb2ypbpr
 testdpcint.sh
 	Enables video output and activates DPC interrupts to test the DPC
 	interrupt handler.  You need to compile all the other tools first to use
-	this script.
+	this script.  NOTE: BROKEN IN THIS RELEASE.
 
 dpc2rand.sh
 	Randomizes the DPC2 registers (see tl880doc.txt).
@@ -93,7 +93,7 @@ dpc2dump.sh
 	./iocwritereg.
 
 osd.sh
-	Runs osdtest followed by cursor.
+	Turns on the display, then runs osdtest followed by cursor.
 
 vim: tw=80
 
