@@ -1,3 +1,9 @@
+2006-01-26	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Changed tl880init.c and tl880i2c.c to apply MyHD MDP-110
+	  initialization methods to all MyHD cards until more is known about
+	  the higher end cards (i.e. MDP-120 and MDP-130).
+
 2006-01-25	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Rearranged a few initialization tasks in tl880kern.c.

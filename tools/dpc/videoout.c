@@ -93,6 +93,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
+	write_register(0x10000, 0x80);
+	
 	write_regbits(0x10190, 0xa, 0xa, output_enable);
 	write_regbits(0x10194, 0xa, 0xa, output_enable);
 	write_regbits(0x10198, 0xa, 0xa, output_enable);

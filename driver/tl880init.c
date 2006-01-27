@@ -23,6 +23,7 @@ static void tl880_init_sdram(struct tl880_dev *tl880dev)
 			write_register(tl880dev, 0x28000, wintvhd);
 			break;
 		/* MIT Inc. */
+		case TL880_CARD_MYHD_MDP130:
 		case TL880_CARD_MYHD_MDP120:
 		case TL880_CARD_MYHD_MDP110:
 		case TL880_CARD_MYHD_MDP100:
@@ -174,7 +175,7 @@ void tl880_init_chip(struct tl880_dev *tl880dev)
  */
 void tl880_init_myhd(struct tl880_dev *tl880dev)
 {
-	if(tl880dev->card_type == TL880_CARD_MYHD_MDP110) {
+	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		write_regbits(tl880dev, 0x10194, 0x17, 0, 0xeff00);
 	} else if(tl880dev->card_type == TL880_CARD_MYHD_MDP100) {
 		write_regbits(tl880dev, 0x10194, 0xf, 0x8, 0xff);
@@ -184,14 +185,14 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	write_regbits(tl880dev, 0x10190, 0x1b, 0x1a, 3);
 	write_regbits(tl880dev, 0x10194, 0x1b, 0x1a, 0);
 	write_regbits(tl880dev, 0x10198, 0x1b, 0x1a, 0);
-	if(tl880dev->card_type == TL880_CARD_MYHD_MDP110) {
+	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		write_regbits(tl880dev, 0x10198, 0x17, 0x16, 0);
 		write_regbits(tl880dev, 0x10198, 0x10, 0x10, 0);
 		write_regbits(tl880dev, 0x10198, 0x13, 0x11, 3);
 	}
 	tl880_set_gpio(tl880dev, 0, 1);
 	tl880_set_gpio(tl880dev, 6, 1);
-	if(tl880dev->card_type == TL880_CARD_MYHD_MDP110) {
+	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		write_regbits(tl880dev, 0x10198, 0x13, 0x13, 1);
 	}
 

@@ -396,6 +396,9 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 			tl880dev->maxbus = 0;
 			break;
 		case TL880_CARD_MYHD_MDP130:
+			tl880dev->minbus = 0;
+			tl880dev->maxbus = 5;
+			break;
 		case TL880_CARD_MYHD_MDP110:
 			tl880dev->minbus = 0;
 			tl880dev->maxbus = 2;

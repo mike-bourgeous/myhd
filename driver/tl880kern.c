@@ -638,13 +638,6 @@ static int tl880_configure(struct pci_dev *dev)
 			tl_major, tl880dev->minor);
 	}
 
-	/* Get IRQ number and set IRQ handler */
-	tl880dev->irq = dev->irq;
-
-	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
-		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
-	}
-
 	/* Disable interrupts, detect specific card revision, init card */
 	tl880_disable_interrupts(tl880dev);
 	tl880_detect_card(tl880dev);
@@ -653,19 +646,28 @@ static int tl880_configure(struct pci_dev *dev)
 	/* Store driver handle in pci_dev struct */
 	pci_set_drvdata(tl880dev->pcidev, tl880dev);
 	
+
+	/* Get IRQ number and set IRQ handler */
+	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
+		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
+	}
+
 	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
 
-	printk(KERN_DEBUG "tl880: calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+	printk(KERN_DEBUG "tl880: NOT calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
 		tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev);
 	/*
 	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev)) < 0) {
 	*/
-	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT, "tl880", NULL)) != 0) {
+	/*
+	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT | SA_SHIRQ, "tl880", NULL)) != 0) {
 		printk(KERN_ERR "tl880: could not set irq handler for irq %i\n", tl880dev->pcidev->irq);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return result;
 	}
+	tl880dev->irq = dev->irq;
+	*/
 
 	if(list) {
 		/* Look for the end of the linked list */
@@ -705,10 +707,15 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 
 	tl880_deinit_i2c(tl880dev);
 
-	/*
-	free_irq(tl880dev->pcidev->irq, tl880dev);
-	*/
-	free_irq(tl880dev->pcidev->irq, NULL);
+	if(tl880dev->irq) {
+		/*
+		free_irq(tl880dev->pcidev->irq, tl880dev);
+		*/
+		/*
+		free_irq(tl880dev->pcidev->irq, NULL);
+		*/
+		tl880dev->irq = 0;
+	}
 
 	/* Kill the tasklet */
 	tasklet_kill(&tl880dev->tasklet);
