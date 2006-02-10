@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 
 	printf("Mapping memory space\n");
 	if(!(memspace = mmap(0, 0x01000000, PROT_READ | PROT_WRITE, MAP_SHARED, ifdr, 0))) {
-		perror("Failed to mmap memion 0 (mem)");
+		perror("Failed to mmap card memory");
 		close(ifdr);
 		return -1;
 	}

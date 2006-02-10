@@ -223,13 +223,13 @@ int main(int argc, char *argv[])
 	write_register(0x10094, 0x8000);
 
 	printf("Writing image data to memory\n");
-	read_image(argv[1], memspace + 0x100000);
+	read_image(argv[1], memspace + 0x218000);
 
 	printf("Writing OSD parameters to memory\n");
-	lmspace[0x2d8000 / 4] = 0x1ff00001;
-	lmspace[0x2d8004 / 4] = 0x00008000;
-	lmspace[0x2d8008 / 4] = 0x04100000;
-	lmspace[0x2d800c / 4] = 0x0c000000;
+	lmspace[0x2d8000 / 4] = 0x2d97000c;
+	lmspace[0x2d8004 / 4] = 0x70640e00;
+	lmspace[0x2d8008 / 4] = 0xb0218000;
+	lmspace[0x2d800c / 4] = 0x160025c5;
 	
 
 	printf("Unmapping memory space\n");

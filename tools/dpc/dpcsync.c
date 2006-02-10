@@ -631,6 +631,12 @@ int main(int argc, char *argv[])
 	*/
 	set_sync_1024x768p();
 	set_aux_1024x768p(1920, 1080, 1);
+
+	/* 1920x1080i doesn't work (yet) */
+	/*
+	set_sync_1920x1080i();
+	set_aux_1920x1080i(1920, 1080, 1);
+	*/
 	write_register(0x10000, 0x132);
 	write_regbits(0x10190, 0xa, 0xa, 1);
 	write_regbits(0x10194, 0xa, 0xa, 1);

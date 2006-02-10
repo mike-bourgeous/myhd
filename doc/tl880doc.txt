@@ -58,11 +58,19 @@ second dword at location pointed to by 10084:
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|0000nnnn	Values of 4, 8, and c seem to
-						shift the source image.
+						shift the source image.  When
+						testing with data from the
+						MyHD Windows driver, this
+						adjusts the "phase" of the
+						source image (0 is normal,
+						values up to f progressively
+						place part of the left side of
+						the image on the right side of
+						the screen).
 	00000000|00000000|0nnnnnnn|nnnn0000	Shifts the destination image
 						horizontally by n pixels -
 						lowest bit is ignored, so only
-						multiples of two pixes have
+						multiples of two pixels have
 						any effect.
 	0000nnnn|nnnnnnnn|00000000|00000000	Shifts the destination image
 						vertically by n pixels.
@@ -83,11 +91,22 @@ fourth dword at location pointed to by 10084:
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	0000nn00|00000000|00000000|00000000	Scaling factor?  Sometimes
+	00000000|00000000|00000000|0000nnnn	Palette location - multiplied
+						by 256 to get memory offset
+						(i.e. 25c5 becomes 25c500)
+	0000nn00|00000000|00000000|00000000	Horizontal scaling.  Sometimes
 						this must be set to a non-zero
 						value to display an image on
 						the OSD.  This is confusing.
-						I like to set it to 01 binary.
+						I like to set it to 01 binary
+						(hex digit 4).  The standard
+						value in the driver is 4.  If
+						this is set to 11 (hex digit
+						c), the OSD image is cropped.
+	00nn0000|00000000|00000000|00000000	Vertical scaling.  A value of
+						1 produces a normal image.
+						The standard value in the
+						driver is 1 (hex digit 1).
 
 
 

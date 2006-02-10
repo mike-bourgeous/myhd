@@ -25,6 +25,15 @@ regdump
 
 memdump
 	Dumps the 16MB memory region of the TL880 to a file.
+
+memload
+	Loads all or part of the TL880's 16MB memory region from a file.
+
+readmem
+	Reads a 4-byte value from TL880 memory.
+
+writemem
+	Writes a 4-byte value to TL880 memory.
 	
 readreg
 	Reads the value of a register and prints it to stdout.  Parameter is in
@@ -56,7 +65,7 @@ iocwritereg
 	dereference.  The ioctl() interface will be preferred in the future.
 	
 randram
-	Randomizes part of the TL880 memory (to see if anything happens).
+	Randomizes all or part of the TL880 memory (to see if anything happens).
 
 striperam
 	Sets part of the TL880 memory to alternating pattern.
