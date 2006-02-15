@@ -1,3 +1,18 @@
+2006-02-13	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added randreg tool.
+	* Modified memdump and memload to accept addresses and lengths.
+	* Added more OSD knowledge to tl880doc.txt.
+
+2006-02-09	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Modified randram and striperam to accept address and length
+	  parameters.
+	* Added readmem and writemem tools to allow reading and writing TL880
+	  memory.
+	* Added memload tool to load a TL880 memory dump.
+	* Added more OSD knowledge to tl880doc.txt.
+
 2006-01-26	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Changed tl880init.c and tl880i2c.c to apply MyHD MDP-110

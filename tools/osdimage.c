@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <asm/byteorder.h>
 #include "tl880.h"
 
 
@@ -149,6 +150,8 @@ void read_image(char *filename, unsigned char *memspace)
 	FILE *image;
 	struct stat imgstat;
 	int size;
+	unsigned long buf = 0, *memlong = (unsigned long *)memspace;
+	int i;
 	
 	if(!filename) {
 		fprintf(stderr, "read_image: NULL filename\n");
@@ -168,11 +171,17 @@ void read_image(char *filename, unsigned char *memspace)
 	
 	size = imgstat.st_size;
 
+	/*
 	if(size > 0xd8000) {
 		size = 0xd8000;
 	}
+	*/
 
-	fread(memspace, 1, size, image);
+	for(i = 0; i < size; i += 4)
+	{
+		fread(&buf, 1, 4, image);
+		memlong[i / 4] = __cpu_to_be32(buf);
+	}
 
 	fclose(image);
 }
@@ -185,7 +194,7 @@ int main(int argc, char *argv[])
 	unsigned long *lmspace;
 
 	if(argc != 2) {
-		printf("Attempts to draw an imageon the TL880 OSD\n");
+		printf("Attempts to draw a 768x364x8 image on the TL880 OSD\n");
 		printf("Usage: %s raw_image\n", argv[0]);
 		return -1;
 	}
@@ -210,9 +219,9 @@ int main(int argc, char *argv[])
 	}
 	lmspace = (unsigned long *)memspace;
 
-	for(i = 0x10088; i <= 0x100ac; i += 4) {
-		write_register(i, 0x0);
-	}
+	//for(i = 0x10088; i <= 0x100ac; i += 4) {
+	//	write_register(i, 0x0);
+	//}
 
 	printf("Turning on OSD\n");
 	write_regbits(0x10000, 2, 2, 1);
@@ -227,10 +236,9 @@ int main(int argc, char *argv[])
 
 	printf("Writing OSD parameters to memory\n");
 	lmspace[0x2d8000 / 4] = 0x2d97000c;
-	lmspace[0x2d8004 / 4] = 0x70640e00;
+	lmspace[0x2d8004 / 4] = 0x0;
 	lmspace[0x2d8008 / 4] = 0xb0218000;
 	lmspace[0x2d800c / 4] = 0x160025c5;
-	
 
 	printf("Unmapping memory space\n");
 	munmap(memspace, 0x01000000);

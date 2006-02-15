@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 	unsigned long *memspace;
 
 	if(argc > 3 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
-		printf("Randomizes all or part of TL880 RAM\n");
+		printf("Randomizes all or part of TL880 registers (careful!!!)\n");
 		printf("Usage: %s [addr [len]]\n", argv[0]);
 		return -1;
 	}
@@ -31,16 +31,16 @@ int main(int argc, char *argv[])
 
 	addr &= 0xfffffffc;
 	len &= 0xfffffffc;
-	if(addr >= 0x01000000) {
+	if(addr >= 0x0100000) {
 		addr = 0;
 	}
 	
-	if(addr + len >= 0x01000000) {
-		len = 0x01000000 - addr;
+	if(addr + len >= 0x0100000) {
+		len = 0x0100000 - addr;
 	}
 
-	if((memfd = open("/dev/tl880/mem0", O_RDWR)) < 0) {
-		perror("Unable to open /dev/tl880/mem0");
+	if((memfd = open("/dev/tl880/reg0", O_RDWR)) < 0) {
+		perror("Unable to open /dev/tl880/reg0");
 		return -1;
 	}
 		

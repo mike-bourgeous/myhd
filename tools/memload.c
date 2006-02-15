@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 		addr = 0;
 	}
 	
-	if(addr + len >= 0x01000000) {
+	if(addr + len > 0x01000000) {
 		len = 0x01000000 - addr;
 	}
 

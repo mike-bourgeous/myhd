@@ -13,6 +13,8 @@ all:
 	gcc -O2 -Wall writereg.c -o writereg -ggdb3
 	gcc -O2 -Wall setbits.c -o setbits -ggdb3
 	gcc -O2 -Wall write4reg.c -o write4reg -ggdb3
+
+	gcc -O2 -Wall randreg.c -o randreg -ggdb3
 	
 	gcc -O2 -Wall iocsetvip.c -o iocsetvip -ggdb3 -I../driver/
 	gcc -O2 -Wall iocreadreg.c -o iocreadreg -ggdb3 -I../driver/

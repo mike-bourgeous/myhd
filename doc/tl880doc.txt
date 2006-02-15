@@ -14,13 +14,28 @@ TL880 Memory
 ------------
 
 The first 0x186000 bytes (1.5MB+24KB) of the memory region seem to be TL850Memory.
-The next 0x1000000 bytes (16MB) seem to be OSD memory.
+The next 0x1000000 bytes (16MB) seem to be OSD-available memory.
+
+Memory is usually written in big-endian format.  The macro __cpu_to_be32,
+defined in asm/byteorder.h, is useful.
 
 OSD Memory:
+
+The OSD supports multiple pixel formats.  The MyHD software uses a paletted
+format, frequently with 768x364 pixel images, for a total image length of
+0x44400.  The palette is possibly found at 0x44500 plus the image start.  If
+pixel data is not properly converted to big-endian, the pixels in an image
+will be shifted around.
+
+In 24-bit formats, the pixel structure seems to be BGRA.  The alpha range is 0
+to 0x7f.  Values for alpha above 0x7f are clamped.  Accessing the memory as
+little-endian data would result in an ARGB pixel format.
 
 	Register 10084 contains a 16-byte aligned offset in card memory.
 When that offset contains appropriate data, the OSD is displayed.  See
 registers 10080 to 100ac for more details on OSD registers.
+
+Note: the following tables are in little-endian format.
 
 value of register 1008c and first dword at location pointed to by 10084:
    (seems to store properties of the OSD source image - width, etc.)
@@ -77,13 +92,16 @@ second dword at location pointed to by 10084:
 	
 third dword at location pointed to by 10084:
    Seems to control the location and/or parameters of the source image,
-   including pixel format.
+   including pixel format.  The leftmost hex digit is set to b for paletted
+   images (8-bit), 0 for rgba images (32-bit).  Other values have other
+   effects.
+   
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|nnnnnnnn|nnnnnnnn|nnnnnnnn	Memory offset of image
-	0000nn00|00000000|00000000|00000000	Pixel format?
+	0000nn00|00000000|00000000|00000000	Pixel format
 
 fourth dword at location pointed to by 10084:
    Seems to control other source image parameters, including width scaling
@@ -92,7 +110,7 @@ fourth dword at location pointed to by 10084:
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|0000nnnn	Palette location - multiplied
-						by 256 to get memory offset
+						by 0x100 to get memory offset
 						(i.e. 25c5 becomes 25c500)
 	0000nn00|00000000|00000000|00000000	Horizontal scaling.  Sometimes
 						this must be set to a non-zero
@@ -789,7 +807,7 @@ ReadGPIO used in (MyHD):
 	JanusPropety::GetProperty (line 2)
 
 Zeros for bi-level (VGA) sync, something else for tri-level sync:
-101a0
+101a0 - affects sync directly
 101a4
 101a8
 

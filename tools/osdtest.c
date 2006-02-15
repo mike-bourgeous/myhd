@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <asm/byteorder.h>
 #include "tl880.h"
 
 
@@ -87,7 +88,7 @@ void write_regbits(long reg, long high_bit, long low_bit, unsigned long value)
  * Range: 0-255 all channels
  * Return: value suitable for writing to regs 10140-1017c (cursor palette)
  */
-unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsigned long a)
+unsigned long rgb_to_ypbpr(unsigned long r, unsigned long g, unsigned long b, unsigned long a)
 {
 	float red = (float)r / 255.0;
 	float green = (float)g / 255.0;
@@ -141,19 +142,42 @@ unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsig
 	return (a << 24) | (r << 16) | (g << 8) | b;
 }
 
-
+#define rgba_to_argb(r, g, b, a) (((a) << 24) | ((r) << 16) | ((g) << 8) | (b))
 
 int main(int argc, char *argv[])
 {
 	int memfd, i, j;
 	unsigned char *memspace;
 	unsigned long *lmspace;
+	unsigned char r1 = 0xff;
+	unsigned char g1 = 0x00;
+	unsigned char b1 = 0x00;
+	unsigned char a1 = 0x7f;
+	unsigned char r2 = 0x00;
+	unsigned char g2 = 0x00;
+	unsigned char b2 = 0xff;
+	unsigned char a2 = 0x7f;
 
-	if(argc != 1) {
-		printf("Draws a cursor on the TL880 screen\n");
-		printf("Usage: %s\n", argv[0]);
+	if(argc != 1 && argc != 5 && argc != 9) {
+		printf("Draws a test image on the TL880 screen\n");
+		printf("Usage: %s [r1 g1 b1 a1 [r2 g2 b2 a2]] (all values range from 0-255)\n", argv[0]);
 		return -1;
 	}
+	
+	switch(argc)
+	{
+		case 9:
+			r2 = strtoul(argv[5], NULL, 10);
+			g2 = strtoul(argv[6], NULL, 10);
+			b2 = strtoul(argv[7], NULL, 10);
+			a2 = strtoul(argv[8], NULL, 10) / 2;
+		case 5:
+			r1 = strtoul(argv[1], NULL, 10);
+			g1 = strtoul(argv[2], NULL, 10);
+			b1 = strtoul(argv[3], NULL, 10);
+			a1 = strtoul(argv[4], NULL, 10) / 2;
+	}
+			
 
 	printf("Accessing register space\n");
 	if(map_regspace()) {
@@ -175,20 +199,22 @@ int main(int argc, char *argv[])
 	}
 	lmspace = (unsigned long *)memspace;
 
+	/*
 	for(i = 0x10088; i <= 0x100ac; i += 4) {
 		write_register(i, 0x0);
 	}
+	*/
 
 	printf("Turning on OSD\n");
 	write_regbits(0x10000, 2, 2, 1);
 
 	printf("Setting OSD memory offset and other OSD parameters\n");
-	write_register(0x10080, 0x0);
+	/* write_register(0x10080, 0x0); */
 	write_register(0x10084, 0x2d8000);
-	write_register(0x10094, 0x8000);
+	/* write_register(0x10094, 0x8000); */
 
 	printf("Writing colorful data to memory\n");
-	for(i = 0x000000; i < 0x1d8000; i += 0x2000) {
+	for(i = 0x218000; i < 0x25c500; i += 0x2400) {
 		/*
 		if(memspace[i] % 4 == 0) {
 			memspace[i] = 0x7F;
@@ -199,31 +225,30 @@ int main(int argc, char *argv[])
 		}
 		*/
 		/*
-		memspace[i] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF000000) >> 24;
-		memspace[i + 1] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF0000) >> 16;
-		memspace[i + 2] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF00) >> 8;
-		memspace[i + 3] = (rgb2ypbpr(255, 255, 255, 255) & 0xFF);
+		memspace[i] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF000000) >> 24;
+		memspace[i + 1] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF0000) >> 16;
+		memspace[i + 2] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF00) >> 8;
+		memspace[i + 3] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF);
 		*/
-		for(j = 0; j < 0x1000; j += 4) {
-			/*
-			lmspace[(i + j) / 4] = rgb2ypbpr(128, 0, 255, 255);
-			*/
-			lmspace[(i + j) / 4] = 0xff7000ff;
+		for(j = 0; j < 0x1200; j += 4) {
+			/* lmspace[(i + j) / 4] = __cpu_to_be32(0xff7000ff); */
+			/* lmspace[(i + j) / 4] = __cpu_to_be32(0xfefefe7f); */
+			/* lmspace[(i + j) / 4] = rgba_to_argb(0x00, 0xff, 0xff, 0xff); */
+			lmspace[(i + j) / 4] = rgba_to_argb(r1, g1, b1, a1);
 		}
-		for(j = 0x1000; j < 0x2000; j += 4) {
-			/*
-			lmspace[(i + j) / 4] = rgb2ypbpr(0, 0, 0, 255);
-			*/
-			lmspace[(i + j) / 4] = 0x7f00ffff;
+		for(j = 0x1200; j < 0x2400; j += 4) {
+			/* lmspace[(i + j) / 4] = __cpu_to_be32(0x7f00ffff); */
+			/* lmspace[(i + j) / 4] = __cpu_to_be32(0x00ff007f); */
+			/* lmspace[(i + j) / 4] = rgba_to_argb(0x00, 0xff, 0x00, 0xff); */
+			lmspace[(i + j) / 4] = rgba_to_argb(r2, g2, b2, a2);
 		}
 	}
 
 	printf("Writing OSD parameters to memory\n");
 	lmspace[0x2d8000 / 4] = 0x1ff00001;
-	lmspace[0x2d8004 / 4] = 0x00008000;
-	lmspace[0x2d8008 / 4] = 0x00100000;
-	lmspace[0x2d800c / 4] = 0x0c000000;
-	
+	lmspace[0x2d8004 / 4] = 0x00000000;
+	lmspace[0x2d8008 / 4] = 0x00218000;
+	lmspace[0x2d800c / 4] = 0xb40025c5;
 
 	printf("Unmapping memory space\n");
 	munmap(memspace, 0x01000000);

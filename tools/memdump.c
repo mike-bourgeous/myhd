@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <sys/stat.h>
@@ -9,13 +10,24 @@
 int main(int argc, char *argv[])
 {
 	int ifdr, ofd;
+	unsigned long addr = 0;
+	unsigned long len = 0x01000000;
 	unsigned char *memspace;
 
-	if(argc != 2) {
+	if(argc < 2 || argc > 4) {
 		printf("Dumps tl880 memory\n");
-		printf("Usage: %s mem_file\n", argv[0]);
+		printf("Usage: %s mem_file [addr [len]]\n", argv[0]);
 		return -1;
 	}
+
+	if(argc >= 3) {
+		addr = strtoul(argv[2], NULL, 16);
+	}
+
+	if(argc == 4) {
+		len = strtoul(argv[3], NULL, 16);
+	}
+
 
 	if((ifdr = open("/dev/tl880/mem0", O_RDWR)) < 0) {
 		perror("Unable to open /dev/tl880/mem0");
@@ -29,14 +41,24 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Writing memory space\n");
+	addr &= 0xfffffffc;
+	len &= 0xfffffffc;
+	if(addr >= 0x01000000) {
+		addr = 0;
+	}
+	
+	if(addr + len > 0x01000000) {
+		len = 0x01000000 - addr;
+	}
+	
+	printf("Writing 0x%lx bytes starting at offset 0x%lx to %s\n", len, addr, argv[1]);
 	if((ofd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0) {
 		fprintf(stderr, "Failed to open output file %s: %s\n", argv[1], strerror(errno));
 		munmap(memspace, 0x01000000);
 		close(ifdr);
 		return -1;
 	}
-	if(write(ofd, memspace, 0x01000000) != 0x01000000) {
+	if(write(ofd, memspace + addr, len) != len) {
 		perror("Failed to write region 0\n");
 		munmap(memspace, 0x01000000);
 		close(ifdr);
