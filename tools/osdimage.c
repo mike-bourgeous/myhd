@@ -219,9 +219,9 @@ int main(int argc, char *argv[])
 	}
 	lmspace = (unsigned long *)memspace;
 
-	//for(i = 0x10088; i <= 0x100ac; i += 4) {
-	//	write_register(i, 0x0);
-	//}
+	for(i = 0x10088; i <= 0x100ac; i += 4) {
+		write_register(i, 0x0);
+	}
 
 	printf("Turning on OSD\n");
 	write_regbits(0x10000, 2, 2, 1);
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
 	printf("Writing OSD parameters to memory\n");
 	lmspace[0x2d8000 / 4] = 0x2d97000c;
-	lmspace[0x2d8004 / 4] = 0x0;
+	lmspace[0x2d8004 / 4] = 0x70000000;
 	lmspace[0x2d8008 / 4] = 0xb0218000;
 	lmspace[0x2d800c / 4] = 0x160025c5;
 

@@ -656,12 +656,20 @@ registers 1008c and 10090 seem to take turns being zero and some value
 		 
 
 10094 used in showOverlays
-	some bits seem to affect the brightness of the overlay
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|nnnnnnnn|00000000	0x80 in showOverlays
+	00000000|00000000|nnnnnnnn|00000000	0x80 in showOverlays - overlay
+						brightness.  0x80 is standard.
+						0x00 is nearly black; 0xff is
+						like a TV with the brightness
+						turned up almost all the way
+						(it doesn't wash out to white,
+						though).
+	nnnn0000|00000000|00000000|00000000	So far it seems that any value
+						here turns the image white if
+						it is a paletted image.
 
 100c0 
 	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
@@ -750,8 +758,8 @@ to 10184 increments 10180.  It appears that there are 0x400 registers total.
 	      |53677881|
 	      |81786753|
 	------+--------+-----------
-	300   |ccmatrix|Used in cJanus::SetColorConversionMatrix 
-	      |        |(changing these will change display colors)
+	300 to|ccmatrix|Used in cJanus::SetColorConversionMatrix 
+	308   |        |(changing these will change display colors)
 	------+--------+-----------
 	300   |testregs|Used in cJanus::dpc2_registers
 	------+--------+-----------

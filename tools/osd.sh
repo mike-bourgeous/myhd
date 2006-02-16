@@ -2,11 +2,12 @@
 
 ./dpc/dpcsync 1 1 0
 
-sleep 5
+sleep 3
 
-./iocwritereg 10000 3f
+./iocwritereg 10000 24 
 
-./osdtest
+for f in `seq 0 255`; do ./osdtest $f 0 0 255 0 0 `expr 255 - $f` 255 ; done
+
 ./cursor
 
 ./osdimage cloud.raw

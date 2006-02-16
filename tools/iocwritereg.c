@@ -29,8 +29,10 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
+	/*
 	printf("Modifying register\n");
 	printf("Setting register 0x%08lx to 0x%08lx\n", (unsigned long)regval[0], regval[1]);
+	*/
 
 	if(ioctl(ifd, TL880IOCWRITEREG, regval) < 0) {
 		perror("Unable to write register");

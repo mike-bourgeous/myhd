@@ -12,13 +12,12 @@ int main(int argc, char *argv[])
 	int memfd, i, j;
 	unsigned long addr = 0;
 	unsigned long len = 0x01000000;
-	unsigned long width = 0x100;
 	unsigned char *memspace;
 	unsigned long *lmspace;
 
-	if(argc > 4 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
+	if(argc > 3 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Writes alternating values to TL880 RAM\n");
-		printf("Usage: %s [addr [len] [width]]\n", argv[0]);
+		printf("Usage: %s [addr [len]]\n", argv[0]);
 		return -1;
 	}
 
@@ -26,17 +25,12 @@ int main(int argc, char *argv[])
 		addr = strtoul(argv[1], NULL, 16);
 	}
 
-	if(argc >= 3) {
+	if(argc == 3) {
 		len = strtoul(argv[2], NULL, 16);
-	}
-
-	if(argc >= 4) {
-		width = strtoul(argv[3], NULL, 16);
 	}
 
 	addr &= 0xfffffffc;
 	len &= 0xfffffffc;
-	width &= 0xfffffffc;
 	if(addr >= 0x01000000) {
 		addr = 0;
 	}
@@ -58,29 +52,11 @@ int main(int argc, char *argv[])
 	}
 	lmspace = (unsigned long *)memspace;
 
-	printf("Writing stripe values\n");
-#if 0
-	for(i = addr; i < addr + len; i++) {
-		/*
-		memspace[i] = (i % 2) * 0xf0;
-		*/
-		if(memspace[i] % 4 == 0) {
-			memspace[i] = 0x7F;
-		} else {
-			memspace[i] = (i % 512) / 2;
-		}
-		/*
-		memspace[i] = (i % 4) ? 0x00 : 0xff;
-		*/
-	}
-#endif
+	printf("Writing ramp values\n");
 
-	for(i = addr; i < addr + len; i += width) {
-		for(j = 0; j < width / 2; j += 4) {
-			lmspace[(i + j) / 4] = 0xffffffff;
-		}
-		for(j = width / 2; j < width; j += 4) {
-			lmspace[(i + j) / 4] = 0x00000000;
+	for(i = addr; i < addr + len; i += 0x100) {
+		for(j = 0; j < 0x100 && i + j < addr + len; j += 4) {
+			lmspace[(i + j) / 4] = j | j << 8 | j << 16 | j << 24;
 		}
 	}
 	

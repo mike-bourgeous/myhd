@@ -211,10 +211,10 @@ int main(int argc, char *argv[])
 	printf("Setting OSD memory offset and other OSD parameters\n");
 	/* write_register(0x10080, 0x0); */
 	write_register(0x10084, 0x2d8000);
-	/* write_register(0x10094, 0x8000); */
+	write_register(0x10094, 0x8000);
 
 	printf("Writing colorful data to memory\n");
-	for(i = 0x218000; i < 0x25c500; i += 0x2400) {
+	for(i = 0x218000; i < 0x25c500; i += 0x4800) {
 		/*
 		if(memspace[i] % 4 == 0) {
 			memspace[i] = 0x7F;
@@ -230,13 +230,13 @@ int main(int argc, char *argv[])
 		memspace[i + 2] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF00) >> 8;
 		memspace[i + 3] = (rgb_to_ypbpr(255, 255, 255, 255) & 0xFF);
 		*/
-		for(j = 0; j < 0x1200; j += 4) {
+		for(j = 0; j < 0x2400; j += 4) {
 			/* lmspace[(i + j) / 4] = __cpu_to_be32(0xff7000ff); */
 			/* lmspace[(i + j) / 4] = __cpu_to_be32(0xfefefe7f); */
 			/* lmspace[(i + j) / 4] = rgba_to_argb(0x00, 0xff, 0xff, 0xff); */
 			lmspace[(i + j) / 4] = rgba_to_argb(r1, g1, b1, a1);
 		}
-		for(j = 0x1200; j < 0x2400; j += 4) {
+		for(j = 0x2400; j < 0x4800; j += 4) {
 			/* lmspace[(i + j) / 4] = __cpu_to_be32(0x7f00ffff); */
 			/* lmspace[(i + j) / 4] = __cpu_to_be32(0x00ff007f); */
 			/* lmspace[(i + j) / 4] = rgba_to_argb(0x00, 0xff, 0x00, 0xff); */
@@ -245,8 +245,8 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Writing OSD parameters to memory\n");
-	lmspace[0x2d8000 / 4] = 0x1ff00001;
-	lmspace[0x2d8004 / 4] = 0x00000000;
+	lmspace[0x2d8000 / 4] = 0x1ff0000b;
+	lmspace[0x2d8004 / 4] = 0x70000000;
 	lmspace[0x2d8008 / 4] = 0x00218000;
 	lmspace[0x2d800c / 4] = 0xb40025c5;
 

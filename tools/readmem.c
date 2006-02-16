@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Mapping tl880 memory space\n");
+	/* printf("Mapping tl880 memory space\n"); */
 	if(!(memspace = mmap(0, 0x01000000, PROT_READ | PROT_WRITE, MAP_SHARED, ifd, 0))) {
 		perror("Failed to mmap tl880 memory space");
 		close(ifd);
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 	value = __le32_to_cpu(memspace[mem/4]);
 	printf("Memory at 0x%08lx is 0x%08lx\n", mem, value);
 
-	printf("Unmapping memory\n");
+	/* printf("Unmapping memory\n"); */
 	munmap(memspace, 0x01000000);
 	close(ifd);
 
