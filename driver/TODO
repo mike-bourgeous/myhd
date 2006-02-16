@@ -9,7 +9,7 @@ Clean up/organize debugging statements in general
 Interface to existing drivers for ancillary chips, incl. NXT2000
 Implement local i2c functions for controlling chips without an external driver
 Add read() function to tl880/mem? device to allow hexedit to work on TL880 memory
-
+Fix interrupts
 
 
 vim: tw=80
