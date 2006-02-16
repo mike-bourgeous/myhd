@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 	write_regbits(0x10000, 2, 2, 1);
 
 	printf("Setting OSD memory offset and other OSD parameters\n");
-	/* write_register(0x10080, 0x0); */
+	write_register(0x10080, 0x0);
 	write_register(0x10084, 0x2d8000);
 	write_register(0x10094, 0x8000);
 

@@ -87,8 +87,12 @@ second dword at location pointed to by 10084:
 						lowest bit is ignored, so only
 						multiples of two pixels have
 						any effect.
-	0000nnnn|nnnnnnnn|00000000|00000000	Shifts the destination image
+	00000000|nnnnnnnn|00000000|00000000	Shifts the destination image
 						vertically by n pixels.
+	0000nnnn|00000000|00000000|00000000	If not set to 7, changes to
+						the OSD palette and some OSD
+						parameters will not take
+						effect immediately.
 	
 third dword at location pointed to by 10084:
    Seems to control the location and/or parameters of the source image,

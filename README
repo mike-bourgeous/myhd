@@ -1,5 +1,6 @@
 MyHD driver and utility package  --  http://myhd.sourceforge.net/
 Copyright 2003-2006, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
+Licensed under the GPL.
 
 doc/
 	These files describe the known features of the chip

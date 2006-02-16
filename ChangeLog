@@ -1,3 +1,10 @@
+2006-02-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added rampram tool.
+	* Modified striperam to accept a width parameter.
+	* Added more OSD info to tl880doc.txt.
+	* Updated OSD test tools.
+
 2006-02-13	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added randreg tool.
