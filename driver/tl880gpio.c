@@ -18,82 +18,82 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 	if(tl880dev->card_type == TL880_CARD_JANUS) {
 		switch(gpio_line) {
 			case 0:
-				write_regbits(tl880dev, 0x10198, 8, 8, state);
+				tl880_write_regbits(tl880dev, 0x10198, 8, 8, state);
 				return 1;
 				break;
 			case 1:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
-					write_regbits(tl880dev, 0x10198, 9, 9, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 9, 9, state);
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
 					return 1;
 				}
 				break;
 			case 2:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 9, 9, ~state);
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
-					write_regbits(tl880dev, 0x10198, 9, 9, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
 					return 1;
 				}
 				break;
 			case 3:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
-					write_regbits(tl880dev, 0x10198, 0xe, 0xe, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, ~state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xe, 0xe, ~state);
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
 					return 1;
 				}
 				break;
 			case 4:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
-					write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
 					return 1;
 				}
 				break;
 			case 8:
 				if(state == 0) {
-					write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 0);
 					return 1;
 				}
 				
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, 1);
+					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 1);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10194, 0xc, 0xc, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 0);
 					return 1;
 				}
 				break;
 			case 9:
 				if(state == 0) {
-					write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 0);
 					return 1;
 				}
 				
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, 1);
+					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 1);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10194, 0xd, 0xd, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 0);
 					return 1;
 				}
 				break;
@@ -104,59 +104,59 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 	} else if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		switch(gpio_line) {
 			case 0:
-				write_regbits(tl880dev, 0x10198, 8, 8, state);
+				tl880_write_regbits(tl880dev, 0x10198, 8, 8, state);
 				return 1;
 				break;
 			case 1:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
-					write_regbits(tl880dev, 0x10198, 9, 9, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 9, 9, state);
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, ~state);
 					return 1;
 				}
 				break;
 			case 2:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 9, 9, ~state);
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
-					write_regbits(tl880dev, 0x10198, 9, 9, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
 					return 1;
 				}
 				break;
 			case 3:
 				if(state != 1) {
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, ~state);
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
 					return 1;
 				}
 				break;
 			case 4:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 					return 1;
 				}
 				break;
 			case 5:
-				write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+				tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 				return 1;
 				break;
 			case 6:
-				write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
+				tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
 				return 1;
 				break;
 			default:
@@ -172,7 +172,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 		}
 		switch(gpio_line) {
 			case 0:
-				write_regbits(tl880dev, 0x10198, 8, 8, state);
+				tl880_write_regbits(tl880dev, 0x10198, 8, 8, state);
 				return 1;
 				break;
 			case 1:
@@ -180,38 +180,38 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				break;
 			case 2:
 				/* VGA output enable */
-				write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
+				tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
 				return 1;
 				break;
 			case 3:
 				if(!state) {
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, ~state);
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, state);
 					return 1;
 				}
 				break;
 			case 4:
 				if(state == 1) {
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 					return 1;
 				} else {
-					write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
-					write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
-					write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xb, 0xb, ~state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, state);
+					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 					return 1;
 				}
 				break;
 			case 5:
-				write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
+				tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, state);
 				return 1;
 				break;
 			case 6:
-				write_regbits(tl880dev, 0x10194, 0xe, 0xe, 1);
-				write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
+				tl880_write_regbits(tl880dev, 0x10194, 0xe, 0xe, 1);
+				tl880_write_regbits(tl880dev, 0x10198, 0xe, 0xe, state);
 				return 1;
 				break;
 			case 7:
@@ -219,32 +219,32 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				break;
 			case 8:
 				if(state == 0) {
-					write_regbits(tl880dev, 0x10194, 9, 9, 1);
-					write_regbits(tl880dev, 0x10198, 9, 9, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 9, 9, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 9, 9, 0);
 					return 1;
 				} else {
 					if(state == 1) {
-						write_regbits(tl880dev, 0x10194, 9, 9, 1);
-						write_regbits(tl880dev, 0x10198, 9, 9, 1);
+						tl880_write_regbits(tl880dev, 0x10194, 9, 9, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 9, 9, 1);
 						return 1;
 					} else {
-						write_regbits(tl880dev, 0x10194, 9, 9, 0);
+						tl880_write_regbits(tl880dev, 0x10194, 9, 9, 0);
 						return 1;
 					}
 				}
 				break;
 			case 9:
 				if(state == 0) {
-					write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
-					write_regbits(tl880dev, 0x10198, 0xf, 0xf, 0);
+					tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
+					tl880_write_regbits(tl880dev, 0x10198, 0xf, 0xf, 0);
 					return 1;
 				} else {
 					if(state == 1) {
-						write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
-						write_regbits(tl880dev, 0x10198, 0xf, 0xf, 1);
+						tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xf, 0xf, 1);
 						return 1;
 					} else {
-						write_regbits(tl880dev, 0x10194, 0xf, 0xf, 0);
+						tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 0);
 						return 1;
 					}
 				}

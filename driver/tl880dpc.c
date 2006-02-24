@@ -13,7 +13,7 @@ unsigned long tl880_calc_dpc_pll_const(unsigned long a, unsigned char b, unsigne
 
 void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsigned char b, unsigned char c)
 {
-	write_register(tl880dev, 0x5800, tl880_calc_dpc_pll_const(a, b, c));
+	tl880_write_register(tl880dev, 0x5800, tl880_calc_dpc_pll_const(a, b, c));
 }
 
 /* This function has not been fully tested and may be incorrect */
@@ -28,7 +28,7 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigne
 	switch(xres) {
 		case 1024:
 			/* This value makes 1024x768p exactly 60Hz 48.3kHz */
-			/* write_register(tl880dev, 0x5800, 0x00160320); */
+			/* tl880_write_register(tl880dev, 0x5800, 0x00160320); */
 			val = 0x01151bb0;
 			break;
 		case 1440:
@@ -56,8 +56,8 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigne
 			break;
 	}
 
-	write_register(tl880dev, 0x5800, val);
-	write_register(tl880dev, 0x5d14, 0);
+	tl880_write_register(tl880dev, 0x5800, val);
+	tl880_write_register(tl880dev, 0x5d14, 0);
 	tl880_set_gpio(tl880dev, 6, var_4);
 }
 
@@ -66,15 +66,15 @@ void tl880_init_dpc_pll(struct tl880_dev *tl880dev)
 {
 	int i;
 	
-	write_register(tl880dev, 0x10014, 0x80000000);
+	tl880_write_register(tl880dev, 0x10014, 0x80000000);
 
 	tl880_set_dpc_clock(tl880dev, 1024, 768, 0);
 
 	for(i = 0; i < 10; i++) {
-		read_register(tl880dev, 0x10014);
+		tl880_read_register(tl880dev, 0x10014);
 	}
 
-	write_register(tl880dev, 0x10014, 0);
+	tl880_write_register(tl880dev, 0x10014, 0);
 }
 
 
@@ -89,8 +89,8 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 		return;
 	}
 
-	savereg = read_register(tl880dev, 0x10000);
-	write_register(tl880dev, 0x10000, 0x80);
+	savereg = tl880_read_register(tl880dev, 0x10000);
+	tl880_write_register(tl880dev, 0x10000, 0x80);
 
 	reg = 0x10014;
 	set_bits(&value, reg, 0, 0, mode->a);
@@ -103,7 +103,7 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	set_bits(&value, reg, 0x1c, 0x1c, mode->h);
 	set_bits(&value, reg, 0x1d, 0x1d, mode->i);
 	set_bits(&value, reg, 0x1e, 0x1e, mode->j);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 
 	reg = 10018;
 	value = 0;
@@ -112,7 +112,7 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	set_bits(&value, reg, 0xa, 0xa, mode->inv_vsync);
 	set_bits(&value, reg, 0x12, 0xc, mode->h_synclen);
 	set_bits(&value, reg, 0x1c, 0x14, mode->h_frontporch);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 
 	reg = 0x1001c;
 	value = 0;
@@ -121,7 +121,7 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	set_bits(&value, reg, 0x16, 0xc, mode->yres_0);
 	set_bits(&value, reg, 0x1b, 0x18, mode->v_backporch_0);
 	set_bits(&value, reg, 0x1c, 0x1c, mode->ntsc_flag);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 
 	reg = 0x10020;
 	value = 0;
@@ -129,24 +129,24 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	set_bits(&value, reg, 0xb, 4, mode->v_frontporch_1);
 	set_bits(&value, reg, 0x16, 0xc, mode->yres_1);
 	set_bits(&value, reg, 0x1b, 0x18, mode->v_backporch_1);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 	
 	reg = 0x10028;
 	value = 0;
 	set_bits(&value, reg, 0xb, 0, mode->bb);
 	set_bits(&value, reg, 0x18, 0x18, mode->cc);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 	
 	reg = 0x10024;
 	value = 0;
 	set_bits(&value, reg, 0x15, 0, mode->y);
 	set_bits(&value, reg, 0x18, 0x18, mode->z);
 	set_bits(&value, reg, 0x1f, 0x1c, mode->aa);
-	write_register(tl880dev, reg, value);
+	tl880_write_register(tl880dev, reg, value);
 
-	write_register(tl880dev, 0x5800, mode->dd);
+	tl880_write_register(tl880dev, 0x5800, mode->dd);
 
-	write_register(tl880dev, 0x10000, savereg);
+	tl880_write_register(tl880dev, 0x10000, savereg);
 }
 
 
@@ -172,7 +172,7 @@ loc_294ea:
 		/* field_select xor= ebp */
 		field_select ^= 1;
 		
-		write_regbits(tl880dev, 0x10000, 0, 0, field_select);
+		tl880_write_regbits(tl880dev, 0x10000, 0, 0, field_select);
 		
 		if(field_select == 0) {
 			var_10 = 0;
@@ -188,11 +188,11 @@ loc_294ea:
 	/* val = (cJanus->0x10388)->0x270; */
 	val ^= 1;
 	
-	if(read_regbits(tl880dev, 0x10004, 2, 2)) {
+	if(tl880_read_regbits(tl880dev, 0x10004, 2, 2)) {
 		if(val == 3 || val == 1) {
-			write_regbits(tl880dev, 0x10000, 0, 0, 1);
+			tl880_write_regbits(tl880dev, 0x10000, 0, 0, 1);
 		} else {
-			write_regbits(tl880dev, 0x10000, 0, 0, 0);
+			tl880_write_regbits(tl880dev, 0x10000, 0, 0, 0);
 		}
 		
 		var_10 = 1;
@@ -201,9 +201,9 @@ loc_294ea:
 	}
 
 	if(val == 3 || val == 1) {
-		write_regbits(tl880dev, 0x10000, 0, 0, 0);
+		tl880_write_regbits(tl880dev, 0x10000, 0, 0, 0);
 	} else {
-		write_regbits(tl880dev, 0x10000, 0, 0, 1);
+		tl880_write_regbits(tl880dev, 0x10000, 0, 0, 1);
 	}
 
 	var_10 = 0;
@@ -410,7 +410,7 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 
 	tl880dev->dpc_count++;
 
-	tl880dev->dpc_type = read_register(tl880dev, 0x1000c) & read_register(tl880dev, 0x10008);
+	tl880dev->dpc_type = tl880_read_register(tl880dev, 0x1000c) & tl880_read_register(tl880dev, 0x10008);
 
 	/*
 	printk(KERN_DEBUG "tl880: dpc interrupt: 0x%04lx - count %lu\n", 
@@ -433,7 +433,7 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 
 	/* Since this interrupt isn't fully handled yet, disable it after a while */
 	if(tl880dev->dpc_count >= 600) {
-		write_register(tl880dev, 0x10008, 0);
+		tl880_write_register(tl880dev, 0x10008, 0);
 		printk(KERN_DEBUG "tl880: ~%lu dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
 	}
 

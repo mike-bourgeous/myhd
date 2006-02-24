@@ -284,6 +284,14 @@ extern unsigned long dma_bitmask;
 int tl880_create_proc_entry(void);
 void tl880_remove_proc_entry(void);
 
+/* tl880mem.c */
+unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem);
+void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value);
+unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
+void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
+
+
+
 #endif /* __KERNEL__ */
 
 

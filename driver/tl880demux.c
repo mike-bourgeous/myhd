@@ -124,11 +124,11 @@ unsigned long tl880_demux_init(struct tl880_dev *tl880dev)
 		demux_dev_list[i].field_50 = 0;
 		demux_dev_list[i].field_60 = 0;
 
-		write_register(tl880dev, reg, 0x3fff);
-		write_register(tl880dev, reg + 4, 0xa0);
-		write_register(tl880dev, reg + 8, 0);
-		write_register(tl880dev, reg + 0xc, 0);
-		write_register(tl880dev, reg + 0x10, 0);
+		tl880_write_register(tl880dev, reg, 0x3fff);
+		tl880_write_register(tl880dev, reg + 4, 0xa0);
+		tl880_write_register(tl880dev, reg + 8, 0);
+		tl880_write_register(tl880dev, reg + 0xc, 0);
+		tl880_write_register(tl880dev, reg + 0x10, 0);
 	}
 
 	
@@ -154,28 +154,28 @@ unsigned long tl880_demux_init(struct tl880_dev *tl880dev)
 
 	/* Zero some registers */
 	for(i = 0x25718; i <= 0x25764; i += 4) {
-		write_register(tl880dev, i, 0);
+		tl880_write_register(tl880dev, i, 0);
 	}
 	for(i = 0x257f0; i <= 0x257fc; i += 4) {
-		write_register(tl880dev, i, 0);
+		tl880_write_register(tl880dev, i, 0);
 	}
 
-	write_register(tl880dev, 0x27810, 0x5000);
+	tl880_write_register(tl880dev, 0x27810, 0x5000);
 
-	tsd_last_queued_interrupt = read_register(tl880dev, 0x27814) & 0xf;
+	tsd_last_queued_interrupt = tl880_read_register(tl880dev, 0x27814) & 0xf;
 	/* SetTL850Interrupt(0x144, tsdIsq) */
 
 	/* SetTL850Interrupt(0x14a, tsdCommandExecIsr) */
 
 	do {
-		write_register(tl880dev, 0x26804, 0);
-		write_register(tl880dev, 0x26800, 6);
+		tl880_write_register(tl880dev, 0x26804, 0);
+		tl880_write_register(tl880dev, 0x26800, 6);
 		
 		/* Wait on these registers (yes the while loop is empty) */
-		while(read_register(tl880dev, 0x26804) == 0 && read_register(tl880dev, 0x26800) != 5);
-	} while(read_register(tl880dev, 0x26804) != 1);
+		while(tl880_read_register(tl880dev, 0x26804) == 0 && tl880_read_register(tl880dev, 0x26800) != 5);
+	} while(tl880_read_register(tl880dev, 0x26804) != 1);
 
-	write_register(tl880dev, 0x26800, 0);
+	tl880_write_register(tl880dev, 0x26800, 0);
 
 	return 0;
 }

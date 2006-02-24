@@ -38,6 +38,7 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev)
 {
 	struct tl880_dev *list = tl880_list;
 
+	/* Try to find the device using the pci_dev pointer */
 	while(list) {
 		if(list->pcidev == dev) {
 			return list;
@@ -56,4 +57,6 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev)
 
 	return list;
 }
+
+EXPORT_SYMBOL(find_tl880);
 

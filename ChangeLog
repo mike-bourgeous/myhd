@@ -1,3 +1,11 @@
+2006-02-23	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Renamed some functions to make them exportable without polluting
+	  namespace (i.e. added tl880_ prefix).
+	* Started making modifications to allow writing a separate framebuffer
+	  driver.
+	* Added tl880mem.c to parallel tl880reg.c for card memory.
+
 2006-02-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added rampram tool.

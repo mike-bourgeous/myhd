@@ -71,8 +71,8 @@ struct SOverlaySurface *tl880_create_cursor(struct tl880_dev *tl880dev, struct _
 
 void tl880_set_cursor_position(struct tl880_dev *tl880dev, int x, int y)
 {
-	write_regbits(tl880dev, 0x10104, 0xa, 0, x);
-	write_regbits(tl880dev, 0x10104, 0x1a, 0x10, y);
+	tl880_write_regbits(tl880dev, 0x10104, 0xa, 0, x);
+	tl880_write_regbits(tl880dev, 0x10104, 0x1a, 0x10, y);
 }
 
 void tl880_show_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surface, unsigned char state)
@@ -81,15 +81,15 @@ void tl880_show_cursor(struct tl880_dev *tl880dev, struct SOverlaySurface *surfa
 		if(!surface) {
 			printk(KERN_ERR "tl880: NULL surface in tl880_show_cursor\n");
 		} else {
-			write_regbits(tl880dev, 0x10100, 0x19, 4, surface->field_c / 16);
-			write_regbits(tl880dev, 0x10108, 9, 8, surface->field_3c); // horizontal scaling
-			write_regbits(tl880dev, 0x10108, 0x19, 0x18, surface->field_40); // vertical scaling
-			write_regbits(tl880dev, 0x10108, 7, 0, surface->field_14); // 32 - horizontal size
-			write_regbits(tl880dev, 0x10108, 0x17, 0x10, surface->field_18); // 32 - vertical size
+			tl880_write_regbits(tl880dev, 0x10100, 0x19, 4, surface->field_c / 16);
+			tl880_write_regbits(tl880dev, 0x10108, 9, 8, surface->field_3c); // horizontal scaling
+			tl880_write_regbits(tl880dev, 0x10108, 0x19, 0x18, surface->field_40); // vertical scaling
+			tl880_write_regbits(tl880dev, 0x10108, 7, 0, surface->field_14); // 32 - horizontal size
+			tl880_write_regbits(tl880dev, 0x10108, 0x17, 0x10, surface->field_18); // 32 - vertical size
 		}
 	}
 	
-	write_regbits(tl880dev, 0x10000, 3, 3, state);
+	tl880_write_regbits(tl880dev, 0x10000, 3, 3, state);
 }
 
 struct SOverlaySurface *g_cursor_list = NULL;

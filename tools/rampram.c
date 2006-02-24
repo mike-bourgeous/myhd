@@ -9,15 +9,17 @@
 
 int main(int argc, char *argv[])
 {
-	int memfd, i, j;
+	int memfd;
+	unsigned long i, j;
 	unsigned long addr = 0;
 	unsigned long len = 0x01000000;
+	unsigned long ramplen = 0x100;
 	unsigned char *memspace;
 	unsigned long *lmspace;
 
-	if(argc > 3 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
+	if(argc > 4 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Writes alternating values to TL880 RAM\n");
-		printf("Usage: %s [addr [len]]\n", argv[0]);
+		printf("Usage: %s [addr [len [ramplen]]]\n", argv[0]);
 		return -1;
 	}
 
@@ -25,12 +27,18 @@ int main(int argc, char *argv[])
 		addr = strtoul(argv[1], NULL, 16);
 	}
 
-	if(argc == 3) {
+	if(argc >= 3) {
 		len = strtoul(argv[2], NULL, 16);
+	}
+
+	if(argc >= 4) {
+		ramplen = strtoul(argv[3], NULL, 16);
 	}
 
 	addr &= 0xfffffffc;
 	len &= 0xfffffffc;
+	ramplen &= 0xfffffffc;
+	ramplen = ramplen > 8 ? ramplen : 8;
 	if(addr >= 0x01000000) {
 		addr = 0;
 	}
@@ -54,9 +62,13 @@ int main(int argc, char *argv[])
 
 	printf("Writing ramp values\n");
 
-	for(i = addr; i < addr + len; i += 0x100) {
-		for(j = 0; j < 0x100 && i + j < addr + len; j += 4) {
-			lmspace[(i + j) / 4] = j | j << 8 | j << 16 | j << 24;
+	for(i = addr; i < addr + len; i += ramplen) {
+		for(j = 0; j < ramplen && i + j < addr + len; j += 4) {
+			unsigned long k = j * 0x100 / ramplen;
+			lmspace[(i + j) / 4] = k | k << 8 | k << 16 | k << 24;
+			printf("writing 0x%08lx to 0x%08lx\n", 
+				k | k << 8 | k << 16 | k << 24,
+				i + j);
 		}
 	}
 	

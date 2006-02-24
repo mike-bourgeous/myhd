@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
 	addr &= 0xfffffffc;
 	len &= 0xfffffffc;
 	width &= 0xfffffffc;
+	width = width > 8 ? width : 8;
 	if(addr >= 0x01000000) {
 		addr = 0;
 	}

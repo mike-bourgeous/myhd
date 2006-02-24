@@ -138,14 +138,14 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		/* The do {} while(0); allows the use of very local variables */
 		case TL880IOCREADREG:
 			argl = (unsigned long *)arg;
-			__put_user(read_register(tl880dev, *argl), argl);
+			__put_user(tl880_read_register(tl880dev, *argl), argl);
 			break;
 		case TL880IOCWRITEREG:
 			do {
 				unsigned long wrprm[2];
 				argl = (unsigned long *)arg;
 				copy_from_user(wrprm, argl, sizeof(unsigned long) * 2);
-				write_register(tl880dev, wrprm[0], wrprm[1]);
+				tl880_write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
 		case TL880IOCSETVIP:
@@ -161,7 +161,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 				unsigned long cursorpos;
 				argl = (unsigned long *)arg;
 				copy_from_user(&cursorpos, argl, sizeof(unsigned long));
-				write_register(tl880dev, 0x10104, cursorpos);
+				tl880_write_register(tl880dev, 0x10104, cursorpos);
 			} while(0);
 			break;
 		default:
@@ -358,10 +358,10 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 					break;
 				case PCI_SUBSYSTEM_DEVICE_ID_MYHD:
 					snprintf(tl880dev->name, 64, "%s MyHD", tl880dev->name);
-					write_regbits(tl880dev, 0x10198, 0xf, 8, 0x10);
-					write_regbits(tl880dev, 0x10190, 0x17, 8, 0xffff);
-					write_regbits(tl880dev, 0x10194, 0x17, 8, 0);
-					value = read_regbits(tl880dev, 0x1019c, 0x17, 8);
+					tl880_write_regbits(tl880dev, 0x10198, 0xf, 8, 0x10);
+					tl880_write_regbits(tl880dev, 0x10190, 0x17, 8, 0xffff);
+					tl880_write_regbits(tl880dev, 0x10194, 0x17, 8, 0);
+					value = tl880_read_regbits(tl880dev, 0x1019c, 0x17, 8);
 					if((value & 0xc982) == 0xc182) {
 						snprintf(tl880dev->name, 64, "%s MDP-110B", tl880dev->name);
 						tl880dev->card_type = TL880_CARD_MYHD_MDP110;
@@ -380,9 +380,9 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 					snprintf(tl880dev->name, 64, "%s Unknown card %04x:%04x", tl880dev->name,
 						tl880dev->subsys_vendor_id, 
 						tl880dev->subsys_device_id);
-					write_register(tl880dev, 0x10190, 0x0cfffbff);
-					write_register(tl880dev, 0x10194, 0xefb00);
-					write_register(tl880dev, 0x10198, 0xe5900);
+					tl880_write_register(tl880dev, 0x10190, 0x0cfffbff);
+					tl880_write_register(tl880dev, 0x10194, 0xefb00);
+					tl880_write_register(tl880dev, 0x10198, 0xe5900);
 					tl880dev->card_type = TL880_CARD_MYHD_MDP120;
 					break;
 			}
@@ -401,9 +401,9 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 					tl880dev->card_type = TL880_CARD_WINTV_HD;
 					break;
 			}
-			write_register(tl880dev, 0x10190, 0x0cfffbff);
-			write_register(tl880dev, 0x10194, 0xefb00);
-			write_register(tl880dev, 0x10198, 0xe5900);
+			tl880_write_register(tl880dev, 0x10190, 0x0cfffbff);
+			tl880_write_register(tl880dev, 0x10194, 0xefb00);
+			tl880_write_register(tl880dev, 0x10198, 0xe5900);
 			break;
 		case PCI_SUBSYSTEM_VENDOR_ID_TELEMANN:
 		case PCI_SUBSYSTEM_VENDOR_ID_ZERO:
@@ -421,16 +421,16 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 					tl880dev->card_type = TL880_CARD_HIPIX;
 					break;
 			}
-			write_register(tl880dev, 0x10190, 0x0cfffbff);
-			write_register(tl880dev, 0x10194, 0xefb00);
-			write_register(tl880dev, 0x10198, 0xe5900);
+			tl880_write_register(tl880dev, 0x10190, 0x0cfffbff);
+			tl880_write_register(tl880dev, 0x10194, 0xefb00);
+			tl880_write_register(tl880dev, 0x10198, 0xe5900);
 			break;
 		default:
 			snprintf(tl880dev->name, 64, "Unknown TL880 card %04x:%04x",
 				tl880dev->subsys_vendor_id, tl880dev->subsys_device_id);
-			write_register(tl880dev, 0x10190, 0x0cfffbff);
-			write_register(tl880dev, 0x10194, 0xefb00);
-			write_register(tl880dev, 0x10198, 0xe5900);
+			tl880_write_register(tl880dev, 0x10190, 0x0cfffbff);
+			tl880_write_register(tl880dev, 0x10194, 0xefb00);
+			tl880_write_register(tl880dev, 0x10198, 0xe5900);
 			break;
 	}
 

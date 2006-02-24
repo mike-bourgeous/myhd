@@ -23,9 +23,8 @@ OSD Memory:
 
 The OSD supports multiple pixel formats.  The MyHD software uses a paletted
 format, frequently with 768x364 pixel images, for a total image length of
-0x44400.  The palette is possibly found at 0x44500 plus the image start.  If
-pixel data is not properly converted to big-endian, the pixels in an image
-will be shifted around.
+0x44400.  If pixel data is not properly converted to big-endian, the pixels in
+an image will be shifted around.  OSD layers may not overlap.
 
 In 24-bit formats, the pixel structure seems to be BGRA.  The alpha range is 0
 to 0x7f.  Values for alpha above 0x7f are clamped.  Accessing the memory as
@@ -56,7 +55,9 @@ value of register 1008c and first dword at location pointed to by 10084:
 						be the full width of the
 						screen, but this changes -
 						possibly based on a scaling
-						bit in another field.
+						bit in another field.  Is this
+						multiplied by 4 to get the
+						number of pixels?
 	00nnnnnn|nnnn0000|00000000|00000000	Seems to control the height of
 						the displayed image - lower
 						values crop the bottom part of
@@ -105,7 +106,8 @@ third dword at location pointed to by 10084:
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|nnnnnnnn|nnnnnnnn|nnnnnnnn	Memory offset of image
-	0000nn00|00000000|00000000|00000000	Pixel format
+	0000nnnn|00000000|00000000|00000000	Pixel format
+	10000000|00000000|00000000|00000000	Last display list entry
 
 fourth dword at location pointed to by 10084:
    Seems to control other source image parameters, including width scaling

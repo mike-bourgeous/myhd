@@ -6,6 +6,7 @@ all:
 	gcc -O2 -Wall regdump.c -o regdump -ggdb3
 	gcc -O2 -Wall memdump.c -o memdump -ggdb3
 	gcc -O2 -Wall memload.c -o memload -ggdb3
+	gcc -O2 -Wall memloadswab.c -o memloadswab -ggdb3
 	
 	gcc -O2 -Wall readmem.c -o readmem -ggdb3
 	gcc -O2 -Wall writemem.c -o writemem -ggdb3

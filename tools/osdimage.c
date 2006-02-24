@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
 	lmspace[0x2d8000 / 4] = 0x2d97000c;
 	lmspace[0x2d8004 / 4] = 0x70000000;
 	lmspace[0x2d8008 / 4] = 0xb0218000;
-	lmspace[0x2d800c / 4] = 0x160025c5;
+	lmspace[0x2d800c / 4] = 0x140025c5;
 
 	printf("Unmapping memory space\n");
 	munmap(memspace, 0x01000000);

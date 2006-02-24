@@ -102,18 +102,18 @@ void tl880_aux_load_dma_mbox(struct tl880_dev *tl880dev, struct tl880_dma_info *
 
 	if(dmainfo->field_10 != 0xff14) {
 		/* Write upper word */
-		write_register(tl880dev, 0x25750, dmainfo->field_14 >> 0x10);
+		tl880_write_register(tl880dev, 0x25750, dmainfo->field_14 >> 0x10);
 
 		/* Write lower word */
-		write_register(tl880dev, 0x25754, dmainfo->field_14 & 0xffff);
+		tl880_write_register(tl880dev, 0x25754, dmainfo->field_14 & 0xffff);
 	}
 
-	write_register(tl880dev, 0x25758, dmainfo->field_10);
-	write_register(tl880dev, 0x25718, dmainfo->phys_addr >> 0x10);
-	write_register(tl880dev, 0x2571c, dmainfo->phys_addr & 0xffff);
-	write_register(tl880dev, 0x25720, dmainfo->field_c << 2);
-	write_register(tl880dev, 0x25724, dmainfo->field_8 << 1);
-	write_register(tl880dev, 0x25728, dmainfo->field_4);
+	tl880_write_register(tl880dev, 0x25758, dmainfo->field_10);
+	tl880_write_register(tl880dev, 0x25718, dmainfo->phys_addr >> 0x10);
+	tl880_write_register(tl880dev, 0x2571c, dmainfo->phys_addr & 0xffff);
+	tl880_write_register(tl880dev, 0x25720, dmainfo->field_c << 2);
+	tl880_write_register(tl880dev, 0x25724, dmainfo->field_8 << 1);
+	tl880_write_register(tl880dev, 0x25728, dmainfo->field_4);
 }
 
 void tl880_load_dma_descriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)

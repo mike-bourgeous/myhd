@@ -60,10 +60,10 @@
 /*** Driver functions ***/
 
 /* tl880reg.c */
-unsigned long read_register(struct tl880_dev *tl880dev, unsigned long reg);
-void write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigned long value);
-unsigned long read_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit);
-void write_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit, unsigned long value);
+unsigned long tl880_read_register(struct tl880_dev *tl880dev, unsigned long reg);
+void tl880_write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigned long value);
+unsigned long tl880_read_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit);
+void tl880_write_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit, unsigned long value);
 
 #endif /* __KERNEL__ */
 

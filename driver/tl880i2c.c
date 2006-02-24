@@ -26,30 +26,30 @@ static void tl880_i2c_set_scl(void *data, int state)
 		/* MyHD */
 		default:
 		case 0:
-			write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, 0);
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, ~state);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, 0);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, ~state);
 			break;
 		case 1:
-			write_regbits(i2cbus->dev, 0x10194, 0x12, 0x12, 1);
-			write_regbits(i2cbus->dev, 0x10198, 0x12, 0x12, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x12, 0x12, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x12, 0x12, state);
 			break;
 		case 2:
-			write_regbits(i2cbus->dev, 0x10198, 0x17, 0x17, 0);
-			write_regbits(i2cbus->dev, 0x10194, 0x17, 0x17, ~state);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x17, 0x17, 0);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x17, 0x17, ~state);
 			break;
 		/* WinTV-HD */
 		case 3:	// NxtWave_Flag != 0
-			write_regbits(i2cbus->dev, 0x10194, 3, 3, 1);
-			write_regbits(i2cbus->dev, 0x10198, 3, 3, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 3, 3, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 3, 3, state);
 			break;
 		case 4: // NxtWave_Flag == 0
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 1);
-			write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, state);
 			break;
 		/* HiPix */
 		case 5:
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 1);
-			write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, state);
 			break;
 	}
 
@@ -74,29 +74,29 @@ static void tl880_i2c_set_sda(void *data, int state)
 		/* MyHD */
 		default:
 		case 0:
-			write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, 0);
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, ~state);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, 0);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, ~state);
 			break;
 		case 1:
-			write_regbits(i2cbus->dev, 0x10198, 0x11, 0x11, state);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x11, 0x11, state);
 			break;
 		case 2:
-			write_regbits(i2cbus->dev, 0x10198, 0x16, 0x16, 0);
-			write_regbits(i2cbus->dev, 0x10194, 0x16, 0x16, ~state);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x16, 0x16, 0);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x16, 0x16, ~state);
 			break;
 		/* WinTV-HD */
 		case 3:	// NxtWave_Flag != 0
-			write_regbits(i2cbus->dev, 0x10194, 1, 1, 1);
-			write_regbits(i2cbus->dev, 0x10198, 1, 1, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 1, 1, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 1, 1, state);
 			break;
 		case 4: // NxtWave_Flag == 0
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 1);
-			write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1a, 0x1a, state);
 			break;
 		/* HiPix */
 		case 5:
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 1);
-			write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, state);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 1);
+			tl880_write_regbits(i2cbus->dev, 0x10198, 0x1b, 0x1b, state);
 			break;
 	}
 
@@ -121,29 +121,29 @@ static int tl880_i2c_get_scl(void *data)
 		/* MyHD */
 		default:
 		case 0:
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
 			break;
 		case 1:
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x12, 0x12);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x12, 0x12);
 			break;
 		case 2:
-			write_regbits(i2cbus->dev, 0x10194, 0x17, 0x17, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x17, 0x17);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x17, 0x17, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x17, 0x17);
 			break;
 		/* WinTV-HD */
 		case 3: // NxtWave_Flag != 0
-			write_regbits(i2cbus->dev, 0x10194, 3, 3, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 3, 3);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 3, 3, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 3, 3);
 			break;
 		case 4: // NxtWave_Flag == 0
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
 			break;
 		/* HiPix */
 		case 5:
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
 			break;
 	}
 
@@ -168,28 +168,28 @@ static int tl880_i2c_get_sda(void *data)
 		/* MyHD */
 		default:
 		case 0:
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
 			break;
 		case 1:
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x10, 0x10);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x10, 0x10);
 			break;
 		case 2:
-			write_regbits(i2cbus->dev, 0x10194, 0x16, 0x16, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x16, 0x16);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x16, 0x16, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x16, 0x16);
 			break;
 		/* WinTV-HD */
 		case 3: // NxtWave_Flag != 0
-			value = read_regbits(i2cbus->dev, 0x1019c, 0, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0, 0);
 			break;
 		case 4: // NxtWave_Flag == 0
-			write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1a, 0x1a, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1a, 0x1a);
 			break;
 		/* HiPix */
 		case 5:
-			write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
-			value = read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
+			tl880_write_regbits(i2cbus->dev, 0x10194, 0x1b, 0x1b, 0);
+			value = tl880_read_regbits(i2cbus->dev, 0x1019c, 0x1b, 0x1b);
 			break;
 	}
 
