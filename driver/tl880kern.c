@@ -260,13 +260,44 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 }
 
 
-
 static ssize_t tl880_read(struct file *file, char *buf,
 			  size_t count, loff_t *ppos)
 {
-	struct inode *char_inode = file->f_dentry->d_inode;
+	struct inode *char_inode;
+	struct tl880_dev *tl880dev;
+	enum { TL880_MEM, TL880_REG, TL880_UNK } readtype;
+
+	if(CHECK_NULL(file) || CHECK_NULL(buf)) {
+		return -EINVAL;
+	}
+	
+	char_inode = file->f_dentry->d_inode;
+	
 	printk(KERN_DEBUG "tl880: tl880_read called for device %u, %u, card number %u\n",
 		imajor(char_inode), iminor(char_inode), (iminor(char_inode) & DEV_MASK) / 4);
+
+	/* Find card by minor number */
+	if((tl880dev = find_tl880(iminor(char_inode) / 4)) == NULL) {
+		printk(KERN_ERR "tl880: couldin't find card %u (minor %u)\n", iminor(char_inode) / 4, iminor(char_inode));
+		return -ENODEV;
+	}
+
+	/* Determine which card function is requested by minor number */
+	switch(iminor(char_inode) & FUNC_MASK) {
+		case 0:
+			readtype = TL880_MEM;
+			break;
+		case 1:
+			readtype = TL880_REG;
+			break;
+		case 2:
+			readtype = TL880_UNK;
+			break;
+		default:
+			printk(KERN_WARNING "tl880: read: invalid minor number - no function exists for %u\n",
+				iminor(char_inode) & FUNC_MASK);
+			return -ENODEV;
+	}
 
 	return -EINVAL;
 }
@@ -286,7 +317,7 @@ static ssize_t tl880_write(struct file *file, const char *buf,
 static int tl880_open(struct inode *inode, struct file *file)
 {
 	if(CHECK_NULL(inode) || CHECK_NULL(file)) {
-		printk(KERN_ERR "tl880: tl880_release given null parameters\n");
+		printk(KERN_ERR "tl880: tl880_open given null parameters\n");
 		return 0;
 	}
 

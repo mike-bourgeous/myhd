@@ -20,8 +20,8 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 			;
 		} else if(tl880dev->card_type >= 2) {
 			// MspSetInput(9);
-			cmdarg = AUDIO_EXTERN;
-			tl880_call_i2c_clients(tl880dev, AUDC_SET_INPUT, &cmdarg);
+			cmdarg = TVAUDIO_INPUT_EXTERN;
+			tl880_call_i2c_clients(tl880dev, VIDIOC_S_AUDIO, &cmdarg);
 		}
 		a = 1;
 	} else if(a == 3) {
@@ -30,8 +30,8 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 			;
 		} else 	if(tl880dev->card_type >= 2) {
 			// MspSetInput(9);
-			cmdarg = AUDIO_EXTERN;
-			tl880_call_i2c_clients(tl880dev, AUDC_SET_INPUT, &cmdarg);
+			cmdarg = TVAUDIO_INPUT_EXTERN;
+			tl880_call_i2c_clients(tl880dev, VIDIOC_S_AUDIO, &cmdarg);
 		}
 		a = 3;
 	} else {
@@ -40,8 +40,8 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 			;
 		} else if(tl880dev->card_type >= 2) {
 			// MspSetInput(6);
-			cmdarg = AUDIO_TUNER;
-			tl880_call_i2c_clients(tl880dev, AUDC_SET_INPUT, &cmdarg);
+		        cmdarg = TVAUDIO_INPUT_TUNER;
+			tl880_call_i2c_clients(tl880dev, VIDIOC_S_AUDIO, &cmdarg);
 		}
 		a = 2;
 	}

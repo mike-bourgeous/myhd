@@ -1,7 +1,7 @@
 /* 
  * Memory writing support for TL880-based cards (possibly also TL850)
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2006 Mike Bourgeous <nitrogen@slimetech.com>
  */
 #include "tl880.h"
 

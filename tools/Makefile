@@ -1,6 +1,7 @@
 all:
 	gcc -O2 -Wall randram.c -o randram -ggdb3
 	gcc -O2 -Wall striperam.c -o striperam -ggdb3
+	gcc -O2 -Wall setalpha.c -o setalpha -ggdb3
 	gcc -O2 -Wall rampram.c -o rampram -ggdb3
 	gcc -O2 -Wall regload.c -o regload -ggdb3
 	gcc -O2 -Wall regdump.c -o regdump -ggdb3
@@ -40,6 +41,11 @@ clean:
 	rm -f randram regload regdump readreg setbits write4reg \
 	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
 	striperam ioccursor randosd osdtest memdump osdimage \
-	memload rampram hexcount readmem writemem randreg
+	memload rampram hexcount readmem writemem randreg setalpha \
+	memloadswab
+
+	make -C dpc clean
+	make -C example clean
+	make -C firmware clean
 
 

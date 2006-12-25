@@ -58,5 +58,6 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev)
 	return list;
 }
 
+EXPORT_SYMBOL(set_bits);
 EXPORT_SYMBOL(find_tl880);
 

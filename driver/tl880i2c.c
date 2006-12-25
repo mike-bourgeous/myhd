@@ -254,7 +254,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 	}
 
 	printk(KERN_DEBUG "tl880: I2C client %s has attached to bus %i on card %i\n", client->name, i2cbus->busno, tl880dev->id);
-	printk(KERN_DEBUG "tl880: I2C client driver is %s (id %i)\n", client->driver->name, client->driver->id);
+	printk(KERN_DEBUG "tl880: I2C client driver is %s (id %i)\n", client->name, client->driver->id);
 
 	for(i = 0; i < I2C_CLIENTS_MAX; i++) {
 		if(!i2cbus->i2c_clients[i]) {
@@ -294,7 +294,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 		tuner = i2c_get_clientdata(client);
 
 		printk(KERN_INFO "tl880: Tuner info: type: %u, freq: %u (want %u), has_signal: %i\n",
-				tuner->type, tuner->freq, cmdval,
+				tuner->type, tuner->tv_freq, cmdval,
 				tuner->has_signal ? tuner->has_signal(client) : -1);
 	} else if(client->driver->id == I2C_DRIVERID_MSP3400 || client->driver->id == I2C_DRIVERID_TVAUDIO) {
 		struct video_audio audio_state;

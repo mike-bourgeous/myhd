@@ -1,3 +1,11 @@
+2006-12-24	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added compilation fixes for 2.6.17 by Jason P. Matthews.
+
+2006-03-23	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Started working on read() function for /dev/tl880/*.
+
 2006-02-23	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Renamed some functions to make them exportable without polluting
