@@ -33,8 +33,9 @@ mk_tldev() {
 	done
 	
 	# Set ownership and permissions
-	chown :$group /dev/tl880/{mem,reg,unk}*
-	chmod 0660 /dev/tl880/{mem,reg,unk}*
+	ls /dev/tl880/
+	chown :$group /dev/tl880/* 
+	chmod 0660 /dev/tl880/*
 
 	return 0
 }

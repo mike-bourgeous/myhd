@@ -625,12 +625,12 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	aux_reset();
-	/*
 	set_sync_720x480i();
 	set_aux_720x480i(1920, 1080, 1);
-	*/
+	/*
 	set_sync_1024x768p();
 	set_aux_1024x768p(1920, 1080, 1);
+	*/
 
 	/* 1920x1080i doesn't work (yet) */
 	/*

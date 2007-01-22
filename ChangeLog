@@ -1,3 +1,15 @@
+2007-01-22	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+	
+	* Fixed interrupts.
+	* Added another bit of documentation to register 10008.
+	* Changed tl880_mkdev script to fix chown/chmod.
+	* Compilation changes for 2.6.19 (may have broken earlier versions).
+
+2007-01-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Removed __init from interrupt handlers.
+	* Check some __must_check values.
+
 2006-12-24	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added compilation fixes for 2.6.17 by Jason P. Matthews.

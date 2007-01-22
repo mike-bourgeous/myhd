@@ -174,7 +174,6 @@ void tl880_bh(unsigned long tl880_id)
 /* Interrupt handler */
 irqreturn_t tl880_irq(int irq, void *dev_id)
 {
-#if 0
 	struct tl880_dev *tl880dev;
 	unsigned long int_type, int_mask;
 
@@ -191,7 +190,6 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	/* Disable interrupts while processing */
 	tl880_write_register(tl880dev, 4, 0);
 
-
 	/* If no bits in type and mask match, then the interrupt was for some other device */
 	if(!(int_type & int_mask)) {
 		if(tl880dev->elseint == 0) {
@@ -201,8 +199,6 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 		/* tl880_write_register(tl880dev, 4, int_mask); */
 		return IRQ_NONE;
 	}
-
-	printk(KERN_DEBUG "tl880: Processing interrupt\n");
 
 	/* If this card is already processing an interrupt, return with interrupts disabled */
 	if(tl880dev->int_type) {
@@ -293,7 +289,6 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 		/* Re-enable interrupts */
 		tl880_write_register(tl880dev, 4, tl880dev->int_mask);
 	}
-#endif
 
 	return IRQ_HANDLED;
 }

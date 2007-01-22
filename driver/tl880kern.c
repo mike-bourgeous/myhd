@@ -694,7 +694,7 @@ static int tl880_configure(struct pci_dev *dev)
 	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
 
 
-	printk(KERN_DEBUG "tl880: (NOT?) calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+	printk(KERN_DEBUG "tl880: calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
 		tl880dev->pcidev->irq, tl880_irq/*_noop*/, /* IRQF_DISABLED | */IRQF_SHARED, "tl880", tl880dev);
 	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, IRQF_SHARED, "tl880", tl880dev)) != 0) {
 	/*
@@ -746,10 +746,7 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 	tl880_deinit_i2c(tl880dev);
 
 	if(tl880dev->irq) {
-		/*
 		free_irq(tl880dev->pcidev->irq, tl880dev);
-		*/
-		free_irq(tl880dev->pcidev->irq, NULL);
 		tl880dev->irq = 0;
 	}
 

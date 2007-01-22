@@ -546,9 +546,13 @@ DPC 10000-10200
 10008 DPC interrupt mask bitfield
 1000C DPC interrupt type bitfield
 
-	00000100 isr_VideoSync (vertical retrace?)
-	00100000 IntDpcEof0 (end of top field?)
-	01000000 IntDpcEof1 (end of bottom field?)
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000100 	isr_VideoSync (unknown function - perhaps analog input's sync)
+	00000000|00000000|00000000|00100000	IntDpcEof0 (Vertical sync - top field)
+	00000000|00000000|00000000|01000000	IntDpcEof1 (Vertical sync - bottom field)
+	00000000|00000000|00000010|00000000	Horizontal sync interrupt ? (very fast)
 
 	bit 9 may be preview client/aux video?
 	bit 0xa may be capture client/aux video?

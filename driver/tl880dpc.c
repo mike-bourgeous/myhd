@@ -332,6 +332,14 @@ void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
 {
 	unsigned int playing_dvd = 0;
 
+	static unsigned long dpc_sync_count = 0;
+	static unsigned long last_jiffies = 0;
+	unsigned long this_jiffies;
+
+	this_jiffies = jiffies;
+	printk(KERN_DEBUG "tl880: dpc video sync interrupt - count %lu, time ~%lums\n", dpc_sync_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	last_jiffies = this_jiffies;
+
 	if(playing_dvd) {
 		// tl880_dpc_video_sync_dvd(tl880dev);
 	} else {
@@ -370,11 +378,9 @@ void tl880_dpc_field0(struct tl880_dev *tl880dev)
 		/* CDma::VopIsrOdd(); */
 	}
 
-	/*
 	this_jiffies = jiffies;
 	printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu, time ~%lums\n", dpc_eof0_count, (this_jiffies - last_jiffies) * 1000 / HZ);
 	last_jiffies = this_jiffies;
-	*/
 }
 
 void tl880_dpc_field1(struct tl880_dev *tl880dev)
@@ -393,11 +399,9 @@ void tl880_dpc_field1(struct tl880_dev *tl880dev)
 	/* ecx = (cJanus->0)->0x110; */
 	/* CDma::VopIsrEven(); */
 
-	/*
 	this_jiffies = jiffies;
 	printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu, time ~%lums\n", dpc_eof1_count, (this_jiffies - last_jiffies) * 1000 / HZ);
 	last_jiffies = this_jiffies;
-	*/
 }
 
 int tl880_dpc_int(struct tl880_dev *tl880dev)
@@ -431,11 +435,13 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 
 	tl880dev->dpc_type = 0;
 
+#if 0
 	/* Since this interrupt isn't fully handled yet, disable it after a while */
 	if(tl880dev->dpc_count >= 600) {
 		tl880_write_register(tl880dev, 0x10008, 0);
 		printk(KERN_DEBUG "tl880: ~%lu dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
 	}
+#endif /* 0 */
 
 	return 0;
 }

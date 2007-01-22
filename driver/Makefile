@@ -20,6 +20,7 @@ PWD     := $(shell pwd)
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
+	chmod +x tl880_mkdev tl880_rmdev
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean

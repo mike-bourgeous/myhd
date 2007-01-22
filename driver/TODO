@@ -9,8 +9,9 @@ Clean up/organize debugging statements in general
 Interface to existing drivers for ancillary chips, incl. NXT2000
 Implement local i2c functions for controlling chips without an external driver
 Add read() function to tl880/mem? device to allow hexedit to work on TL880 memory
-Fix interrupts
-
+Figure out DPC PLL constant register.
+Get the new vpx3220 in the kernel to talk to the VPX chip on the MyHD.
+Keep the tuner module from attaching to the VPX's i2c address.
 
 vim: tw=80
 
