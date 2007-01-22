@@ -4,6 +4,7 @@
 	* Added another bit of documentation to register 10008.
 	* Changed tl880_mkdev script to fix chown/chmod.
 	* Compilation changes for 2.6.19 (may have broken earlier versions).
+	* Fixed compilation on pre-2.6.19 kernels.
 
 2007-01-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

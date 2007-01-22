@@ -690,9 +690,8 @@ static int tl880_configure(struct pci_dev *dev)
 	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
 		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
 	}
-
+	
 	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
-
 
 	printk(KERN_DEBUG "tl880: calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
 		tl880dev->pcidev->irq, tl880_irq/*_noop*/, /* IRQF_DISABLED | */IRQF_SHARED, "tl880", tl880dev);

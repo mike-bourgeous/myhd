@@ -172,7 +172,11 @@ void tl880_bh(unsigned long tl880_id)
 
 
 /* Interrupt handler */
+#ifdef PRE_2619
+irqreturn_t tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
+#else /* IRQF_SHARED */
 irqreturn_t tl880_irq(int irq, void *dev_id)
+#endif /* IRQF_SHARED */
 {
 	struct tl880_dev *tl880dev;
 	unsigned long int_type, int_mask;

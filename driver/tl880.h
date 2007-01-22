@@ -1,7 +1,7 @@
 /* 
  * Driver for TL880-based cards (possibly also TL850)
  *
- * (c) 2003-2005 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  */
 
 #ifndef _TL880_H_
@@ -44,6 +44,17 @@
 #include <media/tvaudio.h>
 
 /*** Driver definitions ***/
+
+/* Compatibility with pre-2.6.19 kernels */
+#ifndef IRQF_SHARED
+#define PRE_2619
+#define IRQF_SHARED SA_SHIRQ
+#endif /* IRQF_SHARED */
+#ifndef IRQF_DISABLED
+#define IRQF_DISABLED SA_INTERRUPT
+#endif /* IRQF_DISABLED */
+
+
 
 /* Devices */
 #define DEV_COUNT				64
@@ -257,7 +268,12 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, unsigned char state, unsigned char b, int c);
 
 /* tl880int.c */
+#ifdef PRE_2619 /* Pre-2.6.19 compatibility */
+#warning Using old-style interrupt routine
+irqreturn_t tl880_irq(int irq, void *dev_id, struct pt_regs *regs);
+#else /* IRQF_SHARED */
 irqreturn_t tl880_irq(int irq, void *dev_id);
+#endif /* IRQF_SHARED */
 void tl880_bh(unsigned long tl880_id);
 void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 
@@ -291,7 +307,6 @@ unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem);
 void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value);
 unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
-
 
 
 #endif /* __KERNEL__ */
