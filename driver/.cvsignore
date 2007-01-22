@@ -1,0 +1,7 @@
+*.cmd
+cscope.*.out
+*.symvers
+*.ko
+*.mod.c
+.tmp_versions
+
