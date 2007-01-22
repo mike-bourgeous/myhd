@@ -4,10 +4,10 @@
  * Copyright (C) 2003-2005 Mike Bourgeous <i_am_nitrogen@hotmail.com>
  *
  * Reverse engineering, all development:
- *   Mike Bourgeous <nitrogen@slimetech.com>
+ *   Mike Bourgeous <nitrogen at users.sourceforge.net>
  *   
  * Original driver framework (based on Stradis driver, mostly gone):
- *   Mark Lehrer <mark@knm.org>
+ *   Mark Lehrer <mark at knm.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 
 /* Driver global variables */
 unsigned int debug;
-unsigned int tl_major;
+unsigned int tl_major = 0;
 
 /*****/
 /* Local variables */
@@ -144,7 +144,9 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			do {
 				unsigned long wrprm[2];
 				argl = (unsigned long *)arg;
-				copy_from_user(wrprm, argl, sizeof(unsigned long) * 2);
+				if(copy_from_user(wrprm, argl, sizeof(unsigned long) * 2)) {
+					printk(KERN_ERR "tl880: copy from user returned nonzero for writereg\n");
+				}
 				tl880_write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
@@ -152,7 +154,9 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			do {
 				unsigned long vipstate;
 				argl = (unsigned long *)arg;
-				copy_from_user(&vipstate, argl, sizeof(unsigned long));
+				if(copy_from_user(&vipstate, argl, sizeof(unsigned long))) {
+					printk(KERN_ERR "tl880: copy from user returned nonzero for setvip\n");
+				}
 				tl880_set_vip(tl880dev, vipstate);
 			} while(0);
 			break;
@@ -160,7 +164,9 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 			do {
 				unsigned long cursorpos;
 				argl = (unsigned long *)arg;
-				copy_from_user(&cursorpos, argl, sizeof(unsigned long));
+				if(copy_from_user(&cursorpos, argl, sizeof(unsigned long))) {
+					printk(KERN_ERR "tl880: copy from user returned nonzero for setcursorpos\n");
+				}
 				tl880_write_register(tl880dev, 0x10104, cursorpos);
 			} while(0);
 			break;
@@ -568,11 +574,13 @@ static void tl880_delete_dev(struct tl880_dev *tl880dev)
 	kfree(tl880dev);
 }
 
+#if 0
 /* Dummy interrupt handler */
-static irqreturn_t __init tl880_irq_noop(int irq, void *dev_id, struct pt_regs *regs)
+static irqreturn_t tl880_irq_noop(int irq, void *dev_id)
 {
 	return IRQ_HANDLED;
 }
+#endif
 
 /* Set up data specific to each TL880 card in the system */
 static int tl880_configure(struct pci_dev *dev)
@@ -603,9 +611,9 @@ static int tl880_configure(struct pci_dev *dev)
 
 	/* Enable bus master setting (just in case?) */
 	pci_set_master(dev);
-	
+
 	/* Verify 32-bit DMA */
-	if((result = pci_set_dma_mask(dev, 0xffffffff))) {
+	if((result = pci_set_dma_mask(dev, 0x00000000ffffffffULL))) {
 		printk(KERN_ERR "tl880: card does not support 32-bit DMA\n");
 		tl880_delete_dev(tl880dev);
 		return result;
@@ -685,20 +693,19 @@ static int tl880_configure(struct pci_dev *dev)
 
 	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
 
-	printk(KERN_DEBUG "tl880: NOT calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
-		tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev);
+
+	printk(KERN_DEBUG "tl880: (NOT?) calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+		tl880dev->pcidev->irq, tl880_irq/*_noop*/, /* IRQF_DISABLED | */IRQF_SHARED, "tl880", tl880dev);
+	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, IRQF_SHARED, "tl880", tl880dev)) != 0) {
 	/*
-	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, SA_INTERRUPT | SA_SHIRQ, "tl880", tl880dev)) < 0) {
+	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, IRQF_SHARED, "tl880", tl880dev)) != 0) {
 	*/
-	/*
-	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, SA_INTERRUPT | SA_SHIRQ, "tl880", NULL)) != 0) {
-		printk(KERN_ERR "tl880: could not set irq handler for irq %i\n", tl880dev->pcidev->irq);
+		printk(KERN_ERR "tl880: could not set irq handler for irq %d: %d\n", tl880dev->pcidev->irq, result);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return result;
 	}
 	tl880dev->irq = dev->irq;
-	*/
 
 	if(list) {
 		/* Look for the end of the linked list */
@@ -742,9 +749,7 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 		/*
 		free_irq(tl880dev->pcidev->irq, tl880dev);
 		*/
-		/*
 		free_irq(tl880dev->pcidev->irq, NULL);
-		*/
 		tl880dev->irq = 0;
 	}
 
@@ -865,7 +870,7 @@ void tl880_remove(struct pci_dev *dev)
 }
 
 
-static int __init tl880_init(void)
+static int tl880_init(void)
 {
 	int result = 0;
 

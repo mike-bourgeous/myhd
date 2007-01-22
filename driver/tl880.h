@@ -14,6 +14,7 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/version.h>
+#include <linux/dma-mapping.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
 #include <linux/fs.h>
@@ -256,8 +257,8 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, unsigned char state, unsigned char b, int c);
 
 /* tl880int.c */
-irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs);
-void __init tl880_bh(unsigned long tl880_id);
+irqreturn_t tl880_irq(int irq, void *dev_id);
+void tl880_bh(unsigned long tl880_id);
 void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 
 /* tl880vip.c */

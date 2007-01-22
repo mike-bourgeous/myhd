@@ -15,7 +15,7 @@ obj-m := $(MODULE_NAME).o
 # Second pass, the actual build.
 else
 KVER	?= $(shell uname -r)
-KDIR    := /lib/modules/$(KVER)/build
+KDIR    := /lib/modules/$(KVER)/source
 PWD     := $(shell pwd)
 
 all:

@@ -355,9 +355,8 @@ static struct i2c_algo_bit_data tl880_i2c_algo_template = {
 	setscl:  tl880_i2c_set_scl,
 	getsda:  tl880_i2c_get_sda,
 	getscl:  tl880_i2c_get_scl,
-	udelay:  10,
-	mdelay:  10, 
-	timeout: 100
+	udelay:  25,
+	timeout: (HZ / 5)
 };
 
 static struct i2c_adapter tl880_i2c_adap_template = {

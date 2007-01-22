@@ -77,7 +77,7 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 	return 0;
 }
 
-void __init tl880_bh(unsigned long tl880_id)
+void tl880_bh(unsigned long tl880_id)
 {
 	struct tl880_dev *tl880dev;
 
@@ -172,8 +172,9 @@ void __init tl880_bh(unsigned long tl880_id)
 
 
 /* Interrupt handler */
-irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
+irqreturn_t tl880_irq(int irq, void *dev_id)
 {
+#if 0
 	struct tl880_dev *tl880dev;
 	unsigned long int_type, int_mask;
 
@@ -189,6 +190,7 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 
 	/* Disable interrupts while processing */
 	tl880_write_register(tl880dev, 4, 0);
+
 
 	/* If no bits in type and mask match, then the interrupt was for some other device */
 	if(!(int_type & int_mask)) {
@@ -291,6 +293,7 @@ irqreturn_t __init tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
 		/* Re-enable interrupts */
 		tl880_write_register(tl880dev, 4, tl880dev->int_mask);
 	}
+#endif
 
 	return IRQ_HANDLED;
 }
