@@ -1,5 +1,5 @@
 MyHD driver and utility package  --  http://myhd.sourceforge.net/
-Copyright 2003-2006, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
+Copyright 2003-2007, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
 Licensed under the GPL.
 
 doc/
@@ -9,6 +9,8 @@ driver/
 	the card and enables I2C)
 tools/
 	Use these to "play" with the card and figure out how stuff works.
+tl880fb/
+	Preliminary framebuffer driver.
 
 There are step-by-step instructions on compiling the driver and running tests at
 http://myhd.sourceforge.net/howtohelp.php.
