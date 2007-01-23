@@ -197,19 +197,26 @@ static int tl880_i2c_get_sda(void *data)
 }
 
 /* Based on bttv_call_i2c_clients from bttv driver */
-void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg)
+int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg)
 {
 	int i;
 	int j;
+	int result;
+	unsigned long oldarg = 0;
+	int done = 0;
 
 	if(!tl880dev) {
 		printk(KERN_ERR "tl880: null tl880dev in tl880_call_i2c_clients\n");
-		return;
+		return -EINVAL;
 	}
 
 	if(!tl880dev->i2cbuses) {
 		printk(KERN_ERR "tl880: no i2cbuses found in tl880_call_i2c_clients on card %i\n", tl880dev->id);
-		return;
+		return -ENOENT;
+	}
+
+	if(arg != NULL) {
+		oldarg = *(unsigned long *)arg;
 	}
 
 	for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
@@ -220,9 +227,27 @@ void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *
 			if (!tl880dev->i2cbuses[j].i2c_clients[i]->driver->command) {
 				continue;
 			}
-			tl880dev->i2cbuses[j].i2c_clients[i]->driver->command(tl880dev->i2cbuses[j].i2c_clients[i], cmd, arg);
+			printk(KERN_DEBUG "tl880: sending command to i2c client %s (id %d, bus %d)\n", 
+					tl880dev->i2cbuses[j].i2c_clients[i]->name, i, j);
+			result = tl880dev->i2cbuses[j].i2c_clients[i]->driver->command(tl880dev->i2cbuses[j].i2c_clients[i], cmd, arg);
+			if(result) {
+				printk(KERN_INFO "tl880: nonzero return from i2c client %s (id %d, bus %d): %d\n", 
+					tl880dev->i2cbuses[j].i2c_clients[i]->name, i, j, result);
+				/* done = 1; */
+			}
+			if(arg != NULL && *(unsigned long *)arg != oldarg) {
+				printk(KERN_INFO "tl880: argument changed by i2c client %s (id %d, bus %d): from 0x%lx to 0x%lx\n", 
+					tl880dev->i2cbuses[j].i2c_clients[i]->name, i, j, oldarg, *(unsigned long *)arg);
+				/* done = 1; */
+				*(unsigned long *)arg = oldarg;
+			}
+			if(done) {
+				return result;
+			}
 		}
 	}
+
+	return 0;
 }
 
 

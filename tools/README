@@ -97,10 +97,17 @@ hexcount
 	Counts in hexadecimal.  This is a utility to replace "seq" for use in
 	shell scripts.
 
+setalpha
+	Sets every fourth bit of the tl880 framebuffer to 0xff - see source.
+
+ioctl
+	Facilitates testing of tl880 ioctls and tl880/i2c driver interfaces
+	(such as tuner, demod, etc.).
+
 testdpcint.sh
 	Enables video output and activates DPC interrupts to test the DPC
 	interrupt handler.  You need to compile all the other tools first to use
-	this script.  NOTE: BROKEN IN THIS RELEASE.
+	this script.
 
 dpc2rand.sh
 	Randomizes the DPC2 registers (see tl880doc.txt).
@@ -111,6 +118,10 @@ dpc2dump.sh
 
 osd.sh
 	Turns on the display and runs some OSD tests.
+
+testioctl.sh
+	Tests ioctl passing by attempting to set the tuner to channel 3 and
+	displaying status in the system log.
 
 
 vim: tw=80

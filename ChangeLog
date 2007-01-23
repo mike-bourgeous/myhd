@@ -5,6 +5,9 @@
 	* Changed tl880_mkdev script to fix chown/chmod.
 	* Compilation changes for 2.6.19 (may have broken earlier versions).
 	* Fixed compilation on pre-2.6.19 kernels.
+	* Added ioctl tool and testioctl.sh test script.
+	* Changed ioctl behavior to pass unknown values to i2c clients.
+	* Removed an unnecessary forward declaration.
 
 2007-01-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

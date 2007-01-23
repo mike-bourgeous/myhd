@@ -103,7 +103,6 @@
 
 /*** Driver types ***/
 struct tl880_dev;
-struct tl880_i2c_bus;
 
 struct tl880_i2c_bus {
 	int busid;	/* bus access type */
@@ -201,25 +200,25 @@ struct tl880_dev {
  * Read register IOCTL - register is read from parameter, then the value read
  * is written back to the parameter.  Single unsigned long.
  */
-#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned long *)
+#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned int *)
 
 /*
  * Write register IOCTL - register is read from parameter[0], the value to
- * write is read from parameter[1].  Array [2] unsigned long.
+ * write is read from parameter[1].  Array [2] unsigned int.
  */
-#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned long *)
+#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned int *)
 
 /*
  * VIP state IOCTL - parameter is a pointer to VIP state int (0 off, 1 on, 2
  * special?)
  */
-#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned long *)
+#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned int *)
 
 /*
- * Set cursor position IOCTL - cursor position is packed into unsigned long
+ * Set cursor position IOCTL - cursor position is packed into unsigned int
  * as two shorts - i.e. (x & 0xffff) | (y << 16)
  */
-#define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, unsigned long *)
+#define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, unsigned int *)
 
 
 #ifdef __KERNEL__
@@ -239,7 +238,7 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev);
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);
 void tl880_deinit_i2c(struct tl880_dev *tl880dev);
-void tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg);
+int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg);
 
 /* tl880ni2c.c */
 int do_i2c_read_byte(struct tl880_i2c_bus *i2cbus, unsigned char *data);

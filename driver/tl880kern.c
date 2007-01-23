@@ -88,15 +88,15 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		       unsigned int cmd, unsigned long arg)
 {
 	struct tl880_dev *tl880dev;
-	unsigned long *argl;
+	u32 *argl;
 	int err = 0;
 
 	if(CHECK_NULL(file) || CHECK_NULL(file)) {
 		return -EINVAL;
 	}
 
-	/* The & DEV_MASK part is not necessary because of the / 4 */
-	tl880dev = find_tl880((iminor(inode) & DEV_MASK) / 4);
+	/* The & DEV_MASK part is not necessary because of the division by 4 */
+	tl880dev = find_tl880((iminor(inode) & DEV_MASK) >> 2);
 
 	if(tl880dev == NULL) {
 		printk(KERN_ERR "tl880: unable to find card for minor %u\n", iminor(inode));
@@ -137,43 +137,50 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 	switch (cmd) {
 		/* The do {} while(0); allows the use of very local variables */
 		case TL880IOCREADREG:
-			argl = (unsigned long *)arg;
+			/* Read from TL880 register */
+			argl = (u32 *)arg;
 			__put_user(tl880_read_register(tl880dev, *argl), argl);
 			break;
 		case TL880IOCWRITEREG:
+			/* Write to TL880 register */
 			do {
-				unsigned long wrprm[2];
-				argl = (unsigned long *)arg;
-				if(copy_from_user(wrprm, argl, sizeof(unsigned long) * 2)) {
+				u32 wrprm[2];
+				argl = (u32 *)arg;
+				if(copy_from_user(wrprm, argl, sizeof(u32) * 2)) {
 					printk(KERN_ERR "tl880: copy from user returned nonzero for writereg\n");
 				}
 				tl880_write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
 		case TL880IOCSETVIP:
+			/* Set TL880 VIP (VESA Interface Port??) state */
 			do {
-				unsigned long vipstate;
-				argl = (unsigned long *)arg;
-				if(copy_from_user(&vipstate, argl, sizeof(unsigned long))) {
+				u32 vipstate;
+				argl = (u32 *)arg;
+				if(copy_from_user(&vipstate, argl, sizeof(u32))) {
 					printk(KERN_ERR "tl880: copy from user returned nonzero for setvip\n");
 				}
 				tl880_set_vip(tl880dev, vipstate);
 			} while(0);
 			break;
 		case TL880IOCSETCURSORPOS:
+			/* Set TL880 mouse cursor position */
 			do {
-				unsigned long cursorpos;
-				argl = (unsigned long *)arg;
-				if(copy_from_user(&cursorpos, argl, sizeof(unsigned long))) {
+				u32 cursorpos;
+				argl = (u32 *)arg;
+				if(copy_from_user(&cursorpos, argl, sizeof(u32))) {
 					printk(KERN_ERR "tl880: copy from user returned nonzero for setcursorpos\n");
 				}
 				tl880_write_register(tl880dev, 0x10104, cursorpos);
 			} while(0);
 			break;
 		default:
-			/* return -ENOIOCTLCMD; */
-			printk(KERN_ERR "tl880: unsupported ioctl\n");
+			/* Unsupported function - try to pass to I2C clients */
+			printk(KERN_ERR "tl880: unsupported ioctl 0x%08lx - passing the buck\n", cmd);
+			return tl880_call_i2c_clients(tl880dev, cmd, (void *)arg);
+			/*
 			return -ENOTTY;
+			*/
 	}
 	return 0;
 }
