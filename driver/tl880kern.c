@@ -82,7 +82,34 @@ int tl880_driver(void)	/* Something for ksymoops? */
 }
 #endif
 
-
+static void tl880_log_status(void)
+{
+	struct tl880_dev *list = tl880_list;
+	printk(KERN_INFO "tl880: VIDIOC_LOG_STATUS:\n");
+	printk(KERN_INFO "tl880: \tNumber of cards: %d\n", n_tl880s);
+	while(list) {
+		printk(KERN_INFO "tl880: \tCard %d:\n", list->id);
+	       	printk(KERN_INFO "tl880: \t  Model: %s\n", list->name);
+		printk(KERN_INFO "tl880: \t  Type ID: %x\n", list->card_type);
+		printk(KERN_INFO "tl880: \t  PCI Subsystem: %04x:%04x\n", 
+				list->subsys_vendor_id, list->subsys_device_id);
+		printk(KERN_INFO "tl880: \t  Bus slot: %s\n", list->pcidev->dev.bus_id);
+		printk(KERN_INFO "tl880: \t  IRQ: %d\n", list->irq);
+		printk(KERN_INFO "tl880: \t  Interrupt line appears to be %sshared\n", 
+				list->elseint ? "" : "un");
+		printk(KERN_INFO "tl880: \t  Interrupts processed:\n");
+		printk(KERN_INFO "tl880: \t    VSC:   %3ld\n", list->vsc_count);
+		printk(KERN_INFO "tl880: \t    APU:   %3ld\n", list->apu_count);
+		printk(KERN_INFO "tl880: \t    BLT:   %3ld\n", list->blt_count);
+		printk(KERN_INFO "tl880: \t    MCE:   %3ld\n", list->mce_count);
+		printk(KERN_INFO "tl880: \t    VPIP:  %3ld\n", list->vpip_count);
+		printk(KERN_INFO "tl880: \t    HPIP:  %3ld\n", list->hpip_count);
+		printk(KERN_INFO "tl880: \t    DPC:   %3ld\n", list->dpc_count);
+		printk(KERN_INFO "tl880: \t    TSD:   %3ld\n", list->tsd_count);
+		printk(KERN_INFO "tl880: \t    Total: %3ld\n", list->int_count);
+		list = list->next;
+	}
+}
 
 static int tl880_ioctl(struct inode *inode, struct file *file,
 		       unsigned int cmd, unsigned long arg)
@@ -96,9 +123,7 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 	}
 
 	/* The & DEV_MASK part is not necessary because of the division by 4 */
-	tl880dev = find_tl880((iminor(inode) & DEV_MASK) >> 2);
-
-	if(tl880dev == NULL) {
+	if((tl880dev = find_tl880((iminor(inode) & DEV_MASK) >> 2)) == NULL) {
 		printk(KERN_ERR "tl880: unable to find card for minor %u\n", iminor(inode));
 		return -ENODEV;
 	}
@@ -174,13 +199,15 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 				tl880_write_register(tl880dev, 0x10104, cursorpos);
 			} while(0);
 			break;
+		case VIDIOC_LOG_STATUS:
+			/* Log driver status of tl880 and all clients */
+			tl880_log_status();
+			tl880_call_i2c_clients(tl880dev, cmd, (void *)arg);
+			break;
 		default:
 			/* Unsupported function - try to pass to I2C clients */
-			printk(KERN_ERR "tl880: unsupported ioctl 0x%08lx - passing the buck\n", cmd);
+			printk(KERN_ERR "tl880: unsupported ioctl 0x%08x - passing the buck\n", cmd);
 			return tl880_call_i2c_clients(tl880dev, cmd, (void *)arg);
-			/*
-			return -ENOTTY;
-			*/
 	}
 	return 0;
 }
@@ -231,9 +258,7 @@ static int tl880_mmap(struct file *file, struct vm_area_struct *vma)
 		printk(KERN_DEBUG "tl880: mapping at offset 0x%08lx\n", offset);
 	}
 
-	tl880dev = find_tl880(iminor(inode) / 4);
-
-	if(tl880dev == NULL) {
+	if((tl880dev = find_tl880(iminor(inode) / 4)) == NULL) {
 		printk(KERN_ERR "tl880: unable to find card for minor %u\n", iminor(inode));
 		return -EINVAL;
 	}
@@ -602,7 +627,7 @@ static int tl880_configure(struct pci_dev *dev)
 		return -EINVAL;
 	}
 	
-	printk(KERN_INFO "tl880: Initializing card %i\n", n_tl880s);
+	printk(KERN_INFO "tl880: Initializing card %d\n", n_tl880s);
 
 	/* Allocate device info struct */
 	if(!(tl880dev = tl880_create_dev())) {
@@ -631,7 +656,7 @@ static int tl880_configure(struct pci_dev *dev)
 	tl880dev->memphys = pci_resource_start(dev, 0);
 	tl880dev->memlen = pci_resource_len(dev, 0);
 	if(!tl880dev->memlen) {
-		printk(KERN_ERR "tl880: card %i mem has zero length!\n", tl880dev->id);
+		printk(KERN_ERR "tl880: card %d mem has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return -ENODEV;
@@ -642,7 +667,7 @@ static int tl880_configure(struct pci_dev *dev)
 	tl880dev->regphys = pci_resource_start(dev, 3);
 	tl880dev->reglen = pci_resource_len(dev, 3);
 	if(!tl880dev->reglen) {
-		printk(KERN_ERR "tl880: card %i register space has zero length!\n", tl880dev->id);
+		printk(KERN_ERR "tl880: card %d register space has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return -ENODEV;
@@ -653,13 +678,13 @@ static int tl880_configure(struct pci_dev *dev)
 	tl880dev->unkphys = pci_resource_start(dev, 4);
 	tl880dev->unklen = pci_resource_len(dev, 4);
 	if(!tl880dev->unklen) {
-		printk(KERN_ERR "tl880: Card %i unknown space has zero length!\n", tl880dev->id);
+		printk(KERN_ERR "tl880: Card %d unknown space has zero length!\n", tl880dev->id);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return -ENODEV;
 	}
 
-	printk(KERN_DEBUG "tl880: Card %i resources: mem: 0x%08lx(0x%08lx), reg: 0x%08lx(0x%08lx), unk: 0x%08lx(0x%08lx)\n", 
+	printk(KERN_DEBUG "tl880: Card %d resources: mem: 0x%08lx(0x%08lx), reg: 0x%08lx(0x%08lx), unk: 0x%08lx(0x%08lx)\n", 
 		tl880dev->id,
 		tl880dev->memphys, (unsigned long)tl880dev->memspace,
 		tl880dev->regphys, (unsigned long)tl880dev->regspace,
@@ -684,10 +709,9 @@ static int tl880_configure(struct pci_dev *dev)
 			tl_major, tl880dev->minor);
 	}
 
-	/* Disable interrupts, detect specific card revision, init card */
+	/* Disable interrupts and detect card type */
 	tl880_disable_interrupts(tl880dev);
 	tl880_detect_card(tl880dev);
-	tl880_init_dev(tl880dev);
 
 	/* Store driver handle in pci_dev struct */
 	pci_set_drvdata(tl880dev->pcidev, tl880dev);
@@ -698,20 +722,21 @@ static int tl880_configure(struct pci_dev *dev)
 		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
 	}
 	
-	printk(KERN_INFO "tl880: Card %i uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
+	printk(KERN_INFO "tl880: Card %d uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
 
-	printk(KERN_DEBUG "tl880: calling request_irq with: %i, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
-		tl880dev->pcidev->irq, tl880_irq/*_noop*/, /* IRQF_DISABLED | */IRQF_SHARED, "tl880", tl880dev);
+	tl880dev->irq = dev->irq;
+	printk(KERN_DEBUG "tl880: calling request_irq with: %d, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+		tl880dev->pcidev->irq, (unsigned long)tl880_irq, IRQF_SHARED, "tl880", (unsigned long)tl880dev);
+
 	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, IRQF_SHARED, "tl880", tl880dev)) != 0) {
-	/*
-	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq_noop, IRQF_SHARED, "tl880", tl880dev)) != 0) {
-	*/
 		printk(KERN_ERR "tl880: could not set irq handler for irq %d: %d\n", tl880dev->pcidev->irq, result);
 		tl880_unconfigure(tl880dev);
 		tl880_delete_dev(tl880dev);
 		return result;
 	}
-	tl880dev->irq = dev->irq;
+
+	/* Initialize card- and chip-specific functions */
+	tl880_init_dev(tl880dev);
 
 	if(list) {
 		/* Look for the end of the linked list */
@@ -741,7 +766,7 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 		return NULL;
 	}
 	
-	printk(KERN_INFO "tl880: deinitializing card number %i\n", tl880dev->id);
+	printk(KERN_INFO "tl880: deinitializing card number %d\n", tl880dev->id);
 	
 	/* Unregister character devices */
 	cdev_del(tl880dev->char_device);
@@ -793,19 +818,6 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 }
 
 
-/* Clean up all tl880 device info structures */
-static void release_tl880(void)
-{
-	struct tl880_dev *tl880dev = tl880_list;
-	while(tl880dev) {
-		tl880dev = tl880_unconfigure(tl880dev);
-	}
-	tl880_list = NULL;
-	n_tl880s = 0;
-
-}
-
-
 /* Process kernel request to enable a tl880 card */
 int tl880_probe(struct pci_dev *dev, const struct pci_device_id *id)
 {
@@ -849,7 +861,7 @@ void tl880_remove(struct pci_dev *dev)
 		return;
 	}
 
-	printk(KERN_INFO "tl880: kernel request to remove card %i\n", tl880dev->id);
+	printk(KERN_INFO "tl880: kernel request to remove card %d\n", tl880dev->id);
 
 	tl880prev = tl880_list;
 	while(tl880prev != NULL && tl880prev->next != NULL && tl880prev->next != tl880dev) {
@@ -873,7 +885,7 @@ void tl880_remove(struct pci_dev *dev)
 }
 
 
-static int tl880_init(void)
+static int __init tl880_init(void)
 {
 	int result = 0;
 
@@ -890,7 +902,7 @@ static int tl880_init(void)
 	}
 	
 	if(result) {
-		printk(KERN_ERR "tl880: Failed to allocate major number %u with error code: %i\n", tl_major, result);
+		printk(KERN_ERR "tl880: Failed to allocate major number %u with error code: %d\n", tl_major, result);
 		return result;
 	}
 

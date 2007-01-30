@@ -10,6 +10,10 @@ of the creation of this document.
 All numbers are in hexadecimal, except for bit descriptions (binary).
 -------------------------------
 
+Card Variants
+-------------
+It appears that the Janus used the VPX chip's GPIO pins to select inputs.
+
 TL880 Memory
 ------------
 

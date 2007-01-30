@@ -30,7 +30,7 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 		 * 7020 1E000010  00000000  00000000  00000000      ................
 		 * 7030 0000003E  00000000  00000000  00000000      >...............
 		 */
-		unsigned long var_10 = 0;
+		unsigned long var_10 = 0;  // Should var_10 be bitsval?
 
 		row_cnt = 1;
 		set_bits(&bitsval, 0x702c, 0x16, 0xc, 0 /* (cJanus->0x10f94)->0xc */);
@@ -50,11 +50,11 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 		
 		field_cnt++;
 	} else {
-	row_cnt = 1;
-	field_cnt = 1;
-	/* cJanus->0x10f98 = 0; */
+		row_cnt = 1;
+		field_cnt = 1;
+		/* cJanus->0x10f98 = 0; */
 	
-	/* (cJanus->0x10388)->0xb70 = 1; */
+		/* (cJanus->0x10388)->0xb70 = 1; */
 	}
 }
 
@@ -174,9 +174,9 @@ void tl880_bh(unsigned long tl880_id)
 /* Interrupt handler */
 #ifdef PRE_2619
 irqreturn_t tl880_irq(int irq, void *dev_id, struct pt_regs *regs)
-#else /* IRQF_SHARED */
+#else /* PRE_2619 */
 irqreturn_t tl880_irq(int irq, void *dev_id)
-#endif /* IRQF_SHARED */
+#endif /* PRE_2619 */
 {
 	struct tl880_dev *tl880dev;
 	unsigned long int_type, int_mask;
@@ -206,13 +206,16 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 
 	/* If this card is already processing an interrupt, return with interrupts disabled */
 	if(tl880dev->int_type) {
-		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx\n", tl880dev->int_type);
+		/* This should never get executed */
+		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx - disabling interrupts\n", 
+				tl880dev->int_type);
 		tl880_disable_interrupts(tl880dev);
 		return IRQ_HANDLED;
 	}
 
 	tl880dev->int_mask = int_mask;
 	tl880dev->int_type = int_type & int_mask;
+	tl880dev->int_count++;
 
 	/* 
 	 * TODO: only schedule worker for tasks that take too long to do in interrupt time.
@@ -279,15 +282,6 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	
 	if(tl880dev->int_type) {
 		/* Queue the deferred interrupt handler if necessary */
-		/*
-		queue_task(&tl880dev->bh, &tq_immediate)
-		mark_bh(IMMEDIATE_BH);
-		*/
-		/*
-		if(!queue_work(tl880dev->wqueue, &tl880dev->worker)) {
-			printk(KERN_WARNING "tl880: Uh...  Interrupt handler already queued.  Is this bad?\n");
-		}
-		*/
 		tasklet_schedule(&tl880dev->tasklet);
 	} else {
 		/* Re-enable interrupts */

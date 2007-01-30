@@ -10,10 +10,10 @@ mk_tldev() {
 	grep '^video:' /etc/group > /dev/null && group="video" || group="wheel"
 	
 	# Make sure tl880 directory exists
-	mkdir -p /dev/tl880/
+	mkdir -p /dev/.static/dev/tl880/
 	
 	# Get rid of old devices
-	rm -f /dev/tl880/*
+	rm -f /dev/.static/dev/tl880/*
 	
 	# Find major number of device
 	#major=`cat /proc/devices | awk "\\$2==\"$module\" {print \\$1}"`
@@ -27,15 +27,15 @@ mk_tldev() {
 	# Create devices for all cards
 	while [ $count -ne 0 ] ; do
 		count=`expr $count - 1`
-		mknod /dev/tl880/mem$count c $major `expr $count \* 4 + 0`
-		mknod /dev/tl880/reg$count c $major `expr $count \* 4 + 1`
-		mknod /dev/tl880/unk$count c $major `expr $count \* 4 + 2`
+		mknod /dev/.static/dev/tl880/mem$count c $major `expr $count \* 4 + 0`
+		mknod /dev/.static/dev/tl880/reg$count c $major `expr $count \* 4 + 1`
+		mknod /dev/.static/dev/tl880/unk$count c $major `expr $count \* 4 + 2`
 	done
 	
 	# Set ownership and permissions
-	ls /dev/tl880/
-	chown :$group /dev/tl880/* 
-	chmod 0660 /dev/tl880/*
+	ls /dev/.static/dev/tl880/
+	chown :$group /dev/.static/dev/tl880/* 
+	chmod 0660 /dev/.static/dev/tl880/*
 
 	return 0
 }

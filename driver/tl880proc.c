@@ -1,7 +1,7 @@
 /* 
  * Functions for handling /proc user interface
  *
- * (c) 2005 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2005, 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  */
 #include "tl880.h"
 
@@ -15,14 +15,15 @@ static int tl880_proc_read(char *page, char **start, off_t offset, int count, in
 
 	page[0] = '\0';
 
-	while(tl880dev != NULL) {
-		snprintf(page, count - 72, "%s%u: %s\t%04x:%04x\n", page,
+	while(tl880dev != NULL && count - strlen(page) > 0) {
+		snprintf(page, count - strlen(page), "%s%u: %s\t%04x:%04x\n", page,
 			tl880dev->id, tl880dev->name,
 			tl880dev->subsys_vendor_id, tl880dev->subsys_device_id);
 		tl880dev = tl880dev->next;
 		/* printk(KERN_DEBUG "tl880: so far, page is %s\n", page); */
 	}
 
+	/* XXX: at this point tl880dev will always be null? */
 	if(!tl880dev) {
 		*eof = 1;
 	}

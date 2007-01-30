@@ -2,16 +2,16 @@ Add functions to set interrupt masks
 Get rid of temporary static and/or global variables (move to tl880_dev, etc.)
 Add ioctl interface for mode switch function and other functions
 Use request_firmware() when it becomes more commonly available
-Replace all ints/longs with appropriate u32/s32/u16/s16 etc. types
+Replace all ints/longs with appropriate u32/s32/u16/s16 etc. types (?)
 Replace osdmem stuff with a proven public domain malloc algorithm
 Use CHECK_NULL and CHECK_NULL_W more
-Clean up/organize debugging statements in general
-Interface to existing drivers for ancillary chips, incl. NXT2000
-Implement local i2c functions for controlling chips without an external driver
 Add read() function to tl880/mem? device to allow hexedit to work on TL880 memory
 Figure out DPC PLL constant register.
-Get the new vpx3220 in the kernel to talk to the VPX chip on the MyHD.
-Keep the tuner module from attaching to the VPX's i2c address.
+Incorporate information from ivs.c (outside source tree).
+Add a function called tl880_disable_all_interrupts that clears interrupt fields
+  across the board, for all chip functions.
+Move to the DVB API.
+Fix the proc interface (though it works, it "shouldn't").
 
 vim: tw=80
 

@@ -1,3 +1,21 @@
+2007-01-29	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added a status dump IOCTL.
+	* Tweak implementation of /proc interface.
+
+2007-01-28	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Check the (usually useless) return value of request_module.
+	* Change i2c init to try to access more possible i2c buses on unknown
+	  card types.
+	* Add __init back to tl880_init() in tl880_kern.c.
+	* Improve/alter some error messages.
+	* Added tl880_i2c_read/write_* functions to tl880i2c.c.
+	* Removed tl880ni2c.c declarations from tl880.h.
+	* Added VPX control functions in tl880vpx.c and made use of them.
+	* Reordered the initialization process to put i2c init before card
+	  init, and card init after IRQ allocation.
+
 2007-01-22	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 	
 	* Fixed interrupts.

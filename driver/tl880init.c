@@ -5,6 +5,26 @@
  */
 #include "tl880.h"
 
+#if 0
+/* From dvbdev.h */
+#define dvb_attach(FUNCTION, ARGS...) ({ \
+        void *__r = NULL; \
+        typeof(&FUNCTION) __a = symbol_request(FUNCTION); \
+        if (__a) { \
+                __r = (void *) __a(ARGS); \
+                if (__r == NULL) \
+                        symbol_put(FUNCTION); \
+        } else { \
+                printk(KERN_ERR "DVB: Unable to find symbol "#FUNCTION"()\n"); \
+        } \
+        __r; \
+})
+/* Taken from drivers/media/dvb/b2c2/flexcop-fe-tuner.c */
+static struct nxt200x_config nxt200x_demod_config = {
+	        .demod_address    = 0x0a,
+};
+#endif
+
 static void tl880_init_sdram(struct tl880_dev *tl880dev)
 {
 	const unsigned long wintvhd = 0x34302130;	/* WinTV-HD 2x2Mx32? */
@@ -175,6 +195,8 @@ void tl880_init_chip(struct tl880_dev *tl880dev)
  */
 void tl880_init_myhd(struct tl880_dev *tl880dev)
 {
+	int result = 0;
+
 	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		tl880_write_regbits(tl880dev, 0x10194, 0x17, 0, 0xeff00);
 	} else if(tl880dev->card_type == TL880_CARD_MYHD_MDP100) {
@@ -206,7 +228,7 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	 *   	bit[1:0]:	Low power mode
 	 *   		  00	Active mode, outputs enabled
 	 *   		  01	Outputs tri-stated; clock divided by 2; I2C full speed
-	 *   		 *10	Outputs tri-stated; clock divided by 4; I2C full speed
+	 *   		 *10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
 	 *   		  11	Outputs tri-stated; clock divided by 8; I2C < 100kbits/s
 	 */
 	// I2CWrite8(0x86, 0xaa, 2);
@@ -214,15 +236,33 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	/*
 	i2c_write8(&tl880dev->i2cbuses[0], 0x43, 0xaa, 2);
 	*/
+	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[0], 0x43, 0xaa, 2);
+	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[0], 0x43, 0xaa, 0);
 	
 	// ConfigVPX();
 	// ConfigMSP();
-	request_module("msp3400");
-	request_module("tuner");
-	request_module("nxt2002");
+	if((result = request_module("vpx322x"))) {
+		printk(KERN_WARNING "tl880: error requesting vpx322x module: %i\n", result);
+	}
+
+	if((result = request_module("msp3400"))) {
+		printk(KERN_WARNING "tl880: error requesting msp3400 module: %i\n", result);
+	}
+
+	if((result = request_module("tuner"))) {
+		printk(KERN_WARNING "tl880: error requesting tuner module: %i\n", result);
+	}
+	
+	if((result = request_module("nxt200x"))) {
+		printk(KERN_WARNING "tl880: error requesting nxt200x module: %i\n", result);
+	}
+#if 0
+	/* Try to attach to the nxt200x */
+	dvb_attach(nxt200x_attach, &nxt200x_demod_config, &tl880dev->i2cbuses[1].i2c_adap);
+#endif
 	
 	// if(*((char*)cJanus+0x16748) == 1) {
-	// 	SetNtscAudioClock()
+	// 	SetNtscAudioClock();
 	// } else {
 	// 	/* Set the VPX322x Output Multiplexer mode:
 	// 	 *   FP register 0x154	Output Multiplexer
@@ -249,12 +289,14 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	// 	 */
 	// 	_VPXWriteFP(0x154, 0x350);
 	// }
+	tl880_vpx_write_fp(&tl880dev->i2cbuses[0], 0x43, 0x154, 0x350);
 	
 	if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		tl880_set_gpio(tl880dev, 5, 0);
 	} else if(tl880dev->card_type >= TL880_CARD_MYHD_MDP100) {
 		tl880_set_gpio(tl880dev, 5, 0);
 		// _VPXWriteFP(0x154, 0x301);
+		tl880_vpx_write_fp(&tl880dev->i2cbuses[0], 0x43, 0x154, 0x301);
 	}
 
 	// cVsbDemod::SpawnVsbTask();
@@ -391,12 +433,16 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 {
 	tl880_init_chip(tl880dev);
 
+	/* Set up I2C bus(es) */
+	tl880_init_i2c(tl880dev);
+
 	/* TODO: Change this to switch on TL880_CARD_* */
 	switch(tl880dev->subsys_vendor_id) {
 		case PCI_SUBSYSTEM_VENDOR_ID_MIT:
 			switch(tl880dev->subsys_device_id) {
 				case PCI_SUBSYSTEM_DEVICE_ID_MYHD:
 				case PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP120:
+				case PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP130:
 					tl880_init_myhd(tl880dev);
 					break;
 				default:
@@ -426,9 +472,6 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 		default:
 			break;
 	}
-
-	/* Set up I2C bus(es) */
-	tl880_init_i2c(tl880dev);
 
 	/* Set NTSC input */
 	tl880_init_ntsc_audio(tl880dev);

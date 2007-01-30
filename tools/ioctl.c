@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 		printf("  tl880 commands:\n");
 		printf("    TL880IOCSETVIP: %s %x num\n", argv[0], TL880IOCSETVIP);
 		printf("  vpx commands:\n");
-		printf("    DECODER_DUMP: %s %x num\n", argv[0], DECODER_DUMP);
+		printf("    DECODER_DUMP: %s %x 0\n", argv[0], DECODER_DUMP);
 		printf("    DECODER_GET_STATUS: %s %x 0\n", argv[0], DECODER_GET_STATUS);
 		printf("    DECODER_SET_NORM: %s %x num\n", argv[0], DECODER_SET_NORM);
 		printf("    DECODER_SET_INPUT: %s %x num\n", argv[0], DECODER_SET_INPUT);

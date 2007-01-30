@@ -42,6 +42,7 @@
 #include <media/tuner.h>
 #include <media/v4l2-common.h>
 #include <media/tvaudio.h>
+#include <../drivers/media/dvb/frontends/nxt200x.h>
 
 /*** Driver definitions ***/
 
@@ -53,7 +54,6 @@
 #ifndef IRQF_DISABLED
 #define IRQF_DISABLED SA_INTERRUPT
 #endif /* IRQF_DISABLED */
-
 
 
 /* Devices */
@@ -98,7 +98,6 @@
 /* Debug */
 #define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
 #define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
-
 
 
 /*** Driver types ***/
@@ -239,22 +238,13 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev);
 int tl880_init_i2c(struct tl880_dev *tl880dev);
 void tl880_deinit_i2c(struct tl880_dev *tl880dev);
 int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg);
-
-/* tl880ni2c.c */
-int do_i2c_read_byte(struct tl880_i2c_bus *i2cbus, unsigned char *data);
-int do_i2c_read(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, unsigned char reg, unsigned char *data, unsigned int count);
-int do_i2c_write_byte_and_wait(struct tl880_i2c_bus *i2cbus, unsigned char data);
-int do_i2c_write_byte(struct tl880_i2c_bus *i2cbus, unsigned char data);
-int do_i2c_write_bit(struct tl880_i2c_bus *i2cbus, int bit);
-void do_i2c_stop_bit(struct tl880_i2c_bus *i2cbus);
-void do_i2c_start_bit(struct tl880_i2c_bus *i2cbus);
-int do_i2c_write(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, unsigned char reg, unsigned char *data, unsigned int count);
-int i2c_read16(struct tl880_i2c_bus *i2cbus, unsigned char addr, int reg, unsigned short *data);
-int i2c_read8(struct tl880_i2c_bus *i2cbus, unsigned char addr, int reg, unsigned char *data);
-int i2c_write16(struct tl880_i2c_bus *i2cbus, unsigned char addr, int reg, unsigned short data);
-int i2c_write8(struct tl880_i2c_bus *i2cbus, unsigned char addr, int reg, unsigned char data);
-int i2c_write(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, unsigned char reg, unsigned char *data, unsigned int count);
-int i2c_read(struct tl880_i2c_bus *i2cbus, unsigned char addr, int bregsel, unsigned char reg, unsigned char *data, unsigned int count);
+/* I2C access functions for features not handled by external chip drivers */
+int tl880_i2c_read_byte(struct tl880_i2c_bus *i2cbus, unsigned short addr);
+int tl880_i2c_write_byte(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char value);
+int tl880_i2c_read_byte_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command);
+int tl880_i2c_write_byte_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command, unsigned char value);
+int tl880_i2c_read_word_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command);
+int tl880_i2c_write_word_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command, unsigned short value);
 
 /* tl880init.c */
 void tl880_init_myhd(struct tl880_dev *tl880dev);
@@ -270,9 +260,9 @@ void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, unsigned char state,
 #ifdef PRE_2619 /* Pre-2.6.19 compatibility */
 #warning Using old-style interrupt routine
 irqreturn_t tl880_irq(int irq, void *dev_id, struct pt_regs *regs);
-#else /* IRQF_SHARED */
+#else /* PRE_2619 */
 irqreturn_t tl880_irq(int irq, void *dev_id);
-#endif /* IRQF_SHARED */
+#endif /* PRE_2619 */
 void tl880_bh(unsigned long tl880_id);
 void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 
@@ -306,6 +296,12 @@ unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem);
 void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value);
 unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
+
+/* tl880vpx.c */
+int tl880_vpx_read(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char reg);
+int tl880_vpx_write(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char reg, unsigned char value);
+unsigned short tl880_vpx_read_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr);
+int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr, unsigned short data);
 
 
 #endif /* __KERNEL__ */
