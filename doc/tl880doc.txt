@@ -14,6 +14,17 @@ Card Variants
 -------------
 It appears that the Janus used the VPX chip's GPIO pins to select inputs.
 
+Initialization
+--------------
+Immediately after the driver is loaded, numerous values (whose meaning is yet to be
+ascertained) are written to registers 0x5c00-5d00 (see tl880init.c).  Then, at least
+on the MDP-130, the audio registers in the 0x3000 range are written to. Immediately
+following these writes, TL880 memory starting at offset 0x1000 and continuing to
+offset 0x103C is set to 0xff.  Then, 3000 and 3004 are written with values.  Then,
+some GPIO lines are changed (too few to be an I2C transaction).  Finally, some audio
+registers are written again.
+
+
 TL880 Memory
 ------------
 
@@ -30,7 +41,7 @@ format, frequently with 768x364 pixel images, for a total image length of
 0x44400.  If pixel data is not properly converted to big-endian, the pixels in
 an image will be shifted around.  OSD layers may not overlap.
 
-In 24-bit formats, the pixel structure seems to be BGRA.  The alpha range is 0
+In 32-bit formats, the pixel structure seems to be BGRA.  The alpha range is 0
 to 0x7f.  Values for alpha above 0x7f are clamped.  Accessing the memory as
 little-endian data would result in an ARGB pixel format.
 
@@ -237,7 +248,9 @@ VSC 1000-1028
 APU (Audio Processing Unit) 3000-307c
 
 3000 used in cJanus::InitNtscAudio
+	set to 01050000 in MDP-130 init
      set to zero in cJanus::DisableAPU
+     0x01050000 while watching NTSC over the air
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -257,8 +270,12 @@ APU (Audio Processing Unit) 3000-307c
 	000000nn|00000000|00000000|00000000	1 in cJanus::InitNtscAudio
 
 3004 bit 2 -- stereo/mono NTSC audio
+	Set to 0x00040001 and 0x00000001 in MDP-130 init
      set to zero in cJanus::InitNtscAudio
      set to zero in cJanus::DisableAPU
+     0x387 while watching NTSC over the air.  Changing to 0x39C lowers the
+     pitch without changing speed (as well as other variations on the lowest
+     byte) - sounds pretty cool.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -270,6 +287,8 @@ APU (Audio Processing Unit) 3000-307c
 	00000000|00000000|00000nn0|00000000	1 in cJanus::InitNtscAudio
 
 3008 used in cJanus::InitNtscAudio
+     zero while watching NTSC over the air with Wave audio.  0xnn001029 with
+     SPDIF audio and NTSC over the air.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -294,8 +313,10 @@ APU (Audio Processing Unit) 3000-307c
 3028 may be ntsc recording offset in sdram
      is used in cJanus::RotateVscCapFrame
      is used in cJanus::InitNtscAudio (0x1000 + gpJanus+167d8 myhd1.54)
+     constantly changing while watching NTSC over the air
 
 302c written with 0x1000 in cJanus::InitNtscAudio
+     constantly changing while watching NTSC over the air
 
 3030 written with 0x9000 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
@@ -304,16 +325,22 @@ APU (Audio Processing Unit) 3000-307c
 3038 APU_IAU_IRA_REG - written with _IAU_BASE + 0x77fc
 303c APU_IAU_IEA_REG - written with _IAU_BASE
 	_IAU_BASE is 0x7800 bytes memory allocated with yGetTL850Memory
+	All zero when watching NTSC over the air
 
-305c written with 0xc30000c3 in cJanus::InitNtscAudio
+3040 written with 0x00001000 during MDP-130 init
+3044 written with 0x00000ffc during MDP 130 init
+3058 written with 0x00c30004 and 0x00c30008 and 0x00000008 during MDP-130 init
+3048 written with 0x00001020 during MDP-130 init
 
-3060-3068 written with 0x0 in cJanus::InitNtscAudio
+305c written with 0xc30000c3 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
 
-306c written with 0xc30000c3 in cJanus::InitNtscAudio
+3060-3068 written with 0x0 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
 
-3070-3078 written with 0x0 in cJanus::InitNtscAudio
+306c written with 0xc30000c3 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
 
-307c written with 0xc30000c3 in cJanus::InitNtscAudio
+3070-3078 written with 0x0 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
+
+307c written with 0xc30000c3 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
 
 
 BLT (Blitter?) 4000-405c
@@ -323,20 +350,27 @@ BLT (Blitter?) 4000-405c
 4014 is last queued BLT interrupt
 
 5000 SysPllEq
+	Set to 0x00C61920 in MDP-130 init.
 
 5400 MifPllEq
+	Set to 0x00C61920 in MDP-130 init.
 
 5800 DPC PLL constant
+	Last byte is usually b0, sometimes 80 (1080i) or f0 (480i).  Last
+	byte doesn't seem to affect external video refresh rate.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000xxx	Disable sync if set(?)
-	00000000|00000000|00000000|00001000	Divide by two?
+	00000000|00000000|00000000|00000xxx	Disables sync if set (must radically alter timing)
+	00000000|00000000|00000000|00001000	Divide by two
 	00000000|00000000|00000000|00nn0000	c - 0: off/double, 1/2: on, 3: half speed
 	00000000|00000000|000nnnnn|00000000	b - 0: normal, 2: half, 6: quarter
 						e: eighth, 1e: sixteenth (sometimes)
 	000000nn|nnnnnnnn|00000000|00000000	a: base
+
+5C00-5D00
+	Written with various values during initialization (see tl880init.c).
 
 MCE 6000-603c
 
@@ -685,7 +719,7 @@ registers 1008c and 10090 seem to take turns being zero and some value
 						here turns the image white if
 						it is a paletted image.
 
-100c0 
+100c0 may be a DMA control register - bit 5 is DMA enable/disable?
 	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
 	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
 
@@ -862,6 +896,8 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 240a4 used in Demux_commandTableWrite
 
+24568 is returned directly in GetVideoPid
+
 247e8 plus some offset is used in SetChannelWritePtr
 
 247f0 plus some offset is used in SetTransportCaptureBuffer
@@ -877,7 +913,7 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 2573c is auxTstCurLineCnt
 
-25740 used in _auxEnable/DisableDscInt, may be an interrupt mask
+25740 used in _auxEnable/DisableDscInt, may be an interrupt mask - also related to Aux DMA
 
 25744 used in auxSetAuxReset
 
@@ -894,6 +930,9 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 27814 last queued tsd interrupt
 
 MIF 28000, 28020-280dc - Memory interface
+
+28000
+	Set to 34302130 at beginning of init process. ('40!0' in ascii?)
 
 28040-2807c used in cJanus::PipMifBufSetting
 

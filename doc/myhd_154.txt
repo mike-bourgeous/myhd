@@ -51,13 +51,19 @@ Set a breakpoint in cJanus::SetGPIO some time
 In win2k card registers usually mapped to baab7000
 
 
+Global variables:
+g_AudioMode - the active audio mode (always 1?)
+m_AudioMode - copied into g_AudioMode by InitHardwareAudio()
+
 
 cJanus class layout:
 Use "e gpJanus+offset" to edit the cJanus class in SoftICE
 
-Note: __thiscall functions have the this pointer in ecx.
+Note: __thiscall functions have their *this pointer in ecx.
 
 cJanus+0 may be a struct tagContext?
+
+cJanus+8 may be offset to NTSC audio buffer (first parameter given to READ_REGISTER_BUFFER_ULONG)
 
 cJanus+0b9c may be _last_p_picture_cnt
 
