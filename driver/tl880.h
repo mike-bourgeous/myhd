@@ -123,6 +123,12 @@ struct tl880_dev {
 	char name[64];				/* Card model name */
 	struct semaphore *sem;			/* For reentry protection */
 
+	/* Character device stuff */
+	struct cdev *char_device;		/* Kernel character device handle */
+	unsigned int major;			/* Major number for all tl880 devices (for convenience) */
+	unsigned int minor;			/* First minor number for this card */
+
+
 	/** Card's I/O and memory space **/
 	void *memspace;				/* Mapped memory space */
 	unsigned long memphys;			/* Physical memory address */
@@ -134,14 +140,17 @@ struct tl880_dev {
 	unsigned long unkphys;			/* Physical unknown address */
 	unsigned long unklen;			/* Unknown space length */
 
+
 	/** DMA buffer **/
 	void *dmavirt;				/* System-side DMA buffer pointer */
 	dma_addr_t dmaphys;			/* Bus-side DMA buffer pointer */
+
 
 	/** I2C stuff **/
 	int minbus;				/* Lower bus-type ID for this card */
 	int maxbus;				/* Upper bus-type ID for this card */
 	struct tl880_i2c_bus *i2cbuses;		/* Array of I2C buses on this card */
+
 
 	/** Interrupt stuff **/
 	struct tasklet_struct tasklet;		/* Tasklet for interrupt work */
@@ -156,40 +165,50 @@ struct tl880_dev {
 
 	unsigned long vsc_mask;			/* VSC interrupt mask */
 	unsigned long vsc_type;			/* Type of VSC interrupt received */
-	unsigned long vsc_count;		/* Number of VSC interrupts */
+	unsigned long vsc_count;		/* Number of VSC interrupts received */
 	
 	unsigned long apu_mask;			/* APU interrupt mask */
 	unsigned long apu_type;			/* Type of APU interrupt received */
-	unsigned long apu_count;		/* Number of APU interrupts */
+	unsigned long apu_count;		/* Number of APU interrupts received */
 
 	unsigned long blt_mask;			/* BLT interrupt mask */
 	unsigned long blt_type;			/* Type of BLT interrupt received */
-	unsigned long blt_count;		/* Number of BLT interrupts */
+	unsigned long blt_count;		/* Number of BLT interrupts received */
 
 	unsigned long mce_mask;			/* MCE interrupt mask */
 	unsigned long mce_type;			/* Type of MCE interrupt received */
-	unsigned long mce_count;		/* Number of MCE interrupts */
+	unsigned long mce_count;		/* Number of MCE interrupts received */
+
+	unsigned long mcu_mask;			/* MCU interrupt mask */
+	unsigned long mcu_type;			/* Type of MCU interrupt received */
+	unsigned long mcu_count;		/* Number of MCU interrupts received */
 
 	unsigned long vpip_mask;		/* VPIP interrupt mask */
 	unsigned long vpip_type;		/* Type of VPIP interrupt received */
-	unsigned long vpip_count;		/* Number of VPIP interrupts */
+	unsigned long vpip_count;		/* Number of VPIP interrupts received */
 
 	unsigned long hpip_mask;		/* HPIP interrupt mask */
 	unsigned long hpip_type;		/* Type of HPIP interrupt received */
-	unsigned long hpip_count;		/* Number of HPIP interrupts */
+	unsigned long hpip_count;		/* Number of HPIP interrupts received */
 
 	unsigned long dpc_mask;			/* DPC interrupt mask */
 	unsigned long dpc_type;			/* Type of DPC interrupt received */
-	unsigned long dpc_count;		/* Number of DPC interrupts */
+	unsigned long dpc_count;		/* Number of DPC interrupts received */
 
 	unsigned long tsd_mask;			/* TSD interrupt mask */
 	unsigned long tsd_type;			/* Type of TSD interrupt received */
-	unsigned long tsd_count;		/* Number of TSD interrupts */
+	unsigned long tsd_count;		/* Number of TSD interrupts received */
 
-	/** Character device stuff **/
-	struct cdev *char_device;		/* Kernel character device handle */
-	unsigned int major;			/* Major number for all tl880 devices (for convenience) */
-	unsigned int minor;			/* First minor number for this card */
+
+	/** Audio (APU) State **/
+	enum audio_mode_e { 
+		ZERO = 0, ONE, TWO 
+	} audio_mode;				/* Current audio mode */
+
+	unsigned long iau_base;			/* Base card memory address for audio unit */
+	unsigned long iau_iba_reg;		/* Register used for base address */
+	unsigned long iau_iea_reg;		/* Register used for end address */
+	unsigned long iau_ira_reg;		/* Register used for base address (2) */
 };
 
 #endif /* __KERNEL__ */
@@ -275,9 +294,16 @@ void tl880_set_ntsc_input(struct tl880_dev *tl880dev, int input);
 
 /* tl880audio.c */
 void tl880_disable_apu(struct tl880_dev *tl880dev);
+void tl880_apu_init_iau_reg(struct tl880_dev *tl880dev);
+void tl880_apu_init_ioc(struct tl880_dev *tl880dev);
+void tl880_apu_start_ioc(struct tl880_dev *tl880dev);
+void tl880_apu_stop_ioc(struct tl880_dev *tl880dev);
+
+void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e audio_mode);
+
+void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 void tl880_ntsc_audio_dpc(struct tl880_dev *tl880dev);
 void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev);
-void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 
 /* tl880demux.c */
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);

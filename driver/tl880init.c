@@ -474,6 +474,8 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	}
 
 	/* Set NTSC input */
+	tl880_init_hardware_audio(tl880dev, 1);
+	tl880_apu_start_ioc(tl880dev);
 	tl880_init_ntsc_audio(tl880dev);
 	tl880_set_ntsc_input(tl880dev, 0);
 

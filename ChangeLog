@@ -1,3 +1,21 @@
+2007-03-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added interrupt counting to tl880int.c.
+	* Added interrupt status variables to tl880.h for MCU interrupts.
+	* No longer disable TSD interrupts when receiving one.
+	* Added DMA memory offset registers to tl880doc.txt (thanks to the PCI
+	  traces provided by Stephen Marchang).
+	* Added report of DMA offset to /proc/tl880.
+
+2007-02-18	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Implemented more APU initialization.
+	* Small updates to the chip documentation.
+
+2007-01-31	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Started working on more VPX initialization.
+
 2007-01-29	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added a status dump IOCTL.

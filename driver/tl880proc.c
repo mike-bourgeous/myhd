@@ -16,9 +16,10 @@ static int tl880_proc_read(char *page, char **start, off_t offset, int count, in
 	page[0] = '\0';
 
 	while(tl880dev != NULL && count - strlen(page) > 0) {
-		snprintf(page, count - strlen(page), "%s%u: %s\t%04x:%04x\n", page,
+		snprintf(page, count - strlen(page), "%s%u: %s\t%04x:%04x\tDMA@%08x\n", page,
 			tl880dev->id, tl880dev->name,
-			tl880dev->subsys_vendor_id, tl880dev->subsys_device_id);
+			tl880dev->subsys_vendor_id, tl880dev->subsys_device_id,
+			tl880dev->dmaphys);
 		tl880dev = tl880dev->next;
 		/* printk(KERN_DEBUG "tl880: so far, page is %s\n", page); */
 	}

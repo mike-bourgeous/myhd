@@ -121,7 +121,7 @@ void tl880_init_vpx()
 	// Disable power-saving mode
 	tl880_vpx_set_power_status(0);
 
-vpx3226:
+vpx3226: // Other VPX revisions have a bunch of stuff written to I2C above here
 	if(VPX_short_Llc2pol != 0) { // llc2pol is set to 0 in LoadDefaultSettings
 		b = 0x10; // register 0xaa bit[4]: LLC2 polarity
 	} else {

@@ -1,5 +1,5 @@
 *.cmd
-cscope.*.out
+cscope*.out
 *.symvers
 *.ko
 *.mod.c

@@ -412,8 +412,6 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 		first_jiffies = jiffies;
 	}
 
-	tl880dev->dpc_count++;
-
 	tl880dev->dpc_type = tl880_read_register(tl880dev, 0x1000c) & tl880_read_register(tl880dev, 0x10008);
 
 	/*

@@ -909,6 +909,20 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 25718-25728,25750,25754 used in _auxLdDscMbox (called in VopLoadDescriptor)
 	This function is related to DMA.
 
+25718 	High-order DMA memory offset
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|nnnnnnnn|nnnnnnnn	Upper two bytes of DMA physical memory offset
+
+2571c 	Low-order DMA memory offset
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|nnnnnnnn|nnnnnnnn	Lower two bytes of DMA physical memory offset
+
 25728 is auxTstDscrMboxEmpty
 
 2573c is auxTstCurLineCnt

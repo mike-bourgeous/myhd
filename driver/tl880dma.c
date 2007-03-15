@@ -1,7 +1,7 @@
 /* 
  * DMA related functions for TL880-based cards
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003 Mike Bourgeous <nitrogen at users.sourceforge.net>
  */
 #include "tl880.h"
 

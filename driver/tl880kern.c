@@ -695,6 +695,10 @@ static int tl880_configure(struct pci_dev *dev)
 		printk(KERN_ERR "tl880: Failed to allocate dma space\n");
 		tl880dev->dmaphys = 0;
 	}
+
+	/* Tell the card about the DMA buffer (this should normally be done elsewhere) */
+	tl880_write_register(tl880dev, 0x25718, tl880dev->dmaphys >> 16);
+	tl880_write_register(tl880dev, 0x2571c, tl880dev->dmaphys & 0xffff);
 		
 	/* Initialize tasklet for handling slow interrupt-driven tasks */
 	tasklet_init(&tl880dev->tasklet, tl880_bh, tl880dev->id);
