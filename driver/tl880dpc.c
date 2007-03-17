@@ -21,7 +21,7 @@ void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsign
 void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigned long yres, long interlace)
 {
 	unsigned long val = 0;
-	unsigned long var_4 = 1;
+	unsigned long gpio_val = 1;
 	
 	/* tagContext->0x264 is xres */
 
@@ -38,7 +38,7 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigne
 		case 1920:
 			if(1 /* cJanus->0x16720 */) {
 				val = 0x98280;
-				var_4 = 0;
+				gpio_val = 0;
 			} else {
 				val = tl880_calc_dpc_pll_const(0x14, 2, 0);
 			}
@@ -58,7 +58,7 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigne
 
 	tl880_write_register(tl880dev, 0x5800, val);
 	tl880_write_register(tl880dev, 0x5d14, 0);
-	tl880_set_gpio(tl880dev, 6, var_4);
+	tl880_set_gpio(tl880dev, 6, gpio_val);
 }
 
 
@@ -84,7 +84,7 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	unsigned long savereg;
 	unsigned long value = 0;
 
-	if(!tl880dev || !mode) {
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(mode)) {
 		printk(KERN_ERR "tl880: NULL value passed to tl880_set_mode\n");
 		return;
 	}
@@ -337,11 +337,13 @@ void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
 	unsigned long this_jiffies;
 
 	this_jiffies = jiffies;
-	printk(KERN_DEBUG "tl880: dpc video sync interrupt - count %lu, time ~%lums\n", dpc_sync_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	if(debug > 0 || dpc_sync_count == 2) {
+		printk(KERN_DEBUG "tl880: dpc video sync interrupt - count %lu, time ~%lums\n", dpc_sync_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	}
 	last_jiffies = this_jiffies;
 
 	if(playing_dvd) {
-		// tl880_dpc_video_sync_dvd(tl880dev);
+		tl880_dpc_video_sync_dvd(tl880dev);
 	} else {
 		// tl880_dpc_video_sync_tv(tl880dev);
 	}
@@ -379,7 +381,9 @@ void tl880_dpc_field0(struct tl880_dev *tl880dev)
 	}
 
 	this_jiffies = jiffies;
-	printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu, time ~%lums\n", dpc_eof0_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	if(debug > 0 || dpc_eof0_count == 2) { 
+		printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu, time ~%lums\n", dpc_eof0_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	}
 	last_jiffies = this_jiffies;
 }
 
@@ -400,7 +404,9 @@ void tl880_dpc_field1(struct tl880_dev *tl880dev)
 	/* CDma::VopIsrEven(); */
 
 	this_jiffies = jiffies;
-	printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu, time ~%lums\n", dpc_eof1_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	if(debug > 0 || dpc_eof1_count == 2) {
+		printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu, time ~%lums\n", dpc_eof1_count, (this_jiffies - last_jiffies) * 1000 / HZ);
+	}
 	last_jiffies = this_jiffies;
 }
 
@@ -440,6 +446,10 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 		printk(KERN_DEBUG "tl880: ~%lu dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
 	}
 #endif /* 0 */
+
+	if(debug > 0 && tl880dev->dpc_count % 600 == 0) {
+		printk(KERN_DEBUG "tl880: ~%lu dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
+	}
 
 	return 0;
 }

@@ -42,10 +42,10 @@ void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e aud
 void tl880_deinit_hardware_audio(struct tl880_dev *tl880dev)
 {
 	tl880_apu_stop_ioc(tl880dev);
-	/*
 	tl880_write_register(tl880dev, tl880dev->iau_iba_reg, 0);
 	tl880_write_register(tl880dev, tl880dev->iau_iea_reg, 0);
 	tl880_write_register(tl880dev, tl880dev->iau_ira_reg, 0);
+	/*
 	if(tl880dev->iau_base != 0) {
 		FreeTL850Memory(tl880dev->iau_base);
 		tl880dev->iau_base = 0;
@@ -71,10 +71,10 @@ void tl880_apu_init_iau_reg(struct tl880_dev *tl880dev)
 		tl880dev->iau_iea_reg = 0x3054;
 		tl880dev->iau_ira_reg = 0x3050;
 	}
-	tl880_write_register(tl880dev, tl880dev->iau_iba_reg, 0x1000); /* 1000 used as test base (tl880dev->iau_base) */
+	tl880_write_register(tl880dev, tl880dev->iau_iba_reg, tl880dev->iau_base); /* 1000 used as test base (tl880dev->iau_base) */
 							/* tl880dev->iau_base set to memory allocated with yGetTL850Memory in InitHardwareAudio */
-	tl880_write_register(tl880dev, tl880dev->iau_iea_reg, 0x87fc); /* base + 77fc */
-	tl880_write_register(tl880dev, tl880dev->iau_ira_reg, 0x1000); /* base */
+	tl880_write_register(tl880dev, tl880dev->iau_iea_reg, tl880dev->iau_base + 0x1000); /* base + 77fc */
+	tl880_write_register(tl880dev, tl880dev->iau_ira_reg, tl880dev->iau_base); /* base */
 	// SdramClear(tl880dev->iau_base, 0x7800);
 }
 

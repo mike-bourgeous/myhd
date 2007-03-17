@@ -17,7 +17,7 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 	if(a == 1) {
 		if(tl880dev->card_type == 1) {
 			// _VPXWriteFP(0x154, 0x331);
-			tl880_vpx_write_fp(&(tl880dev->i2cbuses[0]), 0x43, 0x154, 0x331);
+			tl880_vpx_write_fp(tl880dev, 0x154, 0x331);
 		} else if(tl880dev->card_type >= 2) {
 			// MspSetInput(9);
 			cmdarg = TVAUDIO_INPUT_EXTERN;
@@ -27,7 +27,7 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 	} else if(a == 3) {
 		if(tl880dev->card_type == 1) {
 			// _VPXWriteFP(0x154, 0x311);
-			tl880_vpx_write_fp(&(tl880dev->i2cbuses[0]), 0x43, 0x154, 0x311);
+			tl880_vpx_write_fp(tl880dev, 0x154, 0x311);
 		} else 	if(tl880dev->card_type >= 2) {
 			// MspSetInput(9);
 			cmdarg = TVAUDIO_INPUT_EXTERN;
@@ -37,7 +37,7 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 	} else {
 		if(tl880dev->card_type == 1) {
 			// _VPXWriteFP(0x154, 0x331);
-			tl880_vpx_write_fp(&(tl880dev->i2cbuses[0]), 0x43, 0x154, 0x331);
+			tl880_vpx_write_fp(tl880dev, 0x154, 0x331);
 		} else if(tl880dev->card_type >= 2) {
 			// MspSetInput(6);
 		        cmdarg = TVAUDIO_INPUT_TUNER;

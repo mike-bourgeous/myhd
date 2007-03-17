@@ -197,6 +197,10 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 {
 	int result = 0;
 
+	/* Initialize some card-specific information */
+	tl880dev->vpx_addr = 0x43;
+	tl880dev->vpx_i2cbus = 0;
+
 	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		tl880_write_regbits(tl880dev, 0x10194, 0x17, 0, 0xeff00);
 	} else if(tl880dev->card_type == TL880_CARD_MYHD_MDP100) {
@@ -226,24 +230,27 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	/* Set the VPX322x power mode:
 	 *   register 0xAA
 	 *   	bit[1:0]:	Low power mode
-	 *   		  00	Active mode, outputs enabled
+	 *   		 *00	Active mode, outputs enabled
 	 *   		  01	Outputs tri-stated; clock divided by 2; I2C full speed
 	 *   		 *10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
 	 *   		  11	Outputs tri-stated; clock divided by 8; I2C < 100kbits/s
 	 */
-	// I2CWrite8(0x86, 0xaa, 2);
-	/* Uncomment when i2c_write8 is implemented */
 	/*
-	i2c_write8(&tl880dev->i2cbuses[0], 0x43, 0xaa, 2);
+	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 2);
+	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 0);
 	*/
-	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[0], 0x43, 0xaa, 2);
-	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[0], 0x43, 0xaa, 0);
+	tl880_vpx_set_power_status(tl880dev, 2);
 	
 	// ConfigVPX();
+	tl880_vpx_config(tl880dev);
 	// ConfigMSP();
+
+	/*
+	// VPX driver screws up VPX state
 	if((result = request_module("vpx322x"))) {
 		printk(KERN_WARNING "tl880: error requesting vpx322x module: %i\n", result);
 	}
+	*/
 
 	if((result = request_module("msp3400"))) {
 		printk(KERN_WARNING "tl880: error requesting msp3400 module: %i\n", result);
@@ -289,14 +296,13 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	// 	 */
 	// 	_VPXWriteFP(0x154, 0x350);
 	// }
-	tl880_vpx_write_fp(&tl880dev->i2cbuses[0], 0x43, 0x154, 0x350);
+	tl880_vpx_write_fp(tl880dev, 0x154, 0x350);
 	
 	if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		tl880_set_gpio(tl880dev, 5, 0);
 	} else if(tl880dev->card_type >= TL880_CARD_MYHD_MDP100) {
 		tl880_set_gpio(tl880dev, 5, 0);
-		// _VPXWriteFP(0x154, 0x301);
-		tl880_vpx_write_fp(&tl880dev->i2cbuses[0], 0x43, 0x154, 0x301);
+		tl880_vpx_write_fp(tl880dev, 0x154, 0x301);
 	}
 
 	// cVsbDemod::SpawnVsbTask();
@@ -345,6 +351,7 @@ void tl880_init_wintv_hd(struct tl880_dev *tl880dev)
 	// i2c_write8(tl880dev, 0x86, 0xaa, 2);
 	// i2c_write8(tl880dev, 0x86, 0xaa, 0);
 	/* ConfigVPX() */
+	tl880_vpx_config(tl880dev);
 	// if(*((char*)cJanus+0x16748) == 1) {
 	// 	SetNtscAudioClock()
 	// } else {

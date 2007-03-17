@@ -30,7 +30,7 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 		 * 7020 1E000010  00000000  00000000  00000000      ................
 		 * 7030 0000003E  00000000  00000000  00000000      >...............
 		 */
-		unsigned long var_10 = 0;  // Should var_10 be bitsval?
+		//unsigned long var_10 = 0;  // Should var_10 be bitsval?
 
 		row_cnt = 1;
 		set_bits(&bitsval, 0x702c, 0x16, 0xc, 0 /* (cJanus->0x10f94)->0xc */);
@@ -41,8 +41,10 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 			tl880_write_regbits(tl880dev, 0x7000, 0x16, 0x16, 1);
 		}
 		
-		tl880_write_register(tl880dev, 0x702c, var_10 | 0x80000000);
-		tl880_write_register(tl880dev, 0x702c, var_10);
+		//tl880_write_register(tl880dev, 0x702c, var_10 | 0x80000000);
+		//tl880_write_register(tl880dev, 0x702c, var_10);
+		tl880_write_register(tl880dev, 0x702c, bitsval | 0x80000000);
+		tl880_write_register(tl880dev, 0x702c, bitsval);
 		
 		tl880_write_regbits(tl880dev, 0x7000, 0x15, 0x10, 0x3d /* (cJanus->0x10f94)->0xd8 */);
 		
@@ -66,7 +68,6 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 	tl880dev->vpip_type = tl880_read_register(tl880dev, 0x7008) & tl880_read_register(tl880dev, 0x7004);
 	
 	printk(KERN_DEBUG "tl880: vpip interrupt: 0x%08lx\n", tl880dev->vpip_type);
-
 
 	if(tl880dev->vpip_type & 1 /* || !cJanus[0x10388][0x284] */) {
 		tl880_vpip_handler(tl880dev);
@@ -240,15 +241,19 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	if(tl880dev->int_type & 0x400) {
 		tl880dev->tsd_count++;
 		//tl880dev->int_mask &= ~0x400;	/* Clear TSD interrupt bit */
-		printk(KERN_DEBUG "tl880: tsd interrupt: 0x%08lx\n", 
-			(tl880dev->tsd_type = tl880_read_register(tl880dev, 0x27814)));
+		if(debug > 0 || tl880dev->tsd_count == 1) {
+			printk(KERN_DEBUG "tl880: tsd interrupt: 0x%08lx\n", 
+					(tl880dev->tsd_type = tl880_read_register(tl880dev, 0x27814)));
+		}
 
 		/* TSD always needs BH queued (KeInsertQueueDpc in Windows) so don't clear interrupt type */
 	}
 	if(tl880dev->int_type & 0x40) {
 		tl880dev->mce_count++;
 		tl880_write_regbits(tl880dev, 4, 6, 6, 0);
-		printk(KERN_DEBUG "tl880: mce interrupt\n");
+		if(debug > 0 || tl880dev->mce_count == 1) {
+			printk(KERN_DEBUG "tl880: mce interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x8) {
 		tl880dev->dpc_count++;
@@ -263,32 +268,43 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	if(tl880dev->int_type & 0x10) {
 		tl880dev->vsc_count++;
 		tl880_write_regbits(tl880dev, 4, 4, 4, 0);
-		printk(KERN_DEBUG "tl880: vsc interrupt\n");
+		if(debug > 0 || tl880dev->vsc_count == 1) {
+			printk(KERN_DEBUG "tl880: vsc interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x1) {
 		tl880dev->apu_count++;
 		tl880_write_regbits(tl880dev, 4, 0, 0, 0);
-		printk(KERN_DEBUG "tl880: apu interrupt\n");
+		if(debug > 0 || tl880dev->apu_count == 1) {
+			printk(KERN_DEBUG "tl880: apu interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x2) {
 		tl880dev->blt_count++;
 		tl880_write_regbits(tl880dev, 4, 1, 1, 0);
-		printk(KERN_DEBUG "tl880: blt interrupt\n");
+		if(debug > 0 || tl880dev->blt_count == 1) {
+			printk(KERN_DEBUG "tl880: blt interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x100) {
 		tl880dev->hpip_count++;
 		tl880_write_regbits(tl880dev, 4, 8, 8, 0);
-		printk(KERN_DEBUG "tl880: hpip interrupt\n");
+		if(debug > 0 || tl880dev->hpip_count == 1) {
+			printk(KERN_DEBUG "tl880: hpip interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x200) {
 		tl880dev->mcu_count++;
 		tl880_write_regbits(tl880dev, 4, 9, 9, 0);
-		printk(KERN_DEBUG "tl880: mcu interrupt\n");
+		if(debug > 0 || tl880dev->mcu_count == 1) {
+			printk(KERN_DEBUG "tl880: mcu interrupt\n");
+		}
 	}
 	if(tl880dev->int_type & 0x824) {
-		printk(KERN_DEBUG "tl880: unknown interrupt 0x%08lx- disabling interrupts\n",
+		printk(KERN_WARNING "tl880: unknown interrupt 0x%08lx- disabling unknown interrupts\n",
 			tl880dev->int_type);
-		tl880_write_register(tl880dev, 4, 0);
+
+		tl880dev->int_mask &= ~0x824;
 	}
 	
 	if(tl880dev->int_type) {
@@ -304,11 +320,12 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 
 void tl880_disable_interrupts(struct tl880_dev *tl880dev)
 {
-	unsigned long oldmask;
+	// TODO: mutex?
 	
-	/* XXX: Should this handle pending interrupt requests instead? */
+	tl880dev->old_mask = tl880_read_register(tl880dev, 0x4);
+	tl880dev->int_mask = 0;
+
 	tl880_read_register(tl880dev, 0);
-	oldmask = tl880_read_register(tl880dev, 0x4);
 	tl880_write_register(tl880dev, 0x4, 0);
 	tl880_write_register(tl880dev, 0xc, 0);
 	tl880_write_register(tl880dev, 0x6008, 0);

@@ -61,7 +61,7 @@ static struct pci_driver tl880_pcidriver = {
 
 /* Module parameters */
 module_param(debug, int, 0);
-MODULE_PARM_DESC(debug, "Set TL880 driver debug level (currently ignored)");
+MODULE_PARM_DESC(debug, "Set TL880 driver debug level (1 enables interrupt debugging)");
 
 module_param(tl_major, int, 0);
 MODULE_PARM_DESC(tl_major, "TL880 device major number - 0 or unset for automatic");
@@ -102,6 +102,7 @@ static void tl880_log_status(void)
 		printk(KERN_INFO "tl880: \t    APU:   %3ld\n", list->apu_count);
 		printk(KERN_INFO "tl880: \t    BLT:   %3ld\n", list->blt_count);
 		printk(KERN_INFO "tl880: \t    MCE:   %3ld\n", list->mce_count);
+		printk(KERN_INFO "tl880: \t    MCU:   %3ld\n", list->mcu_count);
 		printk(KERN_INFO "tl880: \t    VPIP:  %3ld\n", list->vpip_count);
 		printk(KERN_INFO "tl880: \t    HPIP:  %3ld\n", list->hpip_count);
 		printk(KERN_INFO "tl880: \t    DPC:   %3ld\n", list->dpc_count);
@@ -569,6 +570,10 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->mce_type = 0;
 	tl880dev->mce_count = 0;
 	
+	tl880dev->mcu_mask = 0;
+	tl880dev->mcu_type = 0;
+	tl880dev->mcu_count = 0;
+	
 	tl880dev->vpip_mask = 0;
 	tl880dev->vpip_type = 0;
 	tl880dev->vpip_count = 0;
@@ -589,6 +594,20 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->char_device = NULL;
 	tl880dev->major = tl_major;
 	tl880dev->minor = 0;
+
+	/** Audio state **/
+	tl880dev->audio_mode = 0;
+	tl880dev->iau_base = 0;
+	tl880dev->iau_iba_reg = 0;
+	tl880dev->iau_iea_reg = 0;
+	tl880dev->iau_ira_reg = 0;
+
+	/** Video state **/
+
+	/** Video chip state */
+	tl880dev->vpx_addr = 0;
+	tl880dev->vpx_i2cbus = 0;
+	tl880dev->vpx_video_standard = 0;
 
 	return tl880dev;
 }
