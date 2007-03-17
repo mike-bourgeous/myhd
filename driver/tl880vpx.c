@@ -24,13 +24,14 @@ int tl880_vpx_write(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned 
 	return tl880_i2c_write_byte_data(i2cbus, addr, reg, value);
 }
 
-unsigned short tl880_vpx_read_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr)
+unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpaddr)
 {
 	int result;
 	unsigned short data;
 
 	/* Write the 16-bit address to the FPRD register */
-	if((result = tl880_i2c_write_word_data(i2cbus, addr, 0x26, __cpu_to_be16(fpaddr))) < 0) {
+	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
+					tl880dev->vpx_addr, 0x26, __cpu_to_be16(fpaddr))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP read register: %d\n", result);
 		return -1;
 	}
@@ -43,7 +44,8 @@ unsigned short tl880_vpx_read_fp(struct tl880_i2c_bus *i2cbus, unsigned short ad
 	*/
 
 	/* Read the 16-bit data from the FPDAT register */
-	data = tl880_i2c_read_word_data(i2cbus, addr, 0x28);
+	data = tl880_i2c_read_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
+					tl880dev->vpx_addr, 0x28);
 	if(data == (unsigned short)-1) {
 		printk(KERN_WARNING "tl880: Failed to read vpx FP data\n");
 		return -1;
@@ -52,12 +54,17 @@ unsigned short tl880_vpx_read_fp(struct tl880_i2c_bus *i2cbus, unsigned short ad
 	return __be16_to_cpu(data);
 }
 
-int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr, unsigned short data)
+int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsigned short data)
 {
 	int result;
 
+	if(CHECK_NULL(tl880dev)) {
+		return -1;
+	}
+
 	/* Write the 16-bit address to the FPWR register */
-	if((result = tl880_i2c_write_word_data(i2cbus, addr, 0x27, __cpu_to_be16(fpaddr))) < 0) {
+	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
+					tl880dev->vpx_addr, 0x27, __cpu_to_be16(fpaddr))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP write register: %d\n", result);
 		return -1;
 	}
@@ -70,7 +77,8 @@ int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsign
 	*/
 
 	/* Write the 16-bit data to the FPDAT register */
-	if((result = tl880_i2c_write_word_data(i2cbus, addr, 0x28, __cpu_to_be16(data))) < 0) {
+	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
+					tl880dev->vpx_addr, 0x28, __cpu_to_be16(data))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP data: %d\n", result);
 		return -1;
 	}
@@ -78,269 +86,105 @@ int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsign
 	return 0;
 }
 
-#ifdef WILLNOTCOMPILE
-void tl880_set_vpx_video_standard(char standard)
+int tl880_vpx_set_video_standard(struct tl880_dev *tl880dev, enum video_standard_e standard)
 {
-	int var_4;
-	static int cache1st = 0;
+	static int cachefirst = 0; // Set to 1 once the chip has been initialized once
+	unsigned short tmp;
 	
-	bl = standard;
-	if(gwVPX_Cache /* (short)0 */ == 0 || cache1st == 0) {
-		goto loc_42420;
+	if(/* gwVPX_Cache && */ cachefirst) {
+		if(/*gbStandard*/ tl880dev->vpx_video_standard == standard) {
+			return 0;
+		}
+	} else {
+		cachefirst = 1;
 	}
 
-	if(gbStandard /* (char)0 */ != standard) {
-		goto loc_4242A;
-	}
-
-	ax = 0;
-	goto loc_425B9;
-
-loc_42420:
-	cache1st = 1;
-
-loc_4242A:
-	eax = gwVPX_Type;
-
-	gbStandard = standard;
+	/* gbStandard = standard; */
+	tl880dev->vpx_video_standard = standard;
+	/*
 	if(gwVPX_Type == 0x3350) { // vpx3226e/f
-		goto loc_42533;
+		goto vpx_3226;
 	}
-	if(gwVPX_Type == 0x4260) { // vpx3216b
-		goto loc_42472;
-	}
-	if(gwVPX_Type == 0x4280) { // vpx3214c
-		goto loc_42472;
-	}
-	if(gwVPX_Type == 0x4680) { // vpx3220a
-		goto loc_42472;
-	}
-	if(gwVPX_Type <= 0x722f) {
-		goto loc_42469;
-	}
-	if(gwVPX_Type <= 0x7231) {
-		goto loc_42533;
-	}
+	// Removed code for older chip versions
+vpx_3226:
+	*/
 
-loc_42469:
-	ax = 4;
-	goto loc_425b9;
-
-loc_42472:
-
-	var_4 = tl880_vpx_read_fp(0xf2, &standard);
-
-	standard &= 0x20; // Do not store in standard
-
-	eax = 0;
-	al = bl;
-	if(standard > 5) { // al
-		goto loc_424C3;
-	} else if (standard == 5) {
-		goto loc_424BD;
+	/* Read the current VPX chip stae */
+	tmp = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT); // VPX standard select register
+	if(tmp == (unsigned short)-1) {
+		return -1;
 	}
-	if(standard == 0) {
-		goto loc_424B7;
-	} else if(standard == 1) {
-		goto loc_424ED;
-	} else if(standard == 2) {
-		goto loc_424B1;
-	} else if(standard == 3) {
-		goto loc_424AB;
-	} else if(standard != 4) {
-		goto loc_424FD;
-	}
-	standard |= 9;
-	goto loc_424FD;
+	tmp &= 0x7f0;	// Preserve standard select option bits, wipe out standard select bits,
+			// clear latch bit (should be done after standard change according to doc)
 
-loc_424AB:
-	standard |= 7;
-	goto loc_424FD;
-
-loc_424B1:
-	standard |= 5;
-	goto loc_424FD;
-
-loc_424B7:
-	standard |= 1;
-	goto loc_424FD;
-
-loc_424BD:
-	standard |= 0xb;
-	goto loc_424FD;
-
-loc_424C3:
-	//eax -= 6;
-	if(eax == 6) {
-		goto loc_424F9;
-	}
-	//eax--;
-	if(eax == 7) {
-		goto loc_424F3;
-	}
-	//eax -= 2;
-	if(eax == 9) {
-		goto loc_424DC;
-	}
-	//eax -= 6
-	if(eax != 0xf) {
-		goto loc_424FD;
+	switch(standard) {
+		case 0: // PAL B, G, H, I
+		default:
+			break;
+		case 1: // NTSC M
+			tmp |= 1;
+			break;
+		case 2: // SECAM
+			tmp |= 2;
+			break;
+		case 3: // NTSC44
+			tmp |= 3;
+			break;
+		case 4: // PAL M
+			tmp |= 4;
+			break;
+		case 5: // PAL N
+			tmp |= 5;
+			break;
+		case 6: // PAL 60
+			tmp |= 6;
+			break;
+		case 7: // NTSC COMB
+			tmp |= 7;
+			break;
+		case 9: // Compensated NTSC
+			tmp |= 9;
+			break;
+		case 15:
+			return 4;
 	}
 
-	standard |= 0x3c0;
-	goto loc_424FD;
-
-loc_424DC:
-	eax = 0;
-	al = gbVPX_Adr;
-
-	i2c_write8(gpVPX_Adr, 0x34, 1);
-
-loc_424ED:
-	standard |= 3;
-	goto loc_424FD;
-
-loc_424F3:
-	standard |= 0xf;
-	goto loc_424FD;
-
-loc_424F9:
-	standard |= 0xd;
-
-loc_424FD:
-	var_4 |= tl880_vpx_write_fp(esi, &standard);
-
-	var_4 |= VPXLatchRegisters(0x10);
-	pop esi;
-
-	if(bl != 9) {
-		goto loc_425B5;
-	}
-	eax = 0;
-	al = gbVPX_Adr;
-
-	i2c_write8(gbVPX_Adr, 0x34, 1);
-	goto loc_425B5;
-
-loc_42533:
-	var_4 = tl880_vpx_read_fp(0x20, &standard);
-	standard &= 0x7f0;
-
-	eax = 0;
-	al = bl;
-	if(eax > 5) {
-		goto loc_42582;
-	} else if(eax == 5) {
-		goto loc_4257C;
-	}
-	if(eax == 0) {
-		goto loc_425A8;
-	}
-	if(eax == 1) {
-		goto loc_42576;
-	}
-	if(eax == 2) {
-		goto loc_42570;
-	}
-	if(eax == 3) {
-		goto loc_4256A;
-	}
-	if(eax != 4) {
-		goto loc_425A8;
-	}
-
-	standard |= 4;
-	goto loc_425A8;
-
-loc_4256A:
-	standard |= 3;
-	goto loc_425A8;
-
-loc_42570:
-	standard |= 2;
-	goto loc_425A8;
-
-loc_42576:
-	standard |= 1;
-	goto loc_425A8;
-
-loc_4257C:
-	standard |= 5;
-	goto loc_425A8;
-
-loc_42582:
-	//eax -= 6;
-	if(eax == 6) {
-		goto loc_425A4;
-	}
-	//eax--;
-	if(eax == 7) {
-		goto loc_4259E;
-	}
-	//eax -= 2;
-	if(eax == 9) {
-		goto loc_42598;
-	}
-	// eax -= 6;
-	if(eax != 15) {
-		goto loc_425A8;
-	}
-	goto loc_42469;
-
-loc_42598:
-	standard |= 9;
-	goto loc_425A8;
-
-loc_4259E:
-	standard |= 7;
-	goto loc_425A8;
-
-loc_425A4:
-	standard |= 6;
-
-loc_425A8:
-	var_4 |= tl880_vpx_write_fp(0x20, &standard);
-
-loc_425B5:
-	ax = var_4;
-
-loc_425B9:
-
-	return eax;
+	/* Write the new state */
+	return tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, tmp); // VPX standard select register
 }
 
-
-void tl880_config_vpx()
+void tl880_vpx_config(struct tl880_dev *tl880dev)
 {
 	// Load default VPX settings
 	// LoadDefaultSettings()
 	
 	// Initialize the VPX chip
-	tl880_vpx_init();
+	//tl880_vpx_init(tl880dev);
 
 	// Set the initial video standard
-	tl880_vpx_set_video_standard(7);
+	tl880_vpx_set_video_standard(tl880dev, NTSC_COMB);
 
 	// Set the initial video source
-	tl880_vpx_set_video_source(2, 4);
+	//tl880_vpx_set_video_source(tl880dev, 2, 4);
 
-	// Set the video region decoded (?)
-	tl880_vpx_set_video_window(1, 22, 240, 240, 14, 720, 734, 3000, 0);
-	tl880_vpx_set_video_window(2, 21,   1,   1,  0, 160, 160,    0, 0);
-	tl880_vpx_set_video_window(3,  0,   0,   0,  0,   0,   0,    0, 0);
+	// Set the video region decoded (tl880dev, ?)
+	//tl880_vpx_set_video_window(tl880dev, 1, 22, 240, 240, 14, 720, 734, 3000, 0);
+	//tl880_vpx_set_video_window(tl880dev, 2, 21,   1,   1,  0, 160, 160,    0, 0);
+	//tl880_vpx_set_video_window(tl880dev, 3,  0,   0,   0,  0,   0,   0,    0, 0);
 
 	// Set other video attributes
-	tl880_vpx_set_video_attribute(1, 2, 144);
-	tl880_vpx_set_video_attribute(1, 1, 112);
-	tl880_vpx_set_video_attribute(1, 3, 192);
-	tl880_vpx_set_video_attribute(1, 4, 128);
-	tl880_vpx_set_video_attribute(1, 5, 128);
-	tl880_vpx_set_video_attribute(1, 6, 128);
-	tl880_vpx_set_video_attribute(1, 10, 180);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 2, 144);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 1, 112);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 3, 192);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 4, 128);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 5, 128);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 6, 128);
+	//tl880_vpx_set_video_attribute(tl880dev, 1, 10, 180);
 }
 
+#ifdef WILLNOTCOMPILE
 // A commentary on the initialization procedure of the VPX chip
-void tl880_init_vpx()
+void tl880_vpx_init()
 {
 	// Detect the VPX hardware version
 	tl880_vpx_detect_device();
