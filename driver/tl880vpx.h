@@ -30,6 +30,7 @@
 
 /* VPX FP registers */
 #define VPX_FP_SDT		0x20	// Standard selection register
+#define VPX_FP_INSEL		0x21	// Input selection register
 #define VPX_FP_COMB_UC		0x28	// Comb filter control register
 #define VPX_FP_PEAKING1		0x126	// Peaking/coring selection
 #define VPX_FP_CONTROLWORD	0x140	// Control and latching register
@@ -61,8 +62,10 @@ int tl880_vpx_write(struct tl880_dev *tl880dev, unsigned char reg, unsigned char
 unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpaddr);
 int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsigned short data);
 
+int tl880_vpx_set_power_register(struct tl880_dev *tl880dev, int status);
 int tl880_vpx_set_power_status(struct tl880_dev *tl880dev, int status);
 int tl880_vpx_set_video_standard(struct tl880_dev *tl880dev, enum video_standard_e standard);
+int tl880_vpx_set_video_source(struct tl880_dev *tl880dev, int luma_source, char chroma_source);
 
 void tl880_vpx_config(struct tl880_dev *tl880dev);
 void tl880_vpx_init(struct tl880_dev *tl880dev);

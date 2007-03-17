@@ -239,7 +239,8 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 2);
 	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 0);
 	*/
-	tl880_vpx_set_power_status(tl880dev, 2);
+	tl880_vpx_set_power_register(tl880dev, 2);
+	tl880_vpx_set_power_register(tl880dev, 0);
 	
 	// ConfigVPX();
 	tl880_vpx_config(tl880dev);

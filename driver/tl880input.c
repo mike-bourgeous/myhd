@@ -9,8 +9,7 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 {
 	__u16 cmdarg = 0;
 
-	if(!tl880dev) {
-		printk(KERN_ERR "tl880: NULL tl880dev in tl880_set_video_source\n");
+	if(CHECK_NULL(tl880dev)) {
 		return;
 	}
 	
@@ -28,7 +27,7 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 		if(tl880dev->card_type == 1) {
 			// _VPXWriteFP(0x154, 0x311);
 			tl880_vpx_write_fp(tl880dev, 0x154, 0x311);
-		} else 	if(tl880dev->card_type >= 2) {
+		} else if(tl880dev->card_type >= 2) {
 			// MspSetInput(9);
 			cmdarg = TVAUDIO_INPUT_EXTERN;
 			tl880_call_i2c_clients(tl880dev, VIDIOC_S_AUDIO, &cmdarg);
@@ -47,11 +46,17 @@ void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigne
 	}
 
 	// _VPXSetVideoSource(a, b);
+	
+	tl880_vpx_set_video_source(tl880dev, a, b);
 }
 
 
 void tl880_set_ntsc_input(struct tl880_dev *tl880dev, int input)
 {
+	if(CHECK_NULL(tl880dev)) {
+		return;
+	}
+	
 	switch(input) {
 		default:
 		case 0:

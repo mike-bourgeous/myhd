@@ -150,7 +150,7 @@ int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsign
 
 	/* Write the 16-bit data to the FPDAT register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
-					tl880dev->vpx_addr, VPX_FPDAT, __cpu_to_be16(data))) < 0) {
+					tl880dev->vpx_addr, VPX_I2C_FPDAT, __cpu_to_be16(data))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP data: %d\n", result);
 		return -1;
 	}
@@ -250,90 +250,66 @@ vpx3226:
 	return tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, tmp); // VPX standard select register
 }
 
-#ifdef WILLNOTCOMPILE
-int tl880_vpx_set_video_source(struct tl880_dev *tl880dev, int arg_one, char arg_two)
+// Bit 1 of chroma_source: Y/C vs CVBS mode; bit 4 of chroma_source: chroma input line
+int tl880_vpx_set_video_source(struct tl880_dev *tl880dev, int luma_source, char chroma_source)
 {
-	int retval;
+	int retval = 0;
+	unsigned int tmp1 = 0;
+	unsigned int tmp2 = 0;
 
-	eax = arg_one; // ( >> 24 ?)
-	eax--;
-	if(eax == 1) {
-		goto loc_42288;
+	if(CHECK_NULL(tl880dev)) {
+		return -1;
 	}
-	eax--;
-	if(eax == 2) {
-		goto loc_42282;
-	}
-	eax--;
-	if(eax == 3) {
-		goto loc_4229E;
-	}
-	arg_one->byte_3 = 0;
-	goto loc_4228C;
 
-loc_42282:
-	arg_one->byte_3 = 1;
-	goto loc_4228C;
+	switch(luma_source) {
+		case 1:
+			tmp2 = 2; // Luma from VIN1
+			break;
+		case 2:
+			tmp2 = 1; // Luma from VIN2
+			break;
+		case 3:
+			tmp2 = 0; // Luma from VIN3
+			break;
+		default:
+			printk(KERN_WARNING "tl880: invalid parameters to tl880_vpx_set_video_source: %d %d\n", luma_source, chroma_source);
+			return 2;
+	}
 
-loc_42288:
-	arg_one->byte_3 = 2;
+	switch(chroma_source) {
+		case 1:
+		case 4:
+		case 5:
+			break;
+		default:
+			printk(KERN_WARNING "tl880: invalid parameters to tl880_vpx_set_video_source: %d %d\n", luma_source, chroma_source);
+			return 2;
+	}
+
+	tmp2 |= chroma_source & 4; // Input path for chroma (0 = VIN1 on old chips, CIN1 on 64-pin 3228F; 1 = CIN2)
 	
-loc_4228C:
-	bl = arg_two;
-	if(bl == 1) {
-		goto loc_422A7;
+vpx3226:
+	// VPX3225 and later.  Code for older versions omitted
+	tmp1 = tl880_vpx_read_fp(tl880dev, VPX_FP_INSEL);
+
+	retval = tl880_vpx_write_fp(tl880dev, VPX_FP_INSEL, (tmp1 & 0x7f8) | tmp2);
+
+	tmp1 = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT);
+	retval |= (tmp1 == (unsigned short)-1); // Checking status of read_fp
+	tmp1 &= 0x7ff; // Clear the latch bit (telling the VPX to activate the new parameters)
+
+	if(chroma_source & 1) {
+		tmp1 |= 0x40; // S-video (Y/C)
+	} else {
+		tmp1 &= ~0x40; // Composite (CVBS)
 	}
-	if(bl == 3) {
-		goto loc_4229E;
-	}
-	if(bl == 5) {
-		goto loc_422A7;
-	}
 
-loc_4229E:
-	ax = 2;
-	goto loc_423EF;
+	retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, tmp1);
 
-loc_422A7:
-	al = bl; // arg_two
-	al &= 4;
-	al |= arg_one->byte_3;
-	eax = gwVPX_Type;
-	if(gwVPX_Type == 0x3350) {
-		goto loc_4238A;
-	}
-	// Code for older versions omitted
-	
-loc_4238A:
-	var_4 = tl880_vpx_read_fp(tl880dev, VPX_FP_INSEL);
-
-	cx = arg_one->byte_3;
-
-	eax = var_4;
-	eax &= 0x7f8;
-	eax |= ecx;
-	
-	retval = tl880_vpx_write_fp(tl880dev, VPX_FP_INSEL, eax);
-
-	var_4 = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT);
-	var_4 &= 0x7ff;
-	retval |= eax; // Checking status of read_fp
-	if(!(bl & 1)) {
-		goto loc_423D0;
-	}
-	var_4 |= 0x40;
-	goto loc_423D7;
-
-loc_423D0:
-	var_4 &= ~0x40; // &= 0xffbf;
-
-loc_423D7:
-	retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, var_4);
-	//retval |= tl880_vpx_latch_registers(0x10);
+	//retval |= tl880_vpx_latch_registers(tl880dev, 0x10);
 	
 	return retval;
 }
-#endif /* WILLNOTCOMPILE */
 
 void tl880_vpx_config(struct tl880_dev *tl880dev)
 {
@@ -349,9 +325,9 @@ void tl880_vpx_config(struct tl880_dev *tl880dev)
 	tl880_vpx_set_video_standard(tl880dev, NTSC_COMB);
 
 	// Set the initial video source
-	//tl880_vpx_set_video_source(tl880dev, 2, 4);
+	tl880_vpx_set_video_source(tl880dev, 2, 4);
 
-	// Set the video region decoded (tl880dev, ?)
+	// Set the video region decoded (?)
 	//tl880_vpx_set_video_window(tl880dev, 1, 22, 240, 240, 14, 720, 734, 3000, 0);
 	//tl880_vpx_set_video_window(tl880dev, 2, 21,   1,   1,  0, 160, 160,    0, 0);
 	//tl880_vpx_set_video_window(tl880dev, 3,  0,   0,   0,  0,   0,   0,    0, 0);
@@ -388,7 +364,7 @@ vpx3226: // Other VPX revisions have a bunch of stuff written to I2C above here
 	} else {
 		// Funky optimization way of saying if(oldllc) then set bit 6
 		tmp2 = (-gwVPX_Oldllc) & 0xffff;
-		tmp2 -= b;
+		tmp2 -= tmp2;
 		tmp2 &= 0x40; // register 0xaa bit[6]: old llc timing with longer hold time
 	}
 	tl880_vpx_write(tl880dev, VPX_I2C_LLC, tmp2); // LLC settings
