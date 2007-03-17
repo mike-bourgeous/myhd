@@ -79,6 +79,237 @@ int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsign
 }
 
 #ifdef WILLNOTCOMPILE
+void tl880_set_vpx_video_standard(char standard)
+{
+	int var_4;
+	static int cache1st = 0;
+	
+	bl = standard;
+	if(gwVPX_Cache /* (short)0 */ == 0 || cache1st == 0) {
+		goto loc_42420;
+	}
+
+	if(gbStandard /* (char)0 */ != standard) {
+		goto loc_4242A;
+	}
+
+	ax = 0;
+	goto loc_425B9;
+
+loc_42420:
+	cache1st = 1;
+
+loc_4242A:
+	eax = gwVPX_Type;
+
+	gbStandard = standard;
+	if(gwVPX_Type == 0x3350) { // vpx3226e/f
+		goto loc_42533;
+	}
+	if(gwVPX_Type == 0x4260) { // vpx3216b
+		goto loc_42472;
+	}
+	if(gwVPX_Type == 0x4280) { // vpx3214c
+		goto loc_42472;
+	}
+	if(gwVPX_Type == 0x4680) { // vpx3220a
+		goto loc_42472;
+	}
+	if(gwVPX_Type <= 0x722f) {
+		goto loc_42469;
+	}
+	if(gwVPX_Type <= 0x7231) {
+		goto loc_42533;
+	}
+
+loc_42469:
+	ax = 4;
+	goto loc_425b9;
+
+loc_42472:
+
+	var_4 = tl880_vpx_read_fp(0xf2, &standard);
+
+	standard &= 0x20; // Do not store in standard
+
+	eax = 0;
+	al = bl;
+	if(standard > 5) { // al
+		goto loc_424C3;
+	} else if (standard == 5) {
+		goto loc_424BD;
+	}
+	if(standard == 0) {
+		goto loc_424B7;
+	} else if(standard == 1) {
+		goto loc_424ED;
+	} else if(standard == 2) {
+		goto loc_424B1;
+	} else if(standard == 3) {
+		goto loc_424AB;
+	} else if(standard != 4) {
+		goto loc_424FD;
+	}
+	standard |= 9;
+	goto loc_424FD;
+
+loc_424AB:
+	standard |= 7;
+	goto loc_424FD;
+
+loc_424B1:
+	standard |= 5;
+	goto loc_424FD;
+
+loc_424B7:
+	standard |= 1;
+	goto loc_424FD;
+
+loc_424BD:
+	standard |= 0xb;
+	goto loc_424FD;
+
+loc_424C3:
+	//eax -= 6;
+	if(eax == 6) {
+		goto loc_424F9;
+	}
+	//eax--;
+	if(eax == 7) {
+		goto loc_424F3;
+	}
+	//eax -= 2;
+	if(eax == 9) {
+		goto loc_424DC;
+	}
+	//eax -= 6
+	if(eax != 0xf) {
+		goto loc_424FD;
+	}
+
+	standard |= 0x3c0;
+	goto loc_424FD;
+
+loc_424DC:
+	eax = 0;
+	al = gbVPX_Adr;
+
+	i2c_write8(gpVPX_Adr, 0x34, 1);
+
+loc_424ED:
+	standard |= 3;
+	goto loc_424FD;
+
+loc_424F3:
+	standard |= 0xf;
+	goto loc_424FD;
+
+loc_424F9:
+	standard |= 0xd;
+
+loc_424FD:
+	var_4 |= tl880_vpx_write_fp(esi, &standard);
+
+	var_4 |= VPXLatchRegisters(0x10);
+	pop esi;
+
+	if(bl != 9) {
+		goto loc_425B5;
+	}
+	eax = 0;
+	al = gbVPX_Adr;
+
+	i2c_write8(gbVPX_Adr, 0x34, 1);
+	goto loc_425B5;
+
+loc_42533:
+	var_4 = tl880_vpx_read_fp(0x20, &standard);
+	standard &= 0x7f0;
+
+	eax = 0;
+	al = bl;
+	if(eax > 5) {
+		goto loc_42582;
+	} else if(eax == 5) {
+		goto loc_4257C;
+	}
+	if(eax == 0) {
+		goto loc_425A8;
+	}
+	if(eax == 1) {
+		goto loc_42576;
+	}
+	if(eax == 2) {
+		goto loc_42570;
+	}
+	if(eax == 3) {
+		goto loc_4256A;
+	}
+	if(eax != 4) {
+		goto loc_425A8;
+	}
+
+	standard |= 4;
+	goto loc_425A8;
+
+loc_4256A:
+	standard |= 3;
+	goto loc_425A8;
+
+loc_42570:
+	standard |= 2;
+	goto loc_425A8;
+
+loc_42576:
+	standard |= 1;
+	goto loc_425A8;
+
+loc_4257C:
+	standard |= 5;
+	goto loc_425A8;
+
+loc_42582:
+	//eax -= 6;
+	if(eax == 6) {
+		goto loc_425A4;
+	}
+	//eax--;
+	if(eax == 7) {
+		goto loc_4259E;
+	}
+	//eax -= 2;
+	if(eax == 9) {
+		goto loc_42598;
+	}
+	// eax -= 6;
+	if(eax != 15) {
+		goto loc_425A8;
+	}
+	goto loc_42469;
+
+loc_42598:
+	standard |= 9;
+	goto loc_425A8;
+
+loc_4259E:
+	standard |= 7;
+	goto loc_425A8;
+
+loc_425A4:
+	standard |= 6;
+
+loc_425A8:
+	var_4 |= tl880_vpx_write_fp(0x20, &standard);
+
+loc_425B5:
+	ax = var_4;
+
+loc_425B9:
+
+	return eax;
+}
+
+
 void tl880_config_vpx()
 {
 	// Load default VPX settings
