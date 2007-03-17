@@ -86,7 +86,7 @@ static int tl880_vpx_fp_status(struct tl880_dev *tl880dev)
 	unsigned int i;
 
 	for(i = 0; i < VPX_TIMEOUT_COUNT; i++) {
-		status = tl880_vpx_read(tl880dev, 0x29);
+		status = tl880_vpx_read(tl880dev, VPX_I2C_FPSTA);
 
 		if(!(status & 4)) {
 			return 0;
@@ -109,7 +109,7 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 
 	/* Write the 16-bit address to the FPRD register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
-					tl880dev->vpx_addr, 0x26, __cpu_to_be16(fpaddr))) < 0) {
+					tl880dev->vpx_addr, VPX_I2C_FPRD, __cpu_to_be16(fpaddr))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP read register: %d\n", result);
 		return -1;
 	}
@@ -120,7 +120,7 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 
 	/* Read the 16-bit data from the FPDAT register */
 	data = tl880_i2c_read_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
-					tl880dev->vpx_addr, 0x28);
+					tl880dev->vpx_addr, VPX_I2C_FPDAT);
 	if(data == (unsigned short)-1) {
 		printk(KERN_WARNING "tl880: Failed to read vpx FP data\n");
 		return -1;
@@ -139,7 +139,7 @@ int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsign
 
 	/* Write the 16-bit address to the FPWR register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
-					tl880dev->vpx_addr, 0x27, __cpu_to_be16(fpaddr))) < 0) {
+					tl880dev->vpx_addr, VPX_I2C_FPWR, __cpu_to_be16(fpaddr))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP write register: %d\n", result);
 		return -1;
 	}
@@ -150,7 +150,7 @@ int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsign
 
 	/* Write the 16-bit data to the FPDAT register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
-					tl880dev->vpx_addr, 0x28, __cpu_to_be16(data))) < 0) {
+					tl880dev->vpx_addr, VPX_FPDAT, __cpu_to_be16(data))) < 0) {
 		printk(KERN_WARNING "tl880: Failed to write vpx FP data: %d\n", result);
 		return -1;
 	}
@@ -158,14 +158,28 @@ int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsign
 	return 0;
 }
 
-int tl880_vpx_set_power_status(struct tl880_dev *tl880dev, int status)
+int tl880_vpx_set_power_register(struct tl880_dev *tl880dev, int status)
 {
 	/* Set the VPX322x power mode:
 	 *   register 0xAA
 	 *   	bit[1:0]:	Low power mode
 	 *   		  00	Active mode, outputs enabled
 	 *   		  01	Outputs tri-stated; clock divided by 2; I2C full speed
-	 *   		 *10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
+	 *   		  10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
+	 *   		  11	Outputs tri-stated; clock divided by 8; I2C < 100kbits/s
+	 */
+	return tl880_vpx_write(tl880dev, VPX_I2C_LLC, status);
+}
+
+int tl880_vpx_set_power_status(struct tl880_dev *tl880dev, int status)
+{
+	/* XXX TODO XXX */
+	/* Set the VPX322x power mode:
+	 *   register 0xAA
+	 *   	bit[1:0]:	Low power mode
+	 *   		  00	Active mode, outputs enabled
+	 *   		  01	Outputs tri-stated; clock divided by 2; I2C full speed
+	 *   		  10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
 	 *   		  11	Outputs tri-stated; clock divided by 8; I2C < 100kbits/s
 	 */
 	return tl880_vpx_write(tl880dev, VPX_I2C_LLC, status);
@@ -176,23 +190,21 @@ int tl880_vpx_set_video_standard(struct tl880_dev *tl880dev, enum video_standard
 	static int cachefirst = 0; // Set to 1 once the chip has been initialized once
 	unsigned short tmp;
 	
-	if(/* gwVPX_Cache && */ cachefirst) {
-		if(/*gbStandard*/ tl880dev->vpx_video_standard == standard) {
+	// If VPX mode cache enabled and chip has been initialized, check for different state
+	if(gwVPX_Cache && cachefirst) {
+		if(tl880dev->vpx_video_standard == standard) {
+			// State hasn't changed
 			return 0;
 		}
 	} else {
+		// First run through
 		cachefirst = 1;
 	}
 
-	/* gbStandard = standard; */
 	tl880dev->vpx_video_standard = standard;
-	/*
-	if(gwVPX_Type == 0x3350) { // vpx3226e/f
-		goto vpx_3226;
-	}
+
+vpx3226:
 	// Removed code for older chip versions
-vpx_3226:
-	*/
 
 	/* Read the current VPX chip stae */
 	tmp = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT); // VPX standard select register
@@ -238,6 +250,91 @@ vpx_3226:
 	return tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, tmp); // VPX standard select register
 }
 
+#ifdef WILLNOTCOMPILE
+int tl880_vpx_set_video_source(struct tl880_dev *tl880dev, int arg_one, char arg_two)
+{
+	int retval;
+
+	eax = arg_one; // ( >> 24 ?)
+	eax--;
+	if(eax == 1) {
+		goto loc_42288;
+	}
+	eax--;
+	if(eax == 2) {
+		goto loc_42282;
+	}
+	eax--;
+	if(eax == 3) {
+		goto loc_4229E;
+	}
+	arg_one->byte_3 = 0;
+	goto loc_4228C;
+
+loc_42282:
+	arg_one->byte_3 = 1;
+	goto loc_4228C;
+
+loc_42288:
+	arg_one->byte_3 = 2;
+	
+loc_4228C:
+	bl = arg_two;
+	if(bl == 1) {
+		goto loc_422A7;
+	}
+	if(bl == 3) {
+		goto loc_4229E;
+	}
+	if(bl == 5) {
+		goto loc_422A7;
+	}
+
+loc_4229E:
+	ax = 2;
+	goto loc_423EF;
+
+loc_422A7:
+	al = bl; // arg_two
+	al &= 4;
+	al |= arg_one->byte_3;
+	eax = gwVPX_Type;
+	if(gwVPX_Type == 0x3350) {
+		goto loc_4238A;
+	}
+	// Code for older versions omitted
+	
+loc_4238A:
+	var_4 = tl880_vpx_read_fp(tl880dev, VPX_FP_INSEL);
+
+	cx = arg_one->byte_3;
+
+	eax = var_4;
+	eax &= 0x7f8;
+	eax |= ecx;
+	
+	retval = tl880_vpx_write_fp(tl880dev, VPX_FP_INSEL, eax);
+
+	var_4 = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT);
+	var_4 &= 0x7ff;
+	retval |= eax; // Checking status of read_fp
+	if(!(bl & 1)) {
+		goto loc_423D0;
+	}
+	var_4 |= 0x40;
+	goto loc_423D7;
+
+loc_423D0:
+	var_4 &= ~0x40; // &= 0xffbf;
+
+loc_423D7:
+	retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_SDT, var_4);
+	//retval |= tl880_vpx_latch_registers(0x10);
+	
+	return retval;
+}
+#endif /* WILLNOTCOMPILE */
+
 void tl880_vpx_config(struct tl880_dev *tl880dev)
 {
 	// Load default VPX settings
@@ -272,7 +369,7 @@ void tl880_vpx_config(struct tl880_dev *tl880dev)
 // A commentary on the initialization procedure of the VPX chip
 void tl880_vpx_init(struct tl880_dev *tl880dev)
 {
-	unsigned long a, b, c, d, arg;
+	unsigned long tmp1, tmp2, tmp3, tmp4;
 	int somevar = 0xcc;
 	short version = 0xcc;
 
@@ -287,122 +384,99 @@ void tl880_vpx_init(struct tl880_dev *tl880dev)
 
 vpx3226: // Other VPX revisions have a bunch of stuff written to I2C above here
 	if(gwVPX_Llc2pol != 0) { // llc2pol is set to 0 in LoadDefaultSettings
-		b = 0x10; // register 0xaa bit[4]: LLC2 polarity
+		tmp2 = 0x10; // register 0xaa bit[4]: LLC2 polarity
 	} else {
 		// Funky optimization way of saying if(oldllc) then set bit 6
-		b = (-gwVPX_Oldllc) & 0xffff;
-		b -= b;
-		b &= 0x40; // register 0xaa bit[6]: old llc timing with longer hold time
+		tmp2 = (-gwVPX_Oldllc) & 0xffff;
+		tmp2 -= b;
+		tmp2 &= 0x40; // register 0xaa bit[6]: old llc timing with longer hold time
 	}
-	//i2cwrite8(VPX_byte_Adr, 0xaa, b); // LLC settings
-	tl880_vpx_write(tl880dev, VPX_I2C_LLC, b);
+	tl880_vpx_write(tl880dev, VPX_I2C_LLC, tmp2); // LLC settings
 
-	a = 0;
-	a = gwVPX_Llc2en;	// LLC2 to TDO (if using JTAG in test-logic-reset state)
-	a <<= 1;
-	a |= gwVPX_Zen;	// HREF, VREF, FIELD, VACT, LLC, LLC2 enable
-	a <<= 1;
-	a |= gwVPX_Clkio;	// Pixclock output enable
-	a <<= 1;
-	a |= gwVPX_Ben;	// Video port B enable (disable = tristate)
-	a <<= 1;
-	a |= gwVPX_Aen;	// Video port A enable (disable = tristate)
-	//i2cwrite8(VPX_byte_Adr, 0xf2, a); // Output enable register
-	tl880_vpx_write(tl880dev, VPX_I2C_OENA, a);
+	tmp1 = gwVPX_Llc2en;	// LLC2 to TDO (if using JTAG in test-logic-reset state)
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Zen;		// HREF, VREF, FIELD, VACT, LLC, LLC2 enable
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Clkio;	// Pixclock output enable
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Ben;		// Video port B enable (disable = tristate)
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Aen;		// Video port A enable (disable = tristate)
+	tl880_vpx_write(tl880dev, VPX_I2C_OENA, tmp1); // Output enable register
 
-	a = 0;
-	a = gwVPX_Strpixclk;// additional PIXCLK driving strength (if needed different from below)
-	a <<= 3;
-	a |= gwVPX_Stra2;	// PIXCLK, LLC, VACT driving strength
-	a <<= 3;
-	a |= gwVPX_Stra1;	// Video port A driving strength
-	//i2cwrite8(VPX_byte_Adr, 0xf8, a); // Driving strength register
-	tl880_vpx_write(tl880dev, VPX_I2C_DRIVER_A, a);
+	tmp1 = gwVPX_Strpixclk;	// additional PIXCLK driving strength (if needed different from below)
+	tmp1 <<= 3;
+	tmp1 |= gwVPX_Stra2;	// PIXCLK, LLC, VACT driving strength
+	tmp1 <<= 3;
+	tmp1 |= gwVPX_Stra1;	// Video port A driving strength
+	tl880_vpx_write(tl880dev, VPX_I2C_DRIVER_A, tmp1); // Driving strength register
 
-	a = 0;
-	a = gwVPX_Strb2;	// HREF, VREF, FIELD, LLC2 driving strength
-	a <<= 3;
-	a |= gwVPX_Strb1;	// Video port B driving strength
-	//i2cwrite8(VPX_byte_Adr, 0xf9, a); // Driving strength register
-	tl880_vpx_write(tl880dev, VPX_I2C_DRIVER_B, a);
+	tmp1 = gwVPX_Strb2;	// HREF, VREF, FIELD, LLC2 driving strength
+	tmp1 <<= 3;
+	tmp1 |= gwVPX_Strb1;	// Video port B driving strength
+	tl880_vpx_write(tl880dev, VPX_I2C_DRIVER_B, tmp1); // Driving strength register
 
-	a = 0;
-	a = gwVPX_Vlen;	// VREF pulse width (VPX adds two to this number)
-	a <<= 1;
-	a |= gwVPX_Vrefpol;	// VREF polarity (0 = active high)
-	a <<= 1;
-	a |= gwVPX_Hrefpol;	// HREF polarity (0 = active low)
-	a <<= 1;
-	a |= gwVPX_Prefpol;	// Polarity of field pin (0 = odd high, 1 = even high)
-	tl880_vpx_write_fp(tl880dev, VPX_FP_REFSIG, a); // HREF and VREF control 
+	tmp1 = gwVPX_Vlen;	// VREF pulse width (VPX adds two to this number)
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Vrefpol;	// VREF polarity (0 = active high)
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Hrefpol;	// HREF polarity (0 = active low)
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Prefpol;	// Polarity of field pin (0 = odd high, 1 = even high)
+	tl880_vpx_write_fp(tl880dev, VPX_FP_REFSIG, tmp1); // HREF and VREF control 
 
 	switch(gwVPX_Format) {
 		case 0:
 		default:
-			d = 0;
+			tmp3 = 0;
 		case 8:
-			d = 1;
+			tmp3 = 1;
 		case 9:
-			d = 2;
+			tmp3 = 2;
 	}
 
-	a = 0;
-	a = gwVPX_Flagdel;	// Change ITU-R656 header flags in 0: SAV, 1: EAV
-	c = 0;
-	c = gwVPX_Hsup;		// Suppress ITU-R656 headers for blank lines
-	a &= 1;
-	a <<= 1;
-	c &= 1;
-	a |= c;
-	c = 0;
-	c = gwVPX_UVSwap;	// Specs describe this bit as "reserved"
-	a <<= 1;
-	c &= 1;
-	a |= c;
-	c = 0;
-	c = gwVPX_SplitDis;	// Disable teletext splitting when enabled
-	a <<= 1;
-	c &= 1;
-	a |= c;
-	c = 0;
-	c = gwVPX_Shuffler;	// Shuffler (0: Video Port A=Y, Port B=CbCr, 1: vice versa)
-	a <<= 4;		// Skipping over VBI data range, transmission mode, pixclk selection
-	c &= 1;
-	a |= c;
-	a <<= 2;
-	a |= d;		// bits 1:0 YCbCr 422 format selection (2: bitstream, 1: ITU-R656, 0: ITU-R601)
-	tl880_vpx_write_fp(tl880dev, VPX_FP_FORMAT_SEL, a); // Format selection register
+	tmp1 = gwVPX_Flagdel & 1;	// Change ITU-R656 header flags in 0: SAV, 1: EAV
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_Hsup & 1;		// Suppress ITU-R656 headers for blank lines
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_UVSwap & 1;	// Specs describe this bit as "reserved"
+	tmp1 <<= 1;
+	tmp1 |= gwVPX_SplitDis & 1;	// Disable teletext splitting when enabled
+	tmp1 <<= 4;			// Skipping over VBI data range, transmission mode, pixclk selection
+	tmp1 |= gwVPX_Shuffler & 1;	// Shuffler (0: Video Port A=Y, Port B=CbCr, 1: vice versa)
+	tmp1 <<= 2;
+	tmp1 |= tmp3;			// bits 1:0 YCbCr 422 format selection (2: bitstream, 1: ITU-R656, 0: ITU-R601)
+	tl880_vpx_write_fp(tl880dev, VPX_FP_FORMAT_SEL, tmp1); // Format selection register
 
 	somevar = tl880_vpx_read_fp(tl880dev, VPX_FP_FORMAT_SEL); // Why?
 
-	b = tl880dev->card_type;
-	if(b == 1) {
-		arg = 0x311; // 785 (multipurpose bits and double clock active, port B is 00010001)
-		goto C;
+ 	// Set output multiplexer register
+ 	switch(tl880dev->card_type) {
+		case TL880_CARD_JANUS:
+			// multipurpose bits and double clock active, port B is 00010001
+			tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x311);
+			break;
+		case TL880_CARD_MYHD_MDP100A:
+			// multipurpose bits and double clock active, port B output is 0
+			tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x300);
+			break;
+		case TL880_CARD_MYHD_MDP100:
+		case TL880_CARD_MYHD_MDP110:
+		case TL880_CARD_MYHD_MDP120: // TODO: Need to confirm 120 and 130
+		case TL880_CARD_MYHD_MDP130:
+			// multipurpose bits and double clock active, port B output is 00000001
+			tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x301);
+			break;
+		default:
+			printk(KERN_WARNING "tl880: VPX init not yet finished for this card type\n");
+			break;
 	}
 
-	if(b == 2) {
-		arg = 0x300; // 768 (multipurpose bits and double clock active, port B output is 0)
-		goto C;
-	}
-
-	if(b >= 3) {
-		arg = 0x301; // 769 (multipurpose bits and double clock active, port B output is 00000001)
-		goto C;
-	}
-	goto C;
-
-C:
-	tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, arg/*[0x301 or 0x311 or 0x300]*/); // Output multiplexer register
-
-D:
 	tl880_vpx_write_fp(tl880dev, VPX_FP_PVAL_START, 0);	// Start position of video active signal (chip default is 40)
 	tl880_vpx_write_fp(tl880dev, VPX_FP_PVAL_STOP, 0x320);	// 800 - end position of video active (chip default is 720)
 
-	b = gwVPX_VactMode;	// Mode for video active signal (programmable vs. window size)
-	b |= 0x200;		// Latch: timing mode update enable
-	b <<= 2;
-	tl880_vpx_write_fp(tl880dev, VPX_FP_CONTROLWORD, b); // Control and latching register
+	// Mode for video active signal (programmable vs. window size) and timing mode update latch
+	tl880_vpx_write_fp(tl880dev, VPX_FP_CONTROLWORD, gwVPX_VactMode << 2 | 0x800); // Control and latching register
 	tl880_vpx_write_fp(tl880dev, VPX_FP_REG174, 4);	// Undocumented register? (not in specs)
 
 	if(1 /*vpx type is 3226*/) {
