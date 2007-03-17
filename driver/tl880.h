@@ -159,6 +159,7 @@ struct tl880_dev {
 
 	int elseint;				/* Do we share an interrupt? */
 
+	unsigned long old_mask;			/* Previously used interrupt mask */
 	unsigned long int_mask;			/* Global interrupt enable mask */
 	unsigned long int_type;			/* Type of interrupt to service */
 	unsigned long int_count;		/* Number of interrupts received */
@@ -209,6 +210,29 @@ struct tl880_dev {
 	unsigned long iau_iba_reg;		/* Register used for base address */
 	unsigned long iau_iea_reg;		/* Register used for end address */
 	unsigned long iau_ira_reg;		/* Register used for base address (2) */
+
+	
+	/*** Video State ***/
+
+
+	/*** Video Chip (VPX) State ***/
+	int vpx_addr;				/* Set to 0 if no VPX */
+	int vpx_i2cbus;				/* Set to index of i2cbuses */
+	enum video_standard_e {
+		PAL_B = 0,
+		PAL_G = 0,
+		PAL_H = 0,
+		PAL_I = 0,
+		NTSC_M = 1,
+		SECAM = 2,
+		NTSC44 = 3,
+		PAL_M = 4,
+		PAL_N = 5,
+		PAL_60 = 6,
+		NTSC_COMB = 7,
+		NTSC_COMP = 9,
+		FIFTEEN = 15
+	} vpx_video_standard;			/* Currently active video standard */
 };
 
 #endif /* __KERNEL__ */
@@ -323,13 +347,6 @@ void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned 
 unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
 
-/* tl880vpx.c */
-int tl880_vpx_read(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char reg);
-int tl880_vpx_write(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char reg, unsigned char value);
-unsigned short tl880_vpx_read_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr);
-int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned short fpaddr, unsigned short data);
-
-
 #endif /* __KERNEL__ */
 
 
@@ -338,6 +355,7 @@ int tl880_vpx_write_fp(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsign
 #include "tl880reg.h"
 #include "tl880dpc.h"
 #include "tl880osd.h"
+#include "tl880vpx.h"
 
 #endif /* _TL880_H_ */
 
