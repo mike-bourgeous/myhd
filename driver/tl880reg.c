@@ -7,7 +7,10 @@
 
 void tl880_write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigned long value)
 {
-	if(!tl880dev || !tl880dev->regspace) {
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(tl880dev->regspace)) {
+		return;
+	}
+	if(reg >= 0x100000) {
 		return;
 	}
 	writel(value, (void *)(tl880dev->regspace + reg));
@@ -16,8 +19,11 @@ void tl880_write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigne
 unsigned long tl880_read_register(struct tl880_dev *tl880dev, unsigned long reg)
 {
 	unsigned long value;
-	if(!tl880dev || !tl880dev->regspace) {
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(tl880dev->regspace)) {
 		return 0;
+	}
+	if(reg >= 0x100000) {
+		return -1;
 	}
 	value = readl((void *)(tl880dev->regspace + reg));
 	return value;

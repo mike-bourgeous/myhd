@@ -256,7 +256,7 @@ int main(int argc, char *argv[])
 
 
 	printf("Setting cursor memory offset\n");
-	write_register(0x10100, 0x1d8000);
+	write_register(0x10100, 0x4d8000);
 
 	printf("Setting cursor size\n");
 	write_regbits(0x10108, 9, 8, 4);

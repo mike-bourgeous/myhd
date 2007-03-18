@@ -31,6 +31,10 @@ TL880 Memory
 The first 0x186000 bytes (1.5MB+24KB) of the memory region seem to be TL850Memory.
 The next 0x1000000 bytes (16MB) seem to be OSD-available memory.
 
+While tinkering around, I found that the two field buffers were at memory offsets
+~0x408800 and ~0x587000.  This is not necessarily always the case.  This was after
+loading some PCI traces.
+
 Memory is usually written in big-endian format.  The macro __cpu_to_be32,
 defined in asm/byteorder.h, is useful.
 
@@ -306,14 +310,18 @@ APU (Audio Processing Unit) 3000-307c
 
 3020 written with 0x1000 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
+	Sets the audio buffer reset point (buffer resets to here)
 
 3024 written with 0x10fe0 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
+	Sets the audio buffer reset trigger (when buffer reaches here, it resets)
 
 3028 may be ntsc recording offset in sdram
      is used in cJanus::RotateVscCapFrame
      is used in cJanus::InitNtscAudio (0x1000 + gpJanus+167d8 myhd1.54)
      constantly changing while watching NTSC over the air
+	Writing this with a value that is part of the displayed memory buffer causes
+	the buffer to be overwritten.  This value should be between regs 3020 and 3024.
 
 302c written with 0x1000 in cJanus::InitNtscAudio
      constantly changing while watching NTSC over the air
@@ -664,9 +672,10 @@ DPC 10000-10200
 
   0x5800 is DD
 
-10040 bottom two bits used in DoProgressiveFrame as a bitfield, apparently some
+10040 bottom two bits used in DoProgressiveFrame as a bitfield, maybe some
       kind of register selection for 10068,1006c
       used in cJanus::isr_NonSlice_Tv
+      controls image format
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -678,10 +687,36 @@ DPC 10000-10200
 						multiple times across the screen
 	
 
+10044 is YUV color value used as background for video.
+
 10048 is DispBufReg(?) or NtscDispFrame?
       bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|00000nnn
+	00000000|00000000|00000000|nnnnn000
+	00000000|000000nn|nnnnnnnn|00000000
+	0nnnnnnn|nnnn0000|00000000|00000000
 
-10050, 10054 read in CreateAddSurface
+1004c Seems to control the amount of image that is decoded - the rest is replaced with repeated pixels
+
+10050, 10054 read in CreateAddSurface - modifying the value alters the position of video
+
+10050
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn	Video image phase?
+	00000000|0000nnnn|nnnnnnnn|00000000	Video image x offset on display (last bit ignored)
+	nnnnnnnn|nnnn0000|00000000|00000000	Video image y offset on display
+
+10054 Crops video (does not scale)
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display
+	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display
 
 10068,1006c used in DoProgressiveFrame with g_vsCtlReg
 

@@ -250,7 +250,7 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	}
 	if(tl880dev->int_type & 0x40) {
 		tl880dev->mce_count++;
-		tl880_write_regbits(tl880dev, 4, 6, 6, 0);
+		//tl880_write_regbits(tl880dev, 4, 6, 6, 0);
 		if(debug > 0 || tl880dev->mce_count == 1) {
 			printk(KERN_DEBUG "tl880: mce interrupt\n");
 		}
@@ -267,35 +267,35 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	}
 	if(tl880dev->int_type & 0x10) {
 		tl880dev->vsc_count++;
-		tl880_write_regbits(tl880dev, 4, 4, 4, 0);
+		//tl880_write_regbits(tl880dev, 4, 4, 4, 0);
 		if(debug > 0 || tl880dev->vsc_count == 1) {
 			printk(KERN_DEBUG "tl880: vsc interrupt\n");
 		}
 	}
 	if(tl880dev->int_type & 0x1) {
 		tl880dev->apu_count++;
-		tl880_write_regbits(tl880dev, 4, 0, 0, 0);
+		//tl880_write_regbits(tl880dev, 4, 0, 0, 0);
 		if(debug > 0 || tl880dev->apu_count == 1) {
 			printk(KERN_DEBUG "tl880: apu interrupt\n");
 		}
 	}
 	if(tl880dev->int_type & 0x2) {
 		tl880dev->blt_count++;
-		tl880_write_regbits(tl880dev, 4, 1, 1, 0);
+		//tl880_write_regbits(tl880dev, 4, 1, 1, 0);
 		if(debug > 0 || tl880dev->blt_count == 1) {
 			printk(KERN_DEBUG "tl880: blt interrupt\n");
 		}
 	}
 	if(tl880dev->int_type & 0x100) {
 		tl880dev->hpip_count++;
-		tl880_write_regbits(tl880dev, 4, 8, 8, 0);
+		//tl880_write_regbits(tl880dev, 4, 8, 8, 0);
 		if(debug > 0 || tl880dev->hpip_count == 1) {
 			printk(KERN_DEBUG "tl880: hpip interrupt\n");
 		}
 	}
 	if(tl880dev->int_type & 0x200) {
 		tl880dev->mcu_count++;
-		tl880_write_regbits(tl880dev, 4, 9, 9, 0);
+		//tl880_write_regbits(tl880dev, 4, 9, 9, 0);
 		if(debug > 0 || tl880dev->mcu_count == 1) {
 			printk(KERN_DEBUG "tl880: mcu interrupt\n");
 		}
@@ -332,5 +332,7 @@ void tl880_disable_interrupts(struct tl880_dev *tl880dev)
 	tl880_write_register(tl880dev, 0x10008, 0);
 	tl880_write_register(tl880dev, 0x4010, 0);
 	tl880_write_register(tl880dev, 0x1008, 0);
+
+	tl880_write_register(tl880dev, 0x3014, 0);
 }
 

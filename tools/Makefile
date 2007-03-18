@@ -9,6 +9,8 @@ all:
 	gcc -std=gnu99 -Os -Wall memload.c -o memload -ggdb3
 	gcc -std=gnu99 -Os -Wall memloadswab.c -o memloadswab -ggdb3
 	
+	gcc -std=gnu99 -Os -Wall memset.c -o memset -ggdb3
+	
 	gcc -std=gnu99 -Os -Wall readmem.c -o readmem -ggdb3
 	gcc -std=gnu99 -Os -Wall writemem.c -o writemem -ggdb3
 	
@@ -45,7 +47,7 @@ clean:
 	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
 	striperam ioccursor randosd osdtest memdump osdimage \
 	memload rampram hexcount readmem writemem randreg setalpha \
-	memloadswab
+	memloadswab memset
 
 	make -C dpc clean
 	make -C example clean

@@ -447,7 +447,7 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 	}
 #endif /* 0 */
 
-	if(debug > 0 && tl880dev->dpc_count % 600 == 0) {
+	if((debug > 0 && tl880dev->dpc_count % 60 == 0) || tl880dev->dpc_count % 1200 == 0) {
 		printk(KERN_DEBUG "tl880: ~%lu dpc interrupts per second\n", tl880dev->dpc_count * HZ / (jiffies - first_jiffies));
 	}
 

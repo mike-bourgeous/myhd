@@ -1,10 +1,20 @@
+2007-03-17	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added memset tool.
+	* Many improvements to tl880vpx.c.
+	* Split VPX definitions from tl880.h to tl880vpx.h.
+	* Reduced interrupt printk verbosity.
+	* Other tweaks to the interrupt handler.
+	* VPX improvements.
+	* More chip info in tl880doc.txt.
+
 2007-03-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added interrupt counting to tl880int.c.
 	* Added interrupt status variables to tl880.h for MCU interrupts.
 	* No longer disable TSD interrupts when receiving one.
 	* Added DMA memory offset registers to tl880doc.txt (thanks to the PCI
-	  traces provided by Stephen Marchang).
+	  traces provided by Stephen Marchant).
 	* Added report of DMA offset to /proc/tl880.
 
 2007-02-18	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
