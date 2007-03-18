@@ -327,7 +327,7 @@ loc_41A79:
 	switch(eax)
 	{
 		default:
-			goto loc_41D68;
+			return 2;
 		case 0:
 			goto loc_41A8E;
 loc_41A8E:
@@ -338,21 +338,24 @@ loc_41A8E:
 			}
 			// eax--;
 			if(eax != 2) {
-				goto loc_41D68;
+				return 2
 			}
 			ecx = 0x131;
-			var_4 = 0x40;
+			fplatch = 0x40;
 			goto loc_41AB0;
 loc_41AA7:
 			ecx = 0x127;
-			var_4 = 0x20;
+			fplatch = 0x20;
 loc_41AB0:
 			ax = arg_8;
 			eax -= 0x80;
 			var_c = eax;
 			tl880_vpx_write_fp(tl880dev, ecx, eax);
-			esi = eax;
-			goto loc_41D59;
+			retval_esi = eax;
+
+			//tl880_vpx_latch_registers(fplatch);
+			retval_esi |= eax;
+			return retval_esi;
 			break;
 		case 1:
 			goto loc_41ACB;
@@ -364,27 +367,33 @@ loc_41ACB:
 			}
 			//eax--;
 			if(eax != 2) {
-				goto loc_41D68;
+				return 2;
 			}
-			edi = 0x132;
-			var_4 = 0x40;
+			fpreg = 0x132;
+			fplatch = 0x40;
 			goto loc_41AED;
 loc_41AE4:
-			edi = 0x128;
-			var_4 = 0x20;
+			fpreg = 0x128;
+			fplatch = 0x20;
 loc_41AED:
 			eax = &var_C;
-			tl880_vpx_read_fp(tl880dev, edi, eax);
+			tl880_vpx_read_fp(tl880dev, fpreg, eax);
 			ecx = &var_C;
 			ecx &= 0xfc0;
-			esi = eax;
+			retval_esi = eax;
 			eax = 0;
 			al = arg_8;
 			al >>= 2;
 			ax = al;
 			eax |= ecx;
 			var_C = eax;
-			goto loc_41D50;
+
+			tl880_vpx_write_fp(tl880dev, fpreg, eax);
+			retval_esi |= eax;
+
+			//tl880_vpx_latch_registers(fplatch);
+			retval_esi |= eax;
+			return retval_esi;
 			break;
 		case 2:
 			eax = tl880dev->vpx_video_standard;
@@ -398,13 +407,14 @@ loc_41AED:
 
 loc_41B29:
 			tl880_vpx_write_fp(tl880dev, 0x30, 0);
-			esi = eax;
-			edi = 0x700;
-			tl880_vpx_write_fp(tl880dev, 0x33, edi);
-			esi |= eax;
-			push edi;
+			retval_esi = eax;
+			fpreg = 0x700;
+			tl880_vpx_write_fp(tl880dev, 0x33, fpreg);
+			retval_esi |= eax;
+			push fpreg;
 			push 0x32;
-			goto loc_41CF2;
+			retval_esi |= tl880_vpx_write_fp(tl880dev, stack1, stack2);
+			return retval_esi;
 
 loc_41B4B:
 			ax = arg_8;
@@ -417,8 +427,8 @@ loc_41B59:
 			tl880_vpx_write_fp(stack1, stack2);
 
 loc_41B5E:
-			esi = eax;
-			goto loc_41D63;
+			retval_esi = eax;
+			return retval_esi;
 
 loc_41B65:
 			al = arg_8;
@@ -430,16 +440,16 @@ loc_41B65:
 			if(al > cl) {
 				goto loc_41BA5;
 			}
-			esi = al;
-			eax = esi;
+			retval_esi = al;
+			eax = retval_esi;
 			eax *= 0x83;
 			edx = sign(eax); // cdq
-			edi = ecx;
-			edx::eax /= edi;
-			var_4 = 4;
+			fpreg = ecx;
+			edx::eax /= fpreg;
+			fplatch = 4;
 			arg_8 = 5;
-			edi = eax;
-			eax = esi;
+			fpreg = eax;
+			eax = retval_esi;
 			eax *= 0xd8;
 			edx = sign(eax); // cdq
 			edx::eax /= ecx;
@@ -448,213 +458,125 @@ loc_41B65:
 
 loc_41BA5:
 			eax = al;
-			esi = eax - 0x80;
-			eax = esi;
+			retval_esi = eax - 0x80;
+			eax = retval_esi;
 			eax = 0x83;
 			edx = sign(eax); // cdq
 			ecx = 0x100;
-			edi = ecx;
-			edx::eax /= edi;
-			var_4 = 3;
+			fpreg = ecx;
+			edx::eax /= fpreg;
+			fplatch = 3;
 			arg_8 = 4;
-			edi = eax;
-			eax = esi;
+			fpreg = eax;
+			eax = retval_esi;
 			eax *= 0xd8;
 			edx = sign(eax); // cdq
 			edx::eax /= ecx;
-			edi += 0x41;
-			ebx = eax;
-			ebx = eax;
-			ebx += 0x6c;
+			fpreg += 0x41;
+			ebx = eax + 0x6C;
 
 loc_41BE0:
-			tl880_vpx_write_fp(tl880dev, 0x30, 0);
-			esi = eax;
-			eax = 0;
-			ah = arg_8;
-			eax |= ebx;
-			tl880_vpx_write_fp(tl880dev, 0x33, eax);
-			esi |= eax;
-			eax = 0;
-			ah = var_4;
-			eax = edi;
-			tl880_vpx_write_fp(tl880dev, 0x32, eax);
-			pop ebx;
-			esi |= eax;
-			goto loc_41D63;
-			break;
-		case 3:
-			goto loc_41C13;
-loc_41C13:
-			ax = arg_8;
-			eax = 0xfffffe00 + eax*4; // lea eax, ds:0fffffe00h[eax*4]
-			push eax;
-			arg_4 = eax;
-			push 0xdc;
-			goto loc_41B59;
-
-		case 9:
-			goto loc_41C2D;
-		case 4:
-			goto loc_41C2D;
-loc_41C2D:
-			eax = arg_0;
-			//eax--;
-			if(eax == 1) {
-				goto loc_41C46;
-			}
-			//eax--;
-			if(eax != 2) {
-				goto loc_41D68;
-			}
-			edi = 0x130;
-			var_4 = 0x40;
-			goto loc_41C4F;
-
-loc_41C46:
-			edi = 0x126;
-			var_4 = 0x20;
-
-loc_41C4F:
-			al = arg_8;
-			al >>= 5;
-			arg_0 = al;
-			eax = &arg_4;
-			tl880_vpx_read_fp(edi, eax);
-			ecx = arg_4;
-			esi = eax;
-			ax = arg_0; // sign extended byte to short
-			eax <<= 2;
-			eax &= 0xfe3;
-			goto loc_41D4B;
-		case 5:
-			goto loc_41C7A;
-loc_41C7A:
-			eax = arg_0;
-			//eax--;
-			if(eax == 1) {
-				goto loc_41C93;
-			}
-			//eax--;
-			if(eax != 2) {
-				goto loc_41D68;
-			}
-			edi = 0x130;
-			var_4 = 0x40;
-			goto loc_41C9C;
-
-loc_41C93:
-			edi = 0x126;
-			var_4 = 0x20;
-
-loc_41C9C:
-			al = arg_8;
-			al >>= 6;
-			arg_0 = al;
-			eax = &arg_4;
-			tl880_vpx_read_fp(tl880dev, edi, eax);
-
-			cx = arg_0; // sign extended
-			esi = eax;
-			eax = arg_4; // result of read_fp
-			eax &= 0xffc;
-			goto loc_41D4B;
-		case 6:
-			goto loc_41919;
-		case 7:
-			goto loc_41CC3;
-loc_41CC3:
-			al = arg_8;
-			al >>= 6;
-			arg_0 = al;
-			eax = &arg_4;
-			tl880_vpx_read_fp(tl880dev, 0x21, eax);
-			ecx = arg_4;
-			ecx &= 0x79f;
-			esi = eax;
-			ax = arg_0; // sign extended
-			eax <<= 5;
-			eax |= ecx;
-			push eax;
-			arg_4 = eax;
-			push 0x21;
-
-loc_41CF2:
-			tl880_vpx_write_fp(tl880dev, stack1, stack2);
-			goto loc_41D61;
-		case 8:
-			goto loc_41CF9;
-loc_41CF9:
-			eax = arg_0;
-			//eax--;
-			if(eax == 1) {
-				goto loc_41D0E;
-			}
-			//eax--;
-			if(eax != 2) {
-				goto loc_41D68; // default
-			}
-			edi = 0x132;
-			var_4 = 0x40;
-			goto loc_41D17;
+			retval_esi = tl880_vpx_write_fp(tl880dev, 0x30, 0);
 			
-loc_41D0E:
-			edi = 0x128;
-			var_4 = 0x20;
+			eax = (arg_8 << 8) | ebx;
+			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x33, eax);
 
-loc_41D17:
-			eax = &arg_4;
-			tl880_vpx_read_fp(tl880dev, edi, eax);
-			esi = eax;
-			al = arg_8;
-			al >>= 6;
-			arg_0 = al;
-			if(al != 0) { // Line 41D29 - questionable
-				goto loc_41D32;
+			eax = (fplatch << 8) | fpreg;
+			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x32, eax);
+			return retval_esi;
+		case 3:
+			arg_4 = arg_8 * 4 - 512; // lea eax, ds:0fffffe00h[eax*4]
+
+			tl880_vpx_write_fp(tl880dev, 0xdc, arg_4); // NTSC tint angle
+
+			retval_esi = eax;
+			return retval_esi;
+		case 9:
+		case 4:
+			if(arg_0 == 1) {
+				fpreg = 0x126;
+				fplatch = 0x20;
 			}
-			al = 1;
-			goto loc_41D38;
-
-loc_41D32:
-			if(al != 1) {
-				goto loc_41D3B;
+			if(arg_0 == 2) {
+				fpreg = 0x130;
+				fplatch = 0x40;
+			} else {
+				return 2;
 			}
-			al = 0;
 
-loc_41D38:
-			arg_0 = al;
+			arg_4 = tl880_vpx_read_fp(fpreg, eax);
+			retval_esi = (arg_4 == (unsigned short)-1);
 
-loc_41D3B:
-			ecx = arg_4;
-			ax = al;
-			eax >>= 6;
-			ecx &= 0xf3f;
+			arg_0 = arg_8 >> 5;
+			arg_4 = (arg_0 << 2) | (arg_4 & 0xfe3);
 
-loc_41D4B:
-			eax |= ecx;
-			arg_4 = eax;
+			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, eax);
 
-loc_41D50:
-			tl880_vpx_write_fp(tl880dev, edi, eax);
-			esi |= eax;
+			//tl880_vpx_latch_registers(fplatch);
+			retval_esi |= eax;
+			return retval_esi;
+		case 5:
+			if(arg_0 == 1) {
+				fpreg = 0x126;
+				fplatch = 0x20;
+			} else if(arg_0 == 2) {
+				fpreg = 0x130;
+				fplatch = 0x40;
+			} else {
+				return 2;
+			}
 
-loc_41D59:
-			push var_4;
-			//tl880_vpx_latch_registers(var_4);
+			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval_esi = (arg_4 == (unsigned short)-1);
 
-loc_41D61:
-			esi |= eax;
+			arg_4 = (arg_4 & 0xffc) | (arg_8 >> 6);
+
+			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, arg_4);
+
+			//tl880_vpx_latch_registers(fplatch);
+			retval_esi |= eax;
+			return retval_esi;
+		case 6:
+			return 4;
+		case 7:
+			arg_4 = tl880_vpx_read_fp(tl880dev, 0x21);
+			retval_esi = (arg_4 == (unsigned short)-1);
+
+			arg_0 = arg_8 >> 6;;
+			arg_4 = (arg_0 << 5) | (arg_4 & 0x79f);
+
+			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x21, arg_4);
+			return retval_esi;
+		case 8:
+			if(arg_0 == 1) {
+				fpreg = 0x128;
+				fplatch = 0x20;
+			} else if(arg_0 == 2) {
+				fpreg = 0x132;
+				fplatch = 0x40;
+			} else {
+				return 2;
+			}
+
+			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval_esi = (arg_4 == (unsigned short)-1);
+			arg_0 = arg_8 >> 6;
+
+			/* Is this toggling something */
+			if(arg_0 == 0) {
+				arg_0 = 1; // arg_0 is a pointer?
+			} else if(arg_0 == 1) {
+				arg_0 = 0;
+			}
+
+			arg_4 = (arg_0 << 6) | (arg_4 & 0xf3f);
+
+			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, arg_4);
+
+			//tl880_vpx_latch_registers(fplatch);
+			retval_esi |= eax;
 	}
-loc_41D63:
-			ax = si;
-			goto loc_41D6C;
-
-loc_41D68:
-			ax = 2;
-
-loc_41D6C:
-			return eax;
-
+	return retval_esi;
 }
 #endif /* WILLNOTCOMPILE */
 
