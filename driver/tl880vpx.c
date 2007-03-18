@@ -312,186 +312,110 @@ vpx3226:
 }
 
 #ifdef WILLNOTCOMPILE
-int tl880_vpx_set_video_attribute(unsigned long arg_0, unsigned long arg_4, unsigned char arg_8)
+int tl880_vpx_set_video_attribute(unsigned long arg_0, unsigned long arg_4, unsigned char value)
 {
-	eax = gwVPX_Type;
-
-	if(gwVPX_Type == 0x3350) {
-		goto loc_41A79;
-	}
+vpx3226:
 	// Code for other chips omitted
-	
-loc_41A79:
-	eax = (char)arg_4;
-	eax--;
-	switch(eax)
+	switch(arg_4 - 1)
 	{
 		default:
 			return 2;
-		case 0:
-			goto loc_41A8E;
-loc_41A8E:
-			eax = (char)arg_0;
-			// eax--;
-			if(eax == 1) {
-				goto loc_41AA7;
-			}
-			// eax--;
-			if(eax != 2) {
+		case 0: // Brightness 
+			if(arg_0 == 1) {
+				fpreg = 0x127;
+				fplatch = 0x20;
+			} else if(arg_0 == 2) {
+				fpreg = 0x131;
+				fplatch = 0x40;
+			} else {
 				return 2
 			}
-			ecx = 0x131;
-			fplatch = 0x40;
-			goto loc_41AB0;
-loc_41AA7:
-			ecx = 0x127;
-			fplatch = 0x20;
-loc_41AB0:
-			ax = arg_8;
-			eax -= 0x80;
-			var_c = eax;
-			tl880_vpx_write_fp(tl880dev, ecx, eax);
-			retval_esi = eax;
 
-			//tl880_vpx_latch_registers(fplatch);
-			retval_esi |= eax;
+			var_c = value - 0x80;
+			retval_esi = tl880_vpx_write_fp(tl880dev, fpreg, value - 0x80);
+
+			//retval_esi |= tl880_vpx_latch_registers(fplatch);
 			return retval_esi;
-			break;
-		case 1:
-			goto loc_41ACB;
-loc_41ACB:
-			eax = (char)arg_0;
-			//eax--;
-			if(eax == 1) {
-				goto loc_41AE4;
-			}
-			//eax--;
-			if(eax != 2) {
+		case 1: // Contrast
+			if(arg_0 == 1) {
+				fpreg = 0x128;
+				fplatch = 0x20;
+			} else if(arg_0 == 2) {
+				fpreg = 0x132;
+				fplatch = 0x40;
+			} else {
 				return 2;
 			}
-			fpreg = 0x132;
-			fplatch = 0x40;
-			goto loc_41AED;
-loc_41AE4:
-			fpreg = 0x128;
-			fplatch = 0x20;
-loc_41AED:
-			eax = &var_C;
-			tl880_vpx_read_fp(tl880dev, fpreg, eax);
-			ecx = &var_C;
-			ecx &= 0xfc0;
-			retval_esi = eax;
-			eax = 0;
-			al = arg_8;
-			al >>= 2;
-			ax = al;
-			eax |= ecx;
-			var_C = eax;
 
-			tl880_vpx_write_fp(tl880dev, fpreg, eax);
-			retval_esi |= eax;
+			var_C = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval_esi = (var_C == (unsigned short)-1);
+			eax = (value >> 2) | (var_C & 0xfc0);
 
-			//tl880_vpx_latch_registers(fplatch);
-			retval_esi |= eax;
+			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, eax);
+
+			//retval_esi |= tl880_vpx_latch_registers(fplatch);
 			return retval_esi;
-			break;
-		case 2:
-			eax = tl880dev->vpx_video_standard;
-			//eax -= 2;
-			if(eax == 2) {
-				goto loc_41B65;
+		case 2: // Saturation
+			if(value == 0) {
+				retval_esi = tl880_vpx_write_fp(tl880dev, 0x30, 0);
+				retval_esi |= tl880_vpx_write_fp(tl880dev, 0x33, 0x700);
+				retval_esi |= tl880_vpx_write_fp(tl880dev, 0x32, 0x700);
+				return retval_esi;
+			} else if(tl880dev->vpx_video_standard != 2 && value != 0) {
+				arg_4 = eax;
+
+				return tl880_vpx_write_fp(tl880dev, 0x30, value << 4);
 			}
-			if(arg_8 != 0) {
-				goto loc_41B4B;
+
+			if(value > 0x80) {
+				fplatch = 3; // var_4 = 3
+				fpreg = (value - 0x80) * 0x83 / 0x100 + 0x41;
+				ebx = (value - 0x80) * 0xd8 / 0x100 + 0x6C;
+				value = 4;
+			} else {
+				fplatch = 4; // var_4 = 4
+				fpreg = (value & 0x83) / 0x80;
+				ebx = (value & 0xd8) / 0x80;
+				value = 5;
 			}
 
-loc_41B29:
-			tl880_vpx_write_fp(tl880dev, 0x30, 0);
-			retval_esi = eax;
-			fpreg = 0x700;
-			tl880_vpx_write_fp(tl880dev, 0x33, fpreg);
-			retval_esi |= eax;
-			push fpreg;
-			push 0x32;
-			retval_esi |= tl880_vpx_write_fp(tl880dev, stack1, stack2);
-			return retval_esi;
-
-loc_41B4B:
-			ax = arg_8;
-			eax <<= 4;
-			arg_4 = eax;
-			push eax;
-			push 0x30;
-
-loc_41B59:
-			tl880_vpx_write_fp(stack1, stack2);
-
-loc_41B5E:
-			retval_esi = eax;
-			return retval_esi;
-
-loc_41B65:
-			al = arg_8;
-			if(!al) {
-				goto loc_41B29;
-			}
-			ecx = 0x80;
-			push ebx;
-			if(al > cl) {
-				goto loc_41BA5;
-			}
-			retval_esi = al;
-			eax = retval_esi;
-			eax *= 0x83;
-			edx = sign(eax); // cdq
-			fpreg = ecx;
-			edx::eax /= fpreg;
-			fplatch = 4;
-			arg_8 = 5;
-			fpreg = eax;
-			eax = retval_esi;
-			eax *= 0xd8;
-			edx = sign(eax); // cdq
-			edx::eax /= ecx;
-			ebx = eax;
-			goto loc_41BE0;
-
-loc_41BA5:
-			eax = al;
-			retval_esi = eax - 0x80;
-			eax = retval_esi;
-			eax = 0x83;
-			edx = sign(eax); // cdq
-			ecx = 0x100;
-			fpreg = ecx;
-			edx::eax /= fpreg;
-			fplatch = 3;
-			arg_8 = 4;
-			fpreg = eax;
-			eax = retval_esi;
-			eax *= 0xd8;
-			edx = sign(eax); // cdq
-			edx::eax /= ecx;
-			fpreg += 0x41;
-			ebx = eax + 0x6C;
-
-loc_41BE0:
+			/*
+			 * VPX 3224/3225:
+			 * ACC reference level to adjust Cr, Cb levels on picture bus
+			 * A value of 0 disables the ACC, chroma gain can be adjusted via
+			 * ACCb / ACCr register. The setting is updated when 'sdt' register is
+			 * updated.  Default 2070 decimal.
+			 *
+			 * VPX3226:
+			 * Saturation control
+			 * bit[11:0] 0..4094dec (2070 corresponds to 100% saturation)
+			 *           4095dec disabled (test mode only)
+			 *
+			 */
 			retval_esi = tl880_vpx_write_fp(tl880dev, 0x30, 0);
 			
-			eax = (arg_8 << 8) | ebx;
+			/*
+			 * ACC multiplier value for SECAM Dr chroma comp. to adjust
+			 * Cr on pict. bus
+			 */
+			eax = (value << 8) | ebx;
 			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x33, eax);
 
+			/*
+			 * ACC multiplier value for SECAM Db chroma comp. to adjust
+			 * Cb on pict. bus
+			 */
 			eax = (fplatch << 8) | fpreg;
 			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x32, eax);
 			return retval_esi;
-		case 3:
-			arg_4 = arg_8 * 4 - 512; // lea eax, ds:0fffffe00h[eax*4]
+		case 3: // Hue
+			arg_4 = value * 4 - 512; // lea eax, ds:0fffffe00h[eax*4]
 
 			tl880_vpx_write_fp(tl880dev, 0xdc, arg_4); // NTSC tint angle
 
 			retval_esi = eax;
 			return retval_esi;
-		case 9:
+		case 9: // Sharpness
 		case 4:
 			if(arg_0 == 1) {
 				fpreg = 0x126;
@@ -507,7 +431,7 @@ loc_41BE0:
 			arg_4 = tl880_vpx_read_fp(fpreg, eax);
 			retval_esi = (arg_4 == (unsigned short)-1);
 
-			arg_0 = arg_8 >> 5;
+			arg_0 = value >> 5;
 			arg_4 = (arg_0 << 2) | (arg_4 & 0xfe3);
 
 			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, eax);
@@ -529,7 +453,7 @@ loc_41BE0:
 			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
 			retval_esi = (arg_4 == (unsigned short)-1);
 
-			arg_4 = (arg_4 & 0xffc) | (arg_8 >> 6);
+			arg_4 = (arg_4 & 0xffc) | (value >> 6);
 
 			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, arg_4);
 
@@ -542,7 +466,7 @@ loc_41BE0:
 			arg_4 = tl880_vpx_read_fp(tl880dev, 0x21);
 			retval_esi = (arg_4 == (unsigned short)-1);
 
-			arg_0 = arg_8 >> 6;;
+			arg_0 = value >> 6;;
 			arg_4 = (arg_0 << 5) | (arg_4 & 0x79f);
 
 			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x21, arg_4);
@@ -560,7 +484,7 @@ loc_41BE0:
 
 			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
 			retval_esi = (arg_4 == (unsigned short)-1);
-			arg_0 = arg_8 >> 6;
+			arg_0 = value >> 6;
 
 			/* Is this toggling something */
 			if(arg_0 == 0) {
