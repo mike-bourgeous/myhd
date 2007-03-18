@@ -311,6 +311,353 @@ vpx3226:
 	return retval;
 }
 
+#ifdef WILLNOTCOMPILE
+int tl880_vpx_set_video_attribute(unsigned long arg_0, unsigned long arg_4, unsigned char arg_8)
+{
+	eax = gwVPX_Type;
+
+	if(gwVPX_Type == 0x3350) {
+		goto loc_41A79;
+	}
+	// Code for other chips omitted
+	
+loc_41A79:
+	eax = (char)arg_4;
+	eax--;
+	switch(eax)
+	{
+		default:
+			goto loc_41D68;
+		case 0:
+			goto loc_41A8E;
+loc_41A8E:
+			eax = (char)arg_0;
+			// eax--;
+			if(eax == 1) {
+				goto loc_41AA7;
+			}
+			// eax--;
+			if(eax != 2) {
+				goto loc_41D68;
+			}
+			ecx = 0x131;
+			var_4 = 0x40;
+			goto loc_41AB0;
+loc_41AA7:
+			ecx = 0x127;
+			var_4 = 0x20;
+loc_41AB0:
+			ax = arg_8;
+			eax -= 0x80;
+			var_c = eax;
+			tl880_vpx_write_fp(tl880dev, ecx, eax);
+			esi = eax;
+			goto loc_41D59;
+			break;
+		case 1:
+			goto loc_41ACB;
+loc_41ACB:
+			eax = (char)arg_0;
+			//eax--;
+			if(eax == 1) {
+				goto loc_41AE4;
+			}
+			//eax--;
+			if(eax != 2) {
+				goto loc_41D68;
+			}
+			edi = 0x132;
+			var_4 = 0x40;
+			goto loc_41AED;
+loc_41AE4:
+			edi = 0x128;
+			var_4 = 0x20;
+loc_41AED:
+			eax = &var_C;
+			tl880_vpx_read_fp(tl880dev, edi, eax);
+			ecx = &var_C;
+			ecx &= 0xfc0;
+			esi = eax;
+			eax = 0;
+			al = arg_8;
+			al >>= 2;
+			ax = al;
+			eax |= ecx;
+			var_C = eax;
+			goto loc_41D50;
+			break;
+		case 2:
+			eax = tl880dev->vpx_video_standard;
+			//eax -= 2;
+			if(eax == 2) {
+				goto loc_41B65;
+			}
+			if(arg_8 != 0) {
+				goto loc_41B4B;
+			}
+
+loc_41B29:
+			tl880_vpx_write_fp(tl880dev, 0x30, 0);
+			esi = eax;
+			edi = 0x700;
+			tl880_vpx_write_fp(tl880dev, 0x33, edi);
+			esi |= eax;
+			push edi;
+			push 0x32;
+			goto loc_41CF2;
+
+loc_41B4B:
+			ax = arg_8;
+			eax <<= 4;
+			arg_4 = eax;
+			push eax;
+			push 0x30;
+
+loc_41B59:
+			tl880_vpx_write_fp(stack1, stack2);
+
+loc_41B5E:
+			esi = eax;
+			goto loc_41D63;
+
+loc_41B65:
+			al = arg_8;
+			if(!al) {
+				goto loc_41B29;
+			}
+			ecx = 0x80;
+			push ebx;
+			if(al > cl) {
+				goto loc_41BA5;
+			}
+			esi = al;
+			eax = esi;
+			eax *= 0x83;
+			edx = sign(eax); // cdq
+			edi = ecx;
+			edx::eax /= edi;
+			var_4 = 4;
+			arg_8 = 5;
+			edi = eax;
+			eax = esi;
+			eax *= 0xd8;
+			edx = sign(eax); // cdq
+			edx::eax /= ecx;
+			ebx = eax;
+			goto loc_41BE0;
+
+loc_41BA5:
+			eax = al;
+			esi = eax - 0x80;
+			eax = esi;
+			eax = 0x83;
+			edx = sign(eax); // cdq
+			ecx = 0x100;
+			edi = ecx;
+			edx::eax /= edi;
+			var_4 = 3;
+			arg_8 = 4;
+			edi = eax;
+			eax = esi;
+			eax *= 0xd8;
+			edx = sign(eax); // cdq
+			edx::eax /= ecx;
+			edi += 0x41;
+			ebx = eax;
+			ebx = eax;
+			ebx += 0x6c;
+
+loc_41BE0:
+			tl880_vpx_write_fp(tl880dev, 0x30, 0);
+			esi = eax;
+			eax = 0;
+			ah = arg_8;
+			eax |= ebx;
+			tl880_vpx_write_fp(tl880dev, 0x33, eax);
+			esi |= eax;
+			eax = 0;
+			ah = var_4;
+			eax = edi;
+			tl880_vpx_write_fp(tl880dev, 0x32, eax);
+			pop ebx;
+			esi |= eax;
+			goto loc_41D63;
+			break;
+		case 3:
+			goto loc_41C13;
+loc_41C13:
+			ax = arg_8;
+			eax = 0xfffffe00 + eax*4; // lea eax, ds:0fffffe00h[eax*4]
+			push eax;
+			arg_4 = eax;
+			push 0xdc;
+			goto loc_41B59;
+
+		case 9:
+			goto loc_41C2D;
+		case 4:
+			goto loc_41C2D;
+loc_41C2D:
+			eax = arg_0;
+			//eax--;
+			if(eax == 1) {
+				goto loc_41C46;
+			}
+			//eax--;
+			if(eax != 2) {
+				goto loc_41D68;
+			}
+			edi = 0x130;
+			var_4 = 0x40;
+			goto loc_41C4F;
+
+loc_41C46:
+			edi = 0x126;
+			var_4 = 0x20;
+
+loc_41C4F:
+			al = arg_8;
+			al >>= 5;
+			arg_0 = al;
+			eax = &arg_4;
+			tl880_vpx_read_fp(edi, eax);
+			ecx = arg_4;
+			esi = eax;
+			ax = arg_0; // sign extended byte to short
+			eax <<= 2;
+			eax &= 0xfe3;
+			goto loc_41D4B;
+		case 5:
+			goto loc_41C7A;
+loc_41C7A:
+			eax = arg_0;
+			//eax--;
+			if(eax == 1) {
+				goto loc_41C93;
+			}
+			//eax--;
+			if(eax != 2) {
+				goto loc_41D68;
+			}
+			edi = 0x130;
+			var_4 = 0x40;
+			goto loc_41C9C;
+
+loc_41C93:
+			edi = 0x126;
+			var_4 = 0x20;
+
+loc_41C9C:
+			al = arg_8;
+			al >>= 6;
+			arg_0 = al;
+			eax = &arg_4;
+			tl880_vpx_read_fp(tl880dev, edi, eax);
+
+			cx = arg_0; // sign extended
+			esi = eax;
+			eax = arg_4; // result of read_fp
+			eax &= 0xffc;
+			goto loc_41D4B;
+		case 6:
+			goto loc_41919;
+		case 7:
+			goto loc_41CC3;
+loc_41CC3:
+			al = arg_8;
+			al >>= 6;
+			arg_0 = al;
+			eax = &arg_4;
+			tl880_vpx_read_fp(tl880dev, 0x21, eax);
+			ecx = arg_4;
+			ecx &= 0x79f;
+			esi = eax;
+			ax = arg_0; // sign extended
+			eax <<= 5;
+			eax |= ecx;
+			push eax;
+			arg_4 = eax;
+			push 0x21;
+
+loc_41CF2:
+			tl880_vpx_write_fp(tl880dev, stack1, stack2);
+			goto loc_41D61;
+		case 8:
+			goto loc_41CF9;
+loc_41CF9:
+			eax = arg_0;
+			//eax--;
+			if(eax == 1) {
+				goto loc_41D0E;
+			}
+			//eax--;
+			if(eax != 2) {
+				goto loc_41D68; // default
+			}
+			edi = 0x132;
+			var_4 = 0x40;
+			goto loc_41D17;
+			
+loc_41D0E:
+			edi = 0x128;
+			var_4 = 0x20;
+
+loc_41D17:
+			eax = &arg_4;
+			tl880_vpx_read_fp(tl880dev, edi, eax);
+			esi = eax;
+			al = arg_8;
+			al >>= 6;
+			arg_0 = al;
+			if(al != 0) { // Line 41D29 - questionable
+				goto loc_41D32;
+			}
+			al = 1;
+			goto loc_41D38;
+
+loc_41D32:
+			if(al != 1) {
+				goto loc_41D3B;
+			}
+			al = 0;
+
+loc_41D38:
+			arg_0 = al;
+
+loc_41D3B:
+			ecx = arg_4;
+			ax = al;
+			eax >>= 6;
+			ecx &= 0xf3f;
+
+loc_41D4B:
+			eax |= ecx;
+			arg_4 = eax;
+
+loc_41D50:
+			tl880_vpx_write_fp(tl880dev, edi, eax);
+			esi |= eax;
+
+loc_41D59:
+			push var_4;
+			//tl880_vpx_latch_registers(var_4);
+
+loc_41D61:
+			esi |= eax;
+	}
+loc_41D63:
+			ax = si;
+			goto loc_41D6C;
+
+loc_41D68:
+			ax = 2;
+
+loc_41D6C:
+			return eax;
+
+}
+#endif /* WILLNOTCOMPILE */
+
 void tl880_vpx_config(struct tl880_dev *tl880dev)
 {
 	// Load default VPX settings
