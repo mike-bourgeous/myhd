@@ -272,6 +272,14 @@ APU (Audio Processing Unit) 3000-307c
 	00000000|00nn0000|00000000|00000000	0 in cJanus::InitNtscAudio
 	00000000|nn000000|00000000|00000000	0 in cJanus::InitNtscAudio
 	000000nn|00000000|00000000|00000000	1 in cJanus::InitNtscAudio
+						controls the sample rate (when set to 0
+						my receiver shows PCM 88, and DD audio
+						plays at double speed.  Set to 1, DD
+						audio plays normally.  Set to 2, DD is
+						slowed down about 33%.  Set to 3, my
+						receiver no longer locks onto audio)
+						(setting the SampleClock GPIO lines to
+						0x300 requires me to set this to 3)
 
 3004 bit 2 -- stereo/mono NTSC audio
 	Set to 0x00040001 and 0x00000001 in MDP-130 init
@@ -279,7 +287,11 @@ APU (Audio Processing Unit) 3000-307c
      set to zero in cJanus::DisableAPU
      0x387 while watching NTSC over the air.  Changing to 0x39C lowers the
      pitch without changing speed (as well as other variations on the lowest
-     byte) - sounds pretty cool.
+     byte) - sounds pretty cool.  That's when using PC soundcard playback.
+     Setting to 0x397 speeds up raw audio playback in Linux significantly,
+     when using SPDIF output.
+
+	0x00100001 when playing Dolby Digital audio
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -304,6 +316,8 @@ APU (Audio Processing Unit) 3000-307c
 	00000000|00000000|0nnn0000|00000000	1 in cJanus::InitNtscAudio
 
 300c,3010 written with 0x3000000
+	Very, very small chance that these are AES status bits.
+	0x02000006 when Dolby Digital is playing back.
 
 3014 is APU interrupt mask
 3018 is last queued APU interrupt
@@ -339,6 +353,18 @@ APU (Audio Processing Unit) 3000-307c
 3044 written with 0x00000ffc during MDP 130 init
 3058 written with 0x00c30004 and 0x00c30008 and 0x00000008 during MDP-130 init
 3048 written with 0x00001020 during MDP-130 init
+
+304c-3054 appear to contain memory offsets.  When stuck in looping Dolby Digital audio,
+	writing data to the value in 304c+4 bytes silenced the audio.
+
+304c
+	Start of Dolby Digital buffer in card memory
+
+3050
+	Playback position in buffer pointed to by 304c
+
+3054
+	End of Dolby Digital buffer in card memory
 
 305c written with 0xc30000c3 in cJanus::InitNtscAudio, used in TL850Audio_SetCrossFade
 
@@ -681,33 +707,45 @@ DPC 10000-10200
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|000000nn
-	00000000|00000000|00000000|00000010	Halves vertical image size?
+	00000000|00000000|00000000|00000001	Halves vertical image size (scale)
+	00000000|00000000|00000000|00000010	Halves vertical image size (crop)
 	00000000|00000000|00000000|00100000	1 in cJanus::isr_NonSlice_Tv
 	00000000|00000000|00nn0000|00000000	Repeats the left side of the image 
 						multiple times across the screen
 	
-
 10044 is YUV color value used as background for video.
+
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|nnnnnnnn|00000000|00000000	Y
+	00000000|00000000|nnnnnnnn|00000000	Pb
+	00000000|00000000|00000000|nnnnnnnn	Pr
 
 10048 is DispBufReg(?) or NtscDispFrame?
       bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|00000nnn
-	00000000|00000000|00000000|nnnnn000
+	00000000|00000000|00000000|0000nnnn
+	00000000|00000000|00000000|nnnn0000
 	00000000|000000nn|nnnnnnnn|00000000
 	0nnnnnnn|nnnn0000|00000000|00000000
 
 1004c Seems to control the amount of image that is decoded - the rest is replaced with repeated pixels
-
-10050, 10054 read in CreateAddSurface - modifying the value alters the position of video
-
-10050
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|0000nnnn	Video image phase?
+	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display (0..1024)
+	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display (0..768)
+
+10050, 10054 read in CreateAddSurface - modifying the value alters the position of video
+
+10050 Positions video
+	11111111|11111111|00000000|00000000
+	fedcba98|76543210|fedcba98|76543210
+	--------+--------+--------+--------
+	00000000|00000000|00000000|0000nnnn	Video image byte offset in memory
 	00000000|0000nnnn|nnnnnnnn|00000000	Video image x offset on display (last bit ignored)
 	nnnnnnnn|nnnn0000|00000000|00000000	Video image y offset on display
 
@@ -715,8 +753,8 @@ DPC 10000-10200
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display
-	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display
+	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display (0..1024)
+	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display (0..768)
 
 10068,1006c used in DoProgressiveFrame with g_vsCtlReg
 
@@ -754,15 +792,45 @@ registers 1008c and 10090 seem to take turns being zero and some value
 						here turns the image white if
 						it is a paletted image.
 
-100c0 may be a DMA control register - bit 5 is DMA enable/disable?
-	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
-	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
+Aux Scaler: 100c0-100d8
+	The scaler seems to take a serial video stream and just pick out the pixels it wants.
 
 100c0, 100cc, 100d4, 100d8 - auxSetVertScaler
 
-100c4 - auxSetPictureOrigin
+100c0 may be a DMA control register - bit 5 is DMA enable/disable? (must be on for VGA overlay to display)
+	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
+	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
+
+100c4 - auxSetPictureOrigion
+
+	00000nnn - horizontal input offset
+	0nnn0000 - vertical input offset
 
 100c8, 100d0 - auxSetHrzScaler
+
+100c8
+	Normally 40080 when watching 720 .tp
+	Changing the last digit really screws up the video ("horizontal hold")
+	Changing the 4 to a 0 seems to have no effect.
+	Changing to 40000 makes the VGA overlay about 150% its normal width (cropping right side of image)
+	Changing to 40008 makes the VGA overlay show 256 images (16x16)
+	Changing to 40010 makes the VGA overlay show 64 images (8x8)
+	Changing to 40020 makes the VGA overlay show 16 images (4x4)
+	Changing to 40040 makes the VGA overlay show 4 images (2x2)
+	Changing to 400f0 skews the VGA overlay video diagonally
+
+100cc	
+	000000nn hex - vertical size (unknown units) 0x78 (120) when watching 720p video on VGA overlay
+	nnnnnn00 hex - when set to all f's, minimally increases vertical size of video.
+
+100d4
+	value doesn't seem to affect video when watching 720p .tp video on 60frames/s VGA overlay
+
+100d8
+	20B0A107 while watching 720p .tp on VGA overlay
+	Value doesn't seem to affect video in this situation, except for the 2, which must be set.
+	Setting to 20000000 leaves video intact.  Setting to 10000000 causes VGA overlay to divide in half
+	vertically, showing two copies of the image.
 
 10100 used in showCursor
 
@@ -789,7 +857,6 @@ registers 1008c and 10090 seem to take turns being zero and some value
 	000000nn|00000000|00000000|00000000
 	
 
-
 Registers 10140-1017c are written with Y'PbPr values in OSDProperty::SetProperty
 	These control the color palette used for the cursor.
 
@@ -801,10 +868,10 @@ Registers 10140-1017c are written with Y'PbPr values in OSDProperty::SetProperty
 	00000000|nnnnnnnn|00000000|00000000	Y (luma) (0-0xff)
 	0nnnnnnn|00000000|00000000|00000000	Alpha (0-0x7f)
 
-DPC2 10180-10184
-10180 and 10184 do some weird stuff..  10180 seems to possibly be a register 
-select/status, and 10184 is register/status content.  Reading from or writing
-to 10184 increments 10180.  It appears that there are 0x400 registers total.
+DPC2 10180-10184 (indexed registers)
+10180 selects the DPC2 register, 10184 is the register's content.  Reading from
+or writing to 10184 increments 10180.  It appears that there are 0x400 registers
+total.
 	
 	10180 | 10184  | Desc
 	------+--------+-----------
@@ -826,8 +893,8 @@ to 10184 increments 10180.  It appears that there are 0x400 registers total.
 	210   |38281808|Used in cJanus::InitDisplay
 	      |78685848|
 	      |48586878|
-	      |08182838|
-	      |38281808|
+	      |08182838|  First four rows seem to affect rows of luma
+	      |38281808|  Next four rows seem to affect rows of chroma
 	      |78685848|
 	      |48586878|
 	      |08182838|
@@ -843,6 +910,8 @@ to 10184 increments 10180.  It appears that there are 0x400 registers total.
 	------+--------+-----------
 	300 to|ccmatrix|Used in cJanus::SetColorConversionMatrix 
 	308   |        |(changing these will change display colors)
+	      |        |
+	      |        |Applies to OSD, cursor, and video.
 	------+--------+-----------
 	300   |testregs|Used in cJanus::dpc2_registers
 	------+--------+-----------
@@ -888,7 +957,7 @@ GPIO also controls sampling clock
 SetGPIO used in (MyHD):
 	DebugProperty::SetProperty (line 2)
 	cJanus::SetDpcClock (line 6)
-	SetSamplingClock (line 9 or line 8)
+	SetSamplingClock (line 9 or line 8) - 0x300 hex is the mask
 	cJanus::BoardInitialize (line 0 and line 6, line 5)
 	JanusProperty::SetProperty (line 2)
 	cJanus::SetVIP (line 4, line 3)
@@ -985,7 +1054,7 @@ MIF 28000, 28020-280dc - Memory interface
 
 28040-2807c used in cJanus::PipMifBufSetting
 
-280dc written with 0x31415926 in cJanus::RestartMce
+280dc written with 0x31415926 in cJanus::RestartMce ('1AY&' in ascii?)
 
 
 Some of the values sometimes written to a few registers:

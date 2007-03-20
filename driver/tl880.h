@@ -337,6 +337,8 @@ unsigned int tl880_aux_dma_allocate(void);
 void tl880_aux_dma_free(unsigned int dma);
 extern unsigned long dma_bitmask;
 
+int tl880_dma_vop_on(struct tl880_dev *tl880dev);
+
 /* tl880proc.c */
 int tl880_create_proc_entry(void);
 void tl880_remove_proc_entry(void);

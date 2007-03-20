@@ -229,3 +229,9 @@ void tl880_load_dma_descriptor(struct tl880_dev *tl880dev, int arg_0, int arg_4)
 }
 
 
+/* Returns bit 4 of register 10000 (overlay video on/off) */
+int tl880_dma_vop_on(struct tl880_dev *tl880dev)
+{
+	return tl880_read_regbits(tl880dev, 10000, 4, 4) ? 1 : 0;
+}
+

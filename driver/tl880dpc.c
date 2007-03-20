@@ -362,7 +362,7 @@ void tl880_dpc_field0(struct tl880_dev *tl880dev)
 	*/
 
 	/* VopOn returns bit 4 of 0x10000 */
-	if(0 /* !CDma::VopOn(); */) {
+	if(!tl880_dma_vop_on(tl880dev)) {
 		return;
 	}
 

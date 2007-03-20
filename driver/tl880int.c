@@ -64,7 +64,6 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 /* Each chip component's interrupt handler should return 1 if BH is needed, else 0 */
 int tl880_vpip_int(struct tl880_dev *tl880dev)
 {
-	tl880dev->vpip_count++;
 	tl880dev->vpip_type = tl880_read_register(tl880dev, 0x7008) & tl880_read_register(tl880dev, 0x7004);
 	
 	printk(KERN_DEBUG "tl880: vpip interrupt: 0x%08lx\n", tl880dev->vpip_type);
@@ -78,6 +77,44 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 	return 0;
 }
 
+int tl880_apu_int(struct tl880_dev *tl880dev)
+{
+	if(tl880_read_register(tl880dev, 0x3018) &
+			tl880_read_register(tl880dev, 0x3014) &
+			0x1) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int tl880_hpip_int(struct tl880_dev *tl880dev)
+{
+	tl880_read_register(tl880dev, 0x800c);
+	tl880_read_register(tl880dev, 0x8008);
+	return 0;
+}
+
+int tl880_blt_int(struct tl880_dev *tl880dev)
+{
+	if(tl880_read_register(tl880dev, 0x4014) &
+			tl880_read_register(tl880dev, 0x4010) &
+	       		0x10) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int tl880_mcu_int(struct tl880_dev *tl880dev)
+{
+	tl880_read_register(tl880dev, 0x1d810);
+
+	// gpJanus+10F90 = 2;
+	
+	return 1;
+}
+
 /* TODO: add separate _bh handlers for each Dpc in the Windows driver */
 void tl880_bh(unsigned long tl880_id)
 {
@@ -88,88 +125,114 @@ void tl880_bh(unsigned long tl880_id)
 		return;
 	}
 	
-	printk(KERN_DEBUG "tl880: in bottom half for card %i, int type 0x%08lx\n", tl880dev->id, tl880dev->int_type);
+	if(debug || tl880dev->int_count == 1) {
+		printk(KERN_DEBUG "tl880: in bottom half for card %i, int type 0x%08lx\n", tl880dev->id, tl880dev->int_type);
+	}
 
+	/* I think this is a legitimate use of goto (first time for me!) */
 	if(tl880dev->int_type & 0x80) {
-		printk(KERN_DEBUG "tl880: vpip interrupt bh\n");
+		if((debug && tl880dev->vpip_count % 100 == 0) || tl880dev->vpip_count == 1) {
+			printk(KERN_DEBUG "tl880: vpip interrupt bh: count %ld\n", tl880dev->vpip_count);
+		}
 
 		tl880dev->int_type &= ~0x80;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x400) {
-		printk(KERN_DEBUG "tl880: tsd interrupt bh\n");
+		if((debug && tl880dev->tsd_count % 100 == 0) || tl880dev->tsd_count == 1) {
+			printk(KERN_DEBUG "tl880: tsd interrupt bh: count %ld\n", tl880dev->tsd_count);
+		}
 
 		tl880dev->tsd_type = 0;
 		
 		tl880dev->int_type &= ~0x400;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x40) {
-		printk(KERN_DEBUG "tl880: mce interrupt bh\n");
+		if((debug && tl880dev->mce_count % 100 == 0) || tl880dev->mce_count == 1) {
+			printk(KERN_DEBUG "tl880: mce interrupt bh: count %ld\n", tl880dev->mce_count);
+		}
 
 		tl880dev->int_type &= ~0x40;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x8) {
-		printk(KERN_DEBUG "tl880: dpc interrupt bh: 0x%04lx\n",
-			tl880dev->dpc_type);
+		if((debug && tl880dev->dpc_count % 100 == 0) || tl880dev->dpc_count == 1) {
+			printk(KERN_DEBUG "tl880: dpc interrupt bh: count %ld type %08lx\n", 
+					tl880dev->dpc_count, tl880dev->dpc_type);
+		}
 
 		tl880dev->int_type &= ~0x8;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x10) {
-		printk(KERN_DEBUG "tl880: vsc interrupt bh\n");
+		if((debug && tl880dev->vsc_count % 100 == 0) || tl880dev->vsc_count == 1) {
+			printk(KERN_DEBUG "tl880: vsc interrupt bh: count %ld\n", tl880dev->vsc_count);
+		}
 
 		tl880dev->int_type &= ~0x10;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x1) {
-		printk(KERN_DEBUG "tl880: apu interrupt bh\n");
+		if((debug && tl880dev->apu_count % 100 == 0) || tl880dev->apu_count == 1) {
+			printk(KERN_DEBUG "tl880: apu interrupt bh: count %ld\n", tl880dev->apu_count);
+		}
 
 		tl880dev->int_type &= ~0x1;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x2) {
-		printk(KERN_DEBUG "tl880: blt interrupt bh\n");
+		if((debug && tl880dev->blt_count % 100 == 0) || tl880dev->blt_count == 1) {
+			printk(KERN_DEBUG "tl880: blt interrupt bh: count %ld\n", tl880dev->blt_count);
+		}
 
 		tl880dev->int_type &= ~0x2;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x100) {
-		printk(KERN_DEBUG "tl880: hpip interrupt bh\n");
+		if((debug && tl880dev->hpip_count % 100 == 0) || tl880dev->hpip_count == 1) {
+			printk(KERN_DEBUG "tl880: hpip interrupt bh: count %ld\n", tl880dev->hpip_count);
+		}
 
 		tl880dev->int_type &= ~0x100;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 	if(tl880dev->int_type & 0x200) {
-		printk(KERN_DEBUG "tl880: mcu interrupt bh\n");
+		if((debug && tl880dev->mcu_count % 100 == 0) || tl880dev->mcu_count == 1) {
+			printk(KERN_DEBUG "tl880: mcu interrupt bh: count %ld\n", tl880dev->mcu_count);
+		}
 
 		tl880dev->int_type &= ~0x200;
 		if(!tl880dev->int_type) {
-			return;
+			goto done;
 		}
 	}
 
 	tl880dev->int_type = 0;
 
+done:
 	/* Re-enable interrupts */
 	tl880_write_register(tl880dev, 4, tl880dev->int_mask);
+
+	if(debug) {
+		printk(KERN_DEBUG "tl880: leaving bh with int_mask %08lx\n", tl880dev->int_mask);
+	}
 }
 
 
@@ -191,7 +254,7 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 
 	/* Store the current interrupt mask and type */
 	int_type = tl880_read_register(tl880dev, 0);
-	int_mask = tl880_read_register(tl880dev, 4);
+	tl880dev->int_mask = int_mask = tl880_read_register(tl880dev, 4);
 
 	/* Disable interrupts while processing (does the Windows driver do this?) */
 	tl880_write_register(tl880dev, 4, 0);
@@ -284,6 +347,12 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 		//tl880_write_regbits(tl880dev, 4, 1, 1, 0);
 		if(debug > 0 || tl880dev->blt_count == 1) {
 			printk(KERN_DEBUG "tl880: blt interrupt\n");
+		}
+		if(tl880_blt_int(tl880dev)) {
+			// Schedule BH
+		} else {
+			// Don't schedule BH
+			tl880dev->int_type &= ~0x2;
 		}
 	}
 	if(tl880dev->int_type & 0x100) {

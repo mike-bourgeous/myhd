@@ -1,3 +1,12 @@
+2007-03-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Several new DPC registers (partially) documented.
+	* Fixed a bug in the interrupt bh where interrupts would be disabled
+	  any time the bh (bottom half/deferred interrupt handler) was called.
+	* Three new APU registers partially documented.
+	* Further reduced verbosity of interrupt handler messages (use the
+	  debug module parameter to increase interrupt messages).
+
 2007-03-17	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added memset tool.
