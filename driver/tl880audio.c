@@ -1,7 +1,12 @@
 /* 
  * TL880 Audio Processing Unit
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880audio.c,v $
+ * Revision 1.6  2007/03/26 19:25:05  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

@@ -1,13 +1,15 @@
 /* 
- * tl880.c - Teralogic 880 based HDTV cards
+ * tl880kern.c - Teralogic 880 based HDTV cards - core kernel routines
  *
- * Copyright (C) 2003-2005 Mike Bourgeous <i_am_nitrogen@hotmail.com>
+ * Copyright (C) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * Reverse engineering, all development:
  *   Mike Bourgeous <nitrogen at users.sourceforge.net>
  *   
  * Original driver framework (based on Stradis driver, mostly gone):
  *   Mark Lehrer <mark at knm.org>
+ *
+ * See the AUTHORS and THANKS files for other credits.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +24,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ *
+ * $Log: tl880kern.c,v $
+ * Revision 1.22  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 
 #include "tl880.h"

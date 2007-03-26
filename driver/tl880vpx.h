@@ -1,7 +1,12 @@
 /* 
  * TL880 driver header for VPX-related definitions
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880vpx.h,v $
+ * Revision 1.3  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 
 #ifndef _TL880VPX_H_

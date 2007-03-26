@@ -1,7 +1,12 @@
 /* 
  * Functions for handling /proc user interface
  *
- * (c) 2005, 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ * (c) 2005-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880proc.c,v $
+ * Revision 1.6  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

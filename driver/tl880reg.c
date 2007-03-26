@@ -1,7 +1,12 @@
 /* 
- * Register support for TL880-based cards (possibly also TL850)
+ * Register support for TL880-based cards
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880reg.c,v $
+ * Revision 1.4  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

@@ -3,7 +3,12 @@
  *
  * Based in part on the BT848 I2C interface in drivers/media/video/bttv-if.c
  *
- * (c) 2003,2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880i2c.c,v $
+ * Revision 1.14  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

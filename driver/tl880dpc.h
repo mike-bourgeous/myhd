@@ -1,7 +1,12 @@
 /* 
  * TL880 driver header for DPC-related definitions
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880dpc.h,v $
+ * Revision 1.5  2007/03/26 19:25:05  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 
 #ifndef _TL880DPC_H_

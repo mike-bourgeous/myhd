@@ -1,7 +1,12 @@
 /* 
- * Some utility functions for TL880-based cards driver 
+ * Some utility functions for the TL880 driver 
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880util.c,v $
+ * Revision 1.7  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

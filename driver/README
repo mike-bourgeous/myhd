@@ -1,5 +1,5 @@
 TL880 Kernel Module
-2003, 2005-2007 Mike Bourgeous
+2003, 2005-2007 Mike Bourgeous, et. al. (See AUTHORS file)
 
 Original Framework (based on Stradis driver, mostly gone) in tl880kern.c
 2003, Mark Lehrer

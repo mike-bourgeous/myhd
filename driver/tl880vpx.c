@@ -1,9 +1,14 @@
 /* 
  * VPX322x control for TL880-based cards (until vpx3220 driver has needed features)
  *
- * Functions based on vpx3220 driver and VPX3226F datasheet.
+ * Functions primarily based on vpx3220 driver and VPX3226F datasheet.
  *
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880vpx.c,v $
+ * Revision 1.12  2007/03/26 19:25:06  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 

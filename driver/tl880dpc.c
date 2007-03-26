@@ -1,7 +1,12 @@
 /* 
  * Video mode stuff for TL880 cards
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ *
+ * $Log: tl880dpc.c,v $
+ * Revision 1.18  2007/03/26 19:25:05  nitrogen
+ * Added CVS log generation and updated copyrights and e-mail addresses.
+ *
  */
 #include "tl880.h"
 
