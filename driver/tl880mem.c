@@ -1,7 +1,13 @@
 /* 
- * Memory writing support for TL880-based cards (possibly also TL850)
+ * Memory writing support for TL880-based cards
  *
- * (c) 2006 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2006-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ * (c) 2007 Jason P. Matthews
+ *
+ * $Log: tl880mem.c,v $
+ * Revision 1.3  2007/03/26 19:23:56  nitrogen
+ * Added GPIO patch by Jason P. Matthews.
+ *
  */
 #include "tl880.h"
 
@@ -44,8 +50,19 @@ void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long hig
 	tl880_write_memory(tl880dev, mem, curval);
 }
 
+void tl880_clear_sdram(struct tl880_dev *tl880dev, unsigned long start_addr, unsigned long end_addr, unsigned long value)
+{
+   while (start_addr < end_addr)
+   {
+      tl880_write_memory(tl880dev,start_addr,value);
+      start_addr += 4;
+   }
+   
+   return;
+}
+
 EXPORT_SYMBOL(tl880_write_memory);
 EXPORT_SYMBOL(tl880_read_memory);
 EXPORT_SYMBOL(tl880_write_membits);
 EXPORT_SYMBOL(tl880_read_membits);
-
+EXPORT_SYMBOL(tl880_clear_sdram);

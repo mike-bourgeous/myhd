@@ -2,6 +2,12 @@
  * Driver for TL880-based cards (possibly also TL850)
  *
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
+ * (c) 2007 Jason P. Matthews
+ *
+ * $Log: tl880.h,v $
+ * Revision 1.25  2007/03/26 19:23:56  nitrogen
+ * Added GPIO patch by Jason P. Matthews.
+ *
  */
 
 #ifndef _TL880_H_
@@ -348,6 +354,7 @@ unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem);
 void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value);
 unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
+void tl880_clear_sdram(struct tl880_dev *tl880dev, unsigned long start_addr, unsigned long end_addr, unsigned long value);
 
 #endif /* __KERNEL__ */
 
