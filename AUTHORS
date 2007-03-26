@@ -1,5 +1,11 @@
-Mike Bourgeous <i_am_nitrogen at hotmail.com> - Primary developer
+In addition to the individuals below, please see the THANKS file for valuable
+non-code contributions from others.
 
-Jason P. Matthews - Compilation fixes for kernel 2.6.17
+Mike Bourgeous <nitrogen at users.sourceforge.net>
+ - Primary development
+ - All code not attributed to others below
 
+Jason P. Matthews <excaliber at gmail.com>
+ - Compilation fixes for kernel 2.6.17
+ - GPIO fixes for MDP-120 and MDP-130
 

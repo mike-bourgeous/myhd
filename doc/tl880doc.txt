@@ -732,14 +732,17 @@ DPC 10000-10200
 	00000000|000000nn|nnnnnnnn|00000000
 	0nnnnnnn|nnnn0000|00000000|00000000
 
-1004c Seems to control the amount of image that is decoded - the rest is replaced with repeated pixels
+Values in 1004c-10054 are relative to the external display resolution, and affect both overlay
+and external display.
+
+1004c Controls the amount of the image that is decoded - the rest is replaced with repeated pixels
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display (0..1024)
-	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display (0..768)
+	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display
+	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display
 
-10050, 10054 read in CreateAddSurface - modifying the value alters the position of video
+10050, 10054 read in CreateAddSurface
 
 10050 Positions video
 	11111111|11111111|00000000|00000000
@@ -753,8 +756,8 @@ DPC 10000-10200
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display (0..1024)
-	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display (0..768)
+	00000000|00000000|0000nnnn|nnnnnnnn	Video image width on display
+	0000nnnn|nnnnnnnn|00000000|00000000	Video image height on display
 
 10068,1006c used in DoProgressiveFrame with g_vsCtlReg
 

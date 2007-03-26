@@ -1,2 +1,11 @@
-Stephen Marchant - Provided PCI activity traces of the MyHD
+The following individuals either contributed code that is no longer used in the
+driver, or made valuable non-code contributions.  By no means is this a full or
+complete list.  Many have contributed to discussions on the mailing list.
+
+Mark Lehrer
+ - Provided the empty-function skeleton on which the MyHD driver was originally
+   based (based in turn on the Stradis driver).
+
+Stephen Marchant
+ - Provided PCI activity traces of the MyHD
 

@@ -1,3 +1,10 @@
+2007-03-26	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added MDP-120/MDP-130 GPIO patch from Jason P. Matthews.
+	* Tweaked the GPIO patch to use TL880 driver code conventions.
+	* Updated the AUTHORS and THANKS files.
+	* Chip documentation updates.
+
 2007-03-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Several new DPC registers (partially) documented.
