@@ -6,6 +6,9 @@
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880vpx.c,v $
+ * Revision 1.13  2007/03/26 19:52:14  nitrogen
+ * Changed MDP-120/130 code to reflect thse cards' use of VPX GPIO.
+ *
  * Revision 1.12  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -107,6 +110,7 @@ static int tl880_vpx_fp_status(struct tl880_dev *tl880dev)
 	return -1;
 }
 
+// VPX FP registers are 12-bits long, so a return value of 0xffff ((short)-1) always indicates error.
 unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpaddr)
 {
 	int result;
@@ -636,10 +640,15 @@ vpx3226: // Other VPX revisions have a bunch of stuff written to I2C above here
 			break;
 		case TL880_CARD_MYHD_MDP100:
 		case TL880_CARD_MYHD_MDP110:
-		case TL880_CARD_MYHD_MDP120: // TODO: Need to confirm 120 and 130
-		case TL880_CARD_MYHD_MDP130:
 			// multipurpose bits and double clock active, port B output is 00000001
 			tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x301);
+			break;
+		case TL880_CARD_MYHD_MDP120:
+		case TL880_CARD_MYHD_MDP130:
+			// Preserve existing GPIO state (TODO: see how the Windows driver acts here)
+			tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 
+					(tl880_vpx_read_fp(tl880dev, VPX_FP_OUTMUX) & 0xff) | 0x300
+					);
 			break;
 		default:
 			printk(KERN_WARNING "tl880: VPX init not yet finished for this card type\n");
