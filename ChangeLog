@@ -4,6 +4,7 @@
 	* Tweaked the GPIO patch to use TL880 driver code conventions.
 	* Updated the AUTHORS and THANKS files.
 	* Chip documentation updates.
+	* Corrected a transposition of lines in the initialization messages.
 
 2007-03-20	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

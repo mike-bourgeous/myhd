@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.23  2007/03/26 20:00:26  nitrogen
+ * Fixed interrupt info printk.
+ *
  * Revision 1.22  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -746,17 +749,17 @@ static int tl880_configure(struct pci_dev *dev)
 	/* Store driver handle in pci_dev struct */
 	pci_set_drvdata(tl880dev->pcidev, tl880dev);
 	
-
 	/* Get IRQ number and set IRQ handler */
 	if((result = pci_read_config_byte(dev, PCI_INTERRUPT_PIN, &pin)) < 0) {
 		printk(KERN_WARNING "tl880: couldn't determine interrupt pin\n");
 	}
 	
-	printk(KERN_INFO "tl880: Card %d uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
-
 	tl880dev->irq = dev->irq;
-	printk(KERN_DEBUG "tl880: calling request_irq with: %d, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
-		tl880dev->pcidev->irq, (unsigned long)tl880_irq, IRQF_SHARED, "tl880", (unsigned long)tl880dev);
+	printk(KERN_INFO "tl880: Card %d uses interrupt pin %u on IRQ line %u\n", n_tl880s, pin, tl880dev->irq);
+	if(debug) {
+		printk(KERN_DEBUG "tl880: calling request_irq with: %d, 0x%08lx, 0x%08x, %s, 0x%08lx\n",
+				tl880dev->pcidev->irq, (unsigned long)tl880_irq, IRQF_SHARED, "tl880", (unsigned long)tl880dev);
+	}
 
 	if((result = request_irq(tl880dev->pcidev->irq, tl880_irq, IRQF_SHARED, "tl880", tl880dev)) != 0) {
 		printk(KERN_ERR "tl880: could not set irq handler for irq %d: %d\n", tl880dev->pcidev->irq, result);
