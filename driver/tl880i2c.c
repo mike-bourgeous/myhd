@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.15  2007/03/26 19:55:25  nitrogen
+ * Made MDP-130 I2C selection more sensible.
+ *
  * Revision 1.14  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -436,13 +439,10 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 			tl880dev->minbus = 3;
 			tl880dev->maxbus = 4;
 			break;
+		case TL880_CARD_MYHD_MDP130:
 		case TL880_CARD_MYHD_MDP120:
 			tl880dev->minbus = 0;
 			tl880dev->maxbus = 0;
-			break;
-		case TL880_CARD_MYHD_MDP130:
-			tl880dev->minbus = 0;
-			tl880dev->maxbus = 5;
 			break;
 		case TL880_CARD_MYHD_MDP110:
 			tl880dev->minbus = 0;
@@ -455,7 +455,7 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 			break;
 		default:
 			tl880dev->minbus = 0;
-			tl880dev->maxbus = 5;
+			tl880dev->maxbus = 0;
 			break;
 	}
 
