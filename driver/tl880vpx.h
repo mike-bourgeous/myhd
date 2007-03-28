@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880vpx.h,v $
+ * Revision 1.4  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.3  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -37,7 +40,16 @@
 #define VPX_FP_SDT		0x20	// Standard selection register
 #define VPX_FP_INSEL		0x21	// Input selection register
 #define VPX_FP_COMB_UC		0x28	// Comb filter control register
-#define VPX_FP_PEAKING1		0x126	// Peaking/coring selection
+#define VPX_FP_ACC_SAT		0x30	// Saturation (ACC reference level on VPX322xD)
+#define VPX_FP_ACCB		0x32	// SECAM Cb component adjustment (VPX322xD)
+#define VPX_FP_ACCR		0x33	// SECAM Cr component adjustment (VPX322xD)
+#define VPX_FP_TINT		0xDC	// NTSC tint angle (+/- 512 == +/- pi/4)
+#define VPX_FP_PEAKING1		0x126	// Peaking/coring selection 1
+#define VPX_FP_BRIGHTNESS1	0x127	// Brightness 1
+#define VPX_FP_CONTRAST1	0x128	// Contrast 1
+#define VPX_FP_PEAKING2		0x130	// Peaking/coring selection 2
+#define VPX_FP_BRIGHTNESS2	0x131	// Brightness 2
+#define VPX_FP_CONTRAST2	0x132	// Contrast 2
 #define VPX_FP_CONTROLWORD	0x140	// Control and latching register
 #define VPX_FP_FORMAT_SEL	0x150	// Format selection / shifter / PIXCLK settings
 #define VPX_FP_PVAL_START	0x151	// Video active start position

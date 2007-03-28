@@ -1,3 +1,11 @@
+2007-03-27	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Finished analyzing set_video_attribute VPX function (still needs a
+	  bit of cleaning up), added some more VPX constants to tl880vpx.h.
+	* Added a set_gpio ioctl and added an iocsetgpio tool.
+	* Made some enhancements to the generic ioctl tool.
+	* Changed tl880_init_dev to use detected card type instead of PCI IDs.
+
 2007-03-26	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added MDP-120/MDP-130 GPIO patch from Jason P. Matthews.

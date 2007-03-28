@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880gpio.c,v $
+ * Revision 1.10  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.9  2007/03/26 19:45:17  nitrogen
  * Reformatted to match rest of driver, corrected to use tl880_vpx_read_fp's return value.
  *
@@ -43,7 +46,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 					return 1;
 				}
 				break;
-			case 2:
+			case 2: // VGA output enable
 				if(state == 1) {
 					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
 					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
@@ -129,7 +132,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 					return 1;
 				}
 				break;
-			case 2:
+			case 2: // VGA output enable
 				if(state == 1) {
 					tl880_write_regbits(tl880dev, 0x10198, 9, 9, ~state);
 					tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
@@ -186,8 +189,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 			case 1:
 				return 1;
 				break;
-			case 2:
-				/* VGA output enable */
+			case 2: // VGA output enable
 				tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, state);
 				return 1;
 				break;
@@ -275,7 +277,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 						return 0;
 					case 0:
 						break;
-					case 2:
+					case 2: // VGA output enable
 						if (state == 0)
 							gpio_value &= ~4;
 						else

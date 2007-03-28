@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.24  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.23  2007/03/26 20:00:26  nitrogen
  * Fixed interrupt info printk.
  *
@@ -139,25 +142,6 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		return -ENODEV;
 	}
 
-	/*
-	printk(KERN_DEBUG "tl880: IOCTL is for ");
-	switch(iminor(inode) & FUNC_MASK) {
-		case 0:
-			printk("mem ");
-			break;
-		case 1:
-			printk("reg ");
-			break;
-		case 2:
-			printk("unk ");
-			break;
-		default:
-			printk("invalid device ");
-			break;
-	}
-	printk("on card %u\n", tl880dev->id);
-	*/
-
 	/* Verify the pointer is valid */
 	if(_IOC_DIR(cmd) & _IOC_READ) {
 		err = !access_ok(VERIFY_WRITE, (void *)arg, _IOC_SIZE(cmd));
@@ -208,6 +192,17 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 					printk(KERN_ERR "tl880: copy from user returned nonzero for setcursorpos\n");
 				}
 				tl880_write_register(tl880dev, 0x10104, cursorpos);
+			} while(0);
+			break;
+		case TL880IOCSETGPIO:
+			/* Set GPIO state (taking card revision into consideration) */
+			do {
+				u32 wrprm[2]; //wrprm -- write parameter
+				argl = (u32 *)arg;
+				if(copy_from_user(wrprm, argl, sizeof(u32) * 2)) {
+					printk(KERN_ERR "tl880: copy from user returned nonzero for writereg\n");
+				}
+				tl880_set_gpio(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
 		case VIDIOC_LOG_STATUS:

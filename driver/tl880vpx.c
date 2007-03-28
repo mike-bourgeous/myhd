@@ -6,6 +6,9 @@
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880vpx.c,v $
+ * Revision 1.14  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.13  2007/03/26 19:52:14  nitrogen
  * Changed MDP-120/130 code to reflect thse cards' use of VPX GPIO.
  *
@@ -119,11 +122,12 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 	/* Write the 16-bit address to the FPRD register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
 					tl880dev->vpx_addr, VPX_I2C_FPRD, __cpu_to_be16(fpaddr))) < 0) {
-		printk(KERN_WARNING "tl880: Failed to write vpx FP read register: %d\n", result);
+		printk(KERN_WARNING "tl880: Failed to write VPX FP read register: %d\n", result);
 		return -1;
 	}
 
 	if(tl880_vpx_fp_status(tl880dev) < 0) {
+		printk(KERN_WARNING "tl880: VPX FP read timed out\n");
 		return -1;
 	}
 
@@ -131,7 +135,7 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 	data = tl880_i2c_read_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
 					tl880dev->vpx_addr, VPX_I2C_FPDAT);
 	if(data == (unsigned short)-1) {
-		printk(KERN_WARNING "tl880: Failed to read vpx FP data\n");
+		printk(KERN_WARNING "tl880: Failed to read VPX FP data\n");
 		return -1;
 	}
 
@@ -149,18 +153,19 @@ int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsign
 	/* Write the 16-bit address to the FPWR register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
 					tl880dev->vpx_addr, VPX_I2C_FPWR, __cpu_to_be16(fpaddr))) < 0) {
-		printk(KERN_WARNING "tl880: Failed to write vpx FP write register: %d\n", result);
+		printk(KERN_WARNING "tl880: Failed to write VPX FP write register: %d\n", result);
 		return -1;
 	}
 
 	if(tl880_vpx_fp_status(tl880dev) < 0) {
+		printk(KERN_WARNING "tl880: VPX FP write timed out\n");
 		return -1;
 	}
 
 	/* Write the 16-bit data to the FPDAT register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 
 					tl880dev->vpx_addr, VPX_I2C_FPDAT, __cpu_to_be16(data))) < 0) {
-		printk(KERN_WARNING "tl880: Failed to write vpx FP data: %d\n", result);
+		printk(KERN_WARNING "tl880: Failed to write VPX FP data: %d\n", result);
 		return -1;
 	}
 
@@ -320,72 +325,75 @@ vpx3226:
 	return retval;
 }
 
-#ifdef WILLNOTCOMPILE
-int tl880_vpx_set_video_attribute(unsigned long arg_0, unsigned long arg_4, unsigned char value)
+int tl880_vpx_set_video_attribute(struct tl880_dev *tl880dev, unsigned long input, unsigned long attr, unsigned char value)
 {
+	int retval, fpreg, fplatch;
+	unsigned int tmp, tmp2;
+	int cb_exp, cb_mant; // Exponent and mantissa for Cb control
+	int cr_exp, cr_mant; // Exponent and mantissa for Cr control
+
 vpx3226:
 	// Code for other chips omitted
-	switch(arg_4 - 1)
-	{
+	switch(attr - 1) {
 		default:
 			return 2;
 		case 0: // Brightness 
-			if(arg_0 == 1) {
-				fpreg = 0x127;
+			if(input == 1) {
+				fpreg = VPX_FP_BRIGHTNESS1;
 				fplatch = 0x20;
-			} else if(arg_0 == 2) {
-				fpreg = 0x131;
-				fplatch = 0x40;
-			} else {
-				return 2
-			}
-
-			var_c = value - 0x80;
-			retval_esi = tl880_vpx_write_fp(tl880dev, fpreg, value - 0x80);
-
-			//retval_esi |= tl880_vpx_latch_registers(fplatch);
-			return retval_esi;
-		case 1: // Contrast
-			if(arg_0 == 1) {
-				fpreg = 0x128;
-				fplatch = 0x20;
-			} else if(arg_0 == 2) {
-				fpreg = 0x132;
+			} else if(input == 2) {
+				fpreg = VPX_FP_BRIGHTNESS2;
 				fplatch = 0x40;
 			} else {
 				return 2;
 			}
 
-			var_C = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval_esi = (var_C == (unsigned short)-1);
-			eax = (value >> 2) | (var_C & 0xfc0);
+			retval = tl880_vpx_write_fp(tl880dev, fpreg, value - 0x80);
 
-			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, eax);
+			//retval |= tl880_vpx_latch_registers(tl880dev, fplatch);
+			return retval;
+		case 1: // Contrast
+			if(input == 1) {
+				fpreg = VPX_FP_CONTRAST1;
+				fplatch = 0x20;
+			} else if(input == 2) {
+				fpreg = VPX_FP_CONTRAST2;
+				fplatch = 0x40;
+			} else {
+				return 2;
+			}
 
-			//retval_esi |= tl880_vpx_latch_registers(fplatch);
-			return retval_esi;
+			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval = (tmp == (unsigned short)-1);
+
+			retval |= tl880_vpx_write_fp(tl880dev, fpreg,
+					(value >> 2) | (tmp & 0xfc0));
+
+			//retval |= tl880_vpx_latch_registers(tl880dev, fplatch);
+			return retval;
 		case 2: // Saturation
 			if(value == 0) {
-				retval_esi = tl880_vpx_write_fp(tl880dev, 0x30, 0);
-				retval_esi |= tl880_vpx_write_fp(tl880dev, 0x33, 0x700);
-				retval_esi |= tl880_vpx_write_fp(tl880dev, 0x32, 0x700);
-				return retval_esi;
-			} else if(tl880dev->vpx_video_standard != 2 && value != 0) {
-				arg_4 = eax;
-
-				return tl880_vpx_write_fp(tl880dev, 0x30, value << 4);
+				return tl880_vpx_write_fp(tl880dev, VPX_FP_ACC_SAT, 0) |
+					tl880_vpx_write_fp(tl880dev, VPX_FP_ACCR, 0x700) |
+					tl880_vpx_write_fp(tl880dev, VPX_FP_ACCB, 0x700);
+			} 
+			
+			// Scale incoming 8-bit value to the VPX's 0..4095 range
+			if(tl880dev->vpx_video_standard != SECAM && value != 0) {
+				// << 4 == * 16 (roughly converts 0..255 to 0..4095)
+				return tl880_vpx_write_fp(tl880dev, VPX_FP_ACC_SAT, value << 4);
 			}
 
 			if(value > 0x80) {
-				fplatch = 3; // var_4 = 3
-				fpreg = (value - 0x80) * 0x83 / 0x100 + 0x41;
-				ebx = (value - 0x80) * 0xd8 / 0x100 + 0x6C;
-				value = 4;
+				cb_exp = 3;
+				cb_mant = (value - 0x80) * 0x83 / 0x100 + 0x41;
+				cr_mant = (value - 0x80) * 0xd8 / 0x100 + 0x6C;
+				cr_exp = 4;
 			} else {
-				fplatch = 4; // var_4 = 4
-				fpreg = (value & 0x83) / 0x80;
-				ebx = (value & 0xd8) / 0x80;
-				value = 5;
+				cb_exp = 4;
+				cb_mant = (value & 0x83) / 0x80;
+				cr_mant = (value & 0xd8) / 0x80;
+				cr_exp = 5;
 			}
 
 			/*
@@ -401,121 +409,114 @@ vpx3226:
 			 *           4095dec disabled (test mode only)
 			 *
 			 */
-			retval_esi = tl880_vpx_write_fp(tl880dev, 0x30, 0);
+			retval = tl880_vpx_write_fp(tl880dev, VPX_FP_ACC_SAT, 0);
 			
 			/*
 			 * ACC multiplier value for SECAM Dr chroma comp. to adjust
-			 * Cr on pict. bus
+			 * Cr on pict. bus (multiplier is mant * 2^-exp)
 			 */
-			eax = (value << 8) | ebx;
-			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x33, eax);
+			retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_ACCR, 
+					(cr_exp << 8) | cr_mant);
 
 			/*
 			 * ACC multiplier value for SECAM Db chroma comp. to adjust
-			 * Cb on pict. bus
+			 * Cb on pict. bus (multiplier is mant * 2^-exp)
 			 */
-			eax = (fplatch << 8) | fpreg;
-			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x32, eax);
-			return retval_esi;
-		case 3: // Hue
-			arg_4 = value * 4 - 512; // lea eax, ds:0fffffe00h[eax*4]
-
-			tl880_vpx_write_fp(tl880dev, 0xdc, arg_4); // NTSC tint angle
-
-			retval_esi = eax;
-			return retval_esi;
+			retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_ACCB, 
+					(cb_exp << 8) | cr_mant);
+			return retval;
+		case 3: // Hue (NTSC tint angle)
+			// Scale 8-bit value to -512..512 and write it
+			return tl880_vpx_write_fp(tl880dev, VPX_FP_TINT, 
+					(value << 2) - 512);
 		case 9: // Sharpness
 		case 4:
-			if(arg_0 == 1) {
-				fpreg = 0x126;
+			if(input == 1) {
+				fpreg = VPX_FP_PEAKING1;
 				fplatch = 0x20;
-			}
-			if(arg_0 == 2) {
-				fpreg = 0x130;
+			} else if(input == 2) {
+				fpreg = VPX_FP_PEAKING2;
 				fplatch = 0x40;
 			} else {
 				return 2;
 			}
 
-			arg_4 = tl880_vpx_read_fp(fpreg, eax);
-			retval_esi = (arg_4 == (unsigned short)-1);
+			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval = (tmp == (unsigned short)-1);
 
-			arg_0 = value >> 5;
-			arg_4 = (arg_0 << 2) | (arg_4 & 0xfe3);
+			retval |= tl880_vpx_write_fp(tl880dev, fpreg, 
+					((value >> 5) << 2) | (tmp & 0xfe3));
 
-			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, eax);
-
-			//tl880_vpx_latch_registers(fplatch);
-			retval_esi |= eax;
-			return retval_esi;
+			//retval |= tl880_vpx_latch_registers(tl880dev, fplatch);
+			return retval;
 		case 5:
-			if(arg_0 == 1) {
-				fpreg = 0x126;
+			if(input == 1) {
+				fpreg = VPX_FP_PEAKING1;
 				fplatch = 0x20;
-			} else if(arg_0 == 2) {
-				fpreg = 0x130;
+			} else if(input == 2) {
+				fpreg = VPX_FP_PEAKING2;
 				fplatch = 0x40;
 			} else {
 				return 2;
 			}
 
-			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval_esi = (arg_4 == (unsigned short)-1);
+			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval = (tmp == (unsigned short)-1);
 
-			arg_4 = (arg_4 & 0xffc) | (value >> 6);
+			// Scale 8-bit value to 0..16
+			tmp = (tmp & 0xffc) | (value >> 6);
 
-			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, arg_4);
+			retval |= tl880_vpx_write_fp(tl880dev, fpreg, tmp);
 
-			//tl880_vpx_latch_registers(fplatch);
-			retval_esi |= eax;
-			return retval_esi;
+			//retval |= tl880_vpx_latch_registers(tl880dev, fplatch);
+			return retval;
 		case 6:
 			return 4;
 		case 7:
-			arg_4 = tl880_vpx_read_fp(tl880dev, 0x21);
-			retval_esi = (arg_4 == (unsigned short)-1);
+			tmp = tl880_vpx_read_fp(tl880dev, VPX_FP_INSEL);
+			retval = (tmp == (unsigned short)-1);
 
-			arg_0 = value >> 6;;
-			arg_4 = (arg_0 << 5) | (arg_4 & 0x79f);
+			tmp = ((value >> 6) << 5) | (tmp & 0x79f);
 
-			retval_esi |= tl880_vpx_write_fp(tl880dev, 0x21, arg_4);
-			return retval_esi;
+			retval |= tl880_vpx_write_fp(tl880dev, VPX_FP_INSEL, tmp);
+			return retval;
 		case 8:
-			if(arg_0 == 1) {
-				fpreg = 0x128;
+			if(input == 1) {
+				fpreg = VPX_FP_CONTRAST1;
 				fplatch = 0x20;
-			} else if(arg_0 == 2) {
-				fpreg = 0x132;
+			} else if(input == 2) {
+				fpreg = VPX_FP_CONTRAST2;
 				fplatch = 0x40;
 			} else {
 				return 2;
 			}
 
-			arg_4 = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval_esi = (arg_4 == (unsigned short)-1);
-			arg_0 = value >> 6;
+			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
+			retval = (tmp == (unsigned short)-1);
+			tmp2 = value >> 6;
 
 			/* Is this toggling something */
-			if(arg_0 == 0) {
-				arg_0 = 1; // arg_0 is a pointer?
-			} else if(arg_0 == 1) {
-				arg_0 = 0;
+			if(tmp2 == 0) {
+				tmp2 = 1; // input is a pointer?
+			} else if(tmp2 == 1) {
+				tmp2 = 0;
 			}
 
-			arg_4 = (arg_0 << 6) | (arg_4 & 0xf3f);
+			tmp = (tmp2 << 6) | (tmp & 0xf3f);
 
-			retval_esi |= tl880_vpx_write_fp(tl880dev, fpreg, arg_4);
+			retval |= tl880_vpx_write_fp(tl880dev, fpreg, tmp);
 
-			//tl880_vpx_latch_registers(fplatch);
-			retval_esi |= eax;
+			//retval |= tl880_vpx_latch_registers(tl880dev, fplatch);
+			return retval;
 	}
-	return retval_esi;
+
+	// Unreachable code!  Ooh!
+	return -1;
 }
-#endif /* WILLNOTCOMPILE */
 
 void tl880_vpx_config(struct tl880_dev *tl880dev)
 {
-	// Load default VPX settings
+	// Load default VPX settings from the registry into global variables
 	// LoadDefaultSettings()
 	
 	printk(KERN_DEBUG "tl880: Configuring the VPX chip\n");
@@ -535,13 +536,13 @@ void tl880_vpx_config(struct tl880_dev *tl880dev)
 	//tl880_vpx_set_video_window(tl880dev, 3,  0,   0,   0,  0,   0,   0,    0, 0);
 
 	// Set other video attributes
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 2, 144);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 1, 112);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 3, 192);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 4, 128);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 5, 128);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 6, 128);
-	//tl880_vpx_set_video_attribute(tl880dev, 1, 10, 180);
+	tl880_vpx_set_video_attribute(tl880dev, 1, 2, 144); // Contrast
+	tl880_vpx_set_video_attribute(tl880dev, 1, 1, 112); // Brightness
+	tl880_vpx_set_video_attribute(tl880dev, 1, 3, 192); // Saturation
+	tl880_vpx_set_video_attribute(tl880dev, 1, 4, 128); // Hue
+	tl880_vpx_set_video_attribute(tl880dev, 1, 5, 128); // Peaking/coring
+	tl880_vpx_set_video_attribute(tl880dev, 1, 6, 128); // Peaking/coring
+	tl880_vpx_set_video_attribute(tl880dev, 1, 10, 180); // Peaking/coring (same as 5)
 }
 
 // A commentary on the initialization procedure of the VPX chip

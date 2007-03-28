@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.26  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.25  2007/03/26 19:23:56  nitrogen
  * Added GPIO patch by Jason P. Matthews.
  *
@@ -244,6 +247,9 @@ struct tl880_dev {
 #endif /* __KERNEL__ */
 
 /*** Userspace definitions such as ioctls ***/
+
+/* ioctl definitions are subject to change */
+
 /* 
  * Read register IOCTL - register is read from parameter, then the value read
  * is written back to the parameter.  Single unsigned long.
@@ -267,6 +273,13 @@ struct tl880_dev {
  * as two shorts - i.e. (x & 0xffff) | (y << 16)
  */
 #define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, unsigned int *)
+
+/*
+ * Set card GPIO state - pass two unsigned ints.
+ * parameter[0] = gpio_line
+ * parameter[1] = state
+ */
+#define TL880IOCSETGPIO		_IOW(0xdd, 4, unsigned int *)
 
 
 #ifdef __KERNEL__

@@ -1,11 +1,11 @@
 TL880 Register Map and Chip/Card Doc (incomplete and disorganized)
-2003, Mike Bourgeous
+(c) 2003-2007, Mike Bourgeous
 -------------------------------
 No warranty on accuracy or fitness for any purpose is made of this data.
 This data may be freely redistributed in any form so long as credit is given to
 those who took the time to create it, and no misrepresentation is made
 regarding the origin of this work and any derivatives, or the original purpose
-of the creation of this document.
+of the creation of this document.  Copyright is retained by the author(s).
 
 All numbers are in hexadecimal, except for bit descriptions (binary).
 -------------------------------
@@ -13,6 +13,8 @@ All numbers are in hexadecimal, except for bit descriptions (binary).
 Card Variants
 -------------
 It appears that the Janus used the VPX chip's GPIO pins to select inputs.
+The MDP-120 and MDP-130 use the VPX chip's GPIO pins instead of the TL880's for
+most functions, including enabling the external display.
 
 Initialization
 --------------
@@ -23,7 +25,6 @@ following these writes, TL880 memory starting at offset 0x1000 and continuing to
 offset 0x103C is set to 0xff.  Then, 3000 and 3004 are written with values.  Then,
 some GPIO lines are changed (too few to be an I2C transaction).  Finally, some audio
 registers are written again.
-
 
 TL880 Memory
 ------------
@@ -921,13 +922,15 @@ total.
 	10000 |not used|Used in cJanus::DisplayColorBars
 	------+--------+-----------
 
-MyHD: to turn on external display:
+MyHD MDP-110: to turn on external display:
 
 register	sync value	dump value
 --------	----------	----------
 10190		0x00000400	0x0cffffff
 10194		0x00000400	0x000eff00
 10198		0x00000400	0x000e5d00
+
+MDP-120 and MDP-130 use VPX GPIOs.  Use set_gpio function.
 
 10190	GPIO enable
 10194	GPIO output enable

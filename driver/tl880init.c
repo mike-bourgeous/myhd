@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.15  2007/03/28 08:01:30  nitrogen
+ * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
+ *
  * Revision 1.14  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -33,7 +36,7 @@ static struct nxt200x_config nxt200x_demod_config = {
 static void tl880_init_sdram(struct tl880_dev *tl880dev)
 {
 	const unsigned long wintvhd = 0x34302130;	/* WinTV-HD 2x2Mx32? */
-	const unsigned long mdp100 = 0x34302130;	/* MyHD 2x2Mx32 */
+	const unsigned long mdp100 = 0x34302130;	/* MyHD MDP100-130 2x2Mx32 */
 	const unsigned long janus = 0x34302024;		/* Janus 8x1Mx16 */
 	const unsigned long hipix = 0x34303140;		/* HiPix 8x2MB */
 	const unsigned long other = 0x34303140;
@@ -240,14 +243,9 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	 *   		 *10	Outputs tri-stated; clock divided by 4; I2C full speed (< 100kbits/s for 3226F)
 	 *   		  11	Outputs tri-stated; clock divided by 8; I2C < 100kbits/s
 	 */
-	/*
-	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 2);
-	tl880_i2c_write_byte_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus], 0x43, 0xaa, 0);
-	*/
 	tl880_vpx_set_power_register(tl880dev, 2);
 	tl880_vpx_set_power_register(tl880dev, 0);
 	
-	// ConfigVPX();
 	tl880_vpx_config(tl880dev);
 	// ConfigMSP();
 
@@ -259,15 +257,15 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	*/
 
 	if((result = request_module("msp3400"))) {
-		printk(KERN_WARNING "tl880: error requesting msp3400 module: %i\n", result);
+		printk(KERN_WARNING "tl880: error requesting msp3400 module: %i (this is usually not serious)\n", result);
 	}
 
 	if((result = request_module("tuner"))) {
-		printk(KERN_WARNING "tl880: error requesting tuner module: %i\n", result);
+		printk(KERN_WARNING "tl880: error requesting tuner module: %i (this is usually not serious)\n", result);
 	}
 	
 	if((result = request_module("nxt200x"))) {
-		printk(KERN_WARNING "tl880: error requesting nxt200x module: %i\n", result);
+		printk(KERN_WARNING "tl880: error requesting nxt200x module: %i (this is usually not serious\n", result);
 	}
 #if 0
 	/* Try to attach to the nxt200x */
@@ -302,7 +300,7 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	// 	 */
 	// 	_VPXWriteFP(0x154, 0x350);
 	// }
-	tl880_vpx_write_fp(tl880dev, 0x154, 0x350);
+	tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x350);
 	
 	if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		tl880_set_gpio(tl880dev, 5, 0);
@@ -429,7 +427,7 @@ void tl880_init_hipix(struct tl880_dev *tl880dev)
 	*/
 	tl880_set_vip(tl880dev, 2);
 	
-	// i2c_write8(0x86, 0xaa, 2);
+	// i2c_write8(0x86, 0xaa, 2); // VPX power state
 	// i2c_write8(0x86, 0xaa, 0);
 	// i2c_write8(0x54, 0, 0x10);
 	// i2c_write8(0x54, 1, 0x38);
@@ -449,40 +447,22 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	/* Set up I2C bus(es) */
 	tl880_init_i2c(tl880dev);
 
-	/* TODO: Change this to switch on TL880_CARD_* */
-	switch(tl880dev->subsys_vendor_id) {
-		case PCI_SUBSYSTEM_VENDOR_ID_MIT:
-			switch(tl880dev->subsys_device_id) {
-				case PCI_SUBSYSTEM_DEVICE_ID_MYHD:
-				case PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP120:
-				case PCI_SUBSYSTEM_DEVICE_ID_MYHD_MDP130:
-					tl880_init_myhd(tl880dev);
-					break;
-				default:
-					break;
-			}
+	switch(tl880dev->card_type) {
+		case TL880_CARD_MYHD_MDP100A:
+		case TL880_CARD_MYHD_MDP100:
+		case TL880_CARD_MYHD_MDP110:
+		case TL880_CARD_MYHD_MDP120:
+		case TL880_CARD_MYHD_MDP130:
+			tl880_init_myhd(tl880dev);
 			break;
-		case PCI_SUBSYSTEM_VENDOR_ID_HAUPPAUGE:
-			switch(tl880dev->subsys_device_id) {
-				case PCI_SUBSYSTEM_DEVICE_ID_WINTV_HD:
-					tl880_init_wintv_hd(tl880dev);
-					break;
-				default:
-					break;
-			}
+		case TL880_CARD_WINTV_HD:
+			tl880_init_wintv_hd(tl880dev);
 			break;
-		case PCI_SUBSYSTEM_VENDOR_ID_TELEMANN:
-		case PCI_SUBSYSTEM_VENDOR_ID_ZERO:
-			switch(tl880dev->subsys_device_id) {
-				case PCI_SUBSYSTEM_DEVICE_ID_HIPIX:
-					tl880_init_hipix(tl880dev);
-					break;
-				default:
-					tl880_init_hipix(tl880dev);
-					break;
-			}
+		case TL880_CARD_HIPIX:
+			tl880_init_hipix(tl880dev);
 			break;
 		default:
+			printk(KERN_WARNING "tl880: attempting to init unsupported card\n");
 			break;
 	}
 
@@ -492,7 +472,7 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	tl880_init_ntsc_audio(tl880dev);
 	tl880_set_ntsc_input(tl880dev, 0);
 
-	/* Initialize DPC2? (whatever that is) */
+	/* Initialize DPC2 */
 	tl880_write_register(tl880dev, 0x10180, 0x200);
 	tl880_write_register(tl880dev, 0x10184, 0xf7fafcff);
 	tl880_write_register(tl880dev, 0x10184, 0xfcf6f4f4);
