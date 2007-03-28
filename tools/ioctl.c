@@ -13,6 +13,20 @@
 #include <linux/videodev.h>
 #include <linux/video_decoder.h>
 
+#define VIDIOC_INT_I2S_CLOCK_FREQ 	_IOW ('d', 108, unsigned int)
+#define AUDC_SET_RADIO        _IO('d',88)
+/*
+enum v4l2_tuner_type {
+	V4L2_TUNER_RADIO	     = 1,
+	V4L2_TUNER_ANALOG_TV	     = 2,
+	V4L2_TUNER_DIGITAL_TV	     = 3,
+};
+*/
+/* Switch the tuner to a specific tuner mode. Replacement of AUDC_SET_RADIO */
+#define VIDIOC_INT_S_TUNER_MODE	     _IOW('d', 93, enum v4l2_tuner_type)
+
+
+
 #include "tl880.h"
 
 int main(int argc, char *argv[])
@@ -35,6 +49,11 @@ int main(int argc, char *argv[])
 		printf("    VIDIOCSFREQ: %s %x num\n", argv[0], VIDIOCSFREQ);
 		printf("    VIDIOC_LOG_STATUS: %s %x 0\n", argv[0], VIDIOC_LOG_STATUS);
 		printf("    VIDIOC_S_STD: %s %x num\n", argv[0], VIDIOC_S_STD);
+		printf("  msp commands:\n");
+		printf("    VIDIOC_INT_I2S_CLOCK_FREQ: %s %x 1024000/2048000\n", argv[0], VIDIOC_INT_I2S_CLOCK_FREQ);
+		printf("    AUDC_SET_RADIO: %s %x 0/1\n", argv[0], AUDC_SET_RADIO);
+		printf("    VIDIOC_INT_S_TUNER_MODE: %s %x 1-3\n", argv[0], VIDIOC_INT_S_TUNER_MODE);
+
 		return -1;
 	}
 	
