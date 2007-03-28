@@ -25,6 +25,8 @@ all:
 	gcc -std=gnu99 -Os -Wall iocreadreg.c -o iocreadreg -ggdb3 -I../driver/
 	gcc -std=gnu99 -Os -Wall iocwritereg.c -o iocwritereg -ggdb3 -I../driver/
 	
+	gcc -std=gnu99 -Os -Wall iocsetgpio.c -o iocsetgpio -ggdb3 -I../driver/
+	
 	gcc -std=gnu99 -Os -Wall cursor.c -o cursor -ggdb3 -I../driver/
 	
 	gcc -std=gnu99 -Os -Wall rgb2ypbpr.c -o rgb2ypbpr -ggdb3
@@ -37,7 +39,7 @@ all:
 	
 	gcc -std=gnu99 -Os -Wall hexcount.c -o hexcount -s
 	
-	gcc -std=gnu99 -Os -Wall ioctl.c -o ioctl -ggdb3 -I../driver/
+	gcc -std=gnu99 -Os -Wall ioctl.c -o ioctl -ggdb3 -I../driver/ -I/usr/src/linux/include
 	
 	chmod +x testdpcint.sh dpc2dump.sh dpc2rand.sh osd.sh \
 		testioctl.sh
@@ -47,7 +49,7 @@ clean:
 	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
 	striperam ioccursor randosd osdtest memdump osdimage \
 	memload rampram hexcount readmem writemem randreg setalpha \
-	memloadswab memset
+	memloadswab memset iocsetgpio ioctl
 
 	make -C dpc clean
 	make -C example clean
