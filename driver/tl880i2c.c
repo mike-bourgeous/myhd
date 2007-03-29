@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.17  2007/03/29 09:01:20  nitrogen
+ * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
+ *
  * Revision 1.16  2007/03/29 08:38:54  nitrogen
  * Initial MSP configuration support.
  *
@@ -348,6 +351,9 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 		client->driver->command(client, VIDIOCGAUDIO, &audio_state);
 
 		tl880dev->msp_i2cclient = client_no;
+		
+		//tl880_msp_config(tl880dev);
+		// Don't init msp here - msp driver isn't initialized apparently
 
 		printk(KERN_INFO "tl880: I2C audio client: name: \"%s\", channel: %d, flags: 0x%08x\n",
 			audio_state.name ? audio_state.name : "", audio_state.audio, audio_state.flags);

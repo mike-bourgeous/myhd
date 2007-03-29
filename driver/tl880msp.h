@@ -4,14 +4,11 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880msp.h,v $
+ * Revision 1.2  2007/03/29 09:01:20  nitrogen
+ * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
+ *
  * Revision 1.1  2007/03/29 08:38:54  nitrogen
  * Initial MSP configuration support.
- *
- * Revision 1.4  2007/03/28 08:01:30  nitrogen
- * Initialization improvements, MSP improvements, minor comment and error message tweaks, better docs
- *
- * Revision 1.3  2007/03/26 19:25:06  nitrogen
- * Added CVS log generation and updated copyrights and e-mail addresses.
  *
  */
 

@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.25  2007/03/29 09:01:20  nitrogen
+ * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
+ *
  * Revision 1.24  2007/03/28 08:01:30  nitrogen
  * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
  *
@@ -121,6 +124,13 @@ static void tl880_log_status(void)
 		printk(KERN_INFO "tl880: \t    DPC:   %3ld\n", list->dpc_count);
 		printk(KERN_INFO "tl880: \t    TSD:   %3ld\n", list->tsd_count);
 		printk(KERN_INFO "tl880: \t    Total: %3ld\n", list->int_count);
+		printk(KERN_INFO "tl880: \t  VPX info:\n");
+		printk(KERN_INFO "tl880: \t    I2C Addr:      %2d\n", list->vpx_addr);
+		printk(KERN_INFO "tl880: \t    I2C Bus:       %2d\n", list->vpx_i2cbus);
+		printk(KERN_INFO "tl880: \t  MSP info:\n");
+		printk(KERN_INFO "tl880: \t    I2C Addr:      %2d\n", list->msp_addr);
+		printk(KERN_INFO "tl880: \t    I2C Bus:       %2d\n", list->msp_i2cbus);
+		printk(KERN_INFO "tl880: \t    I2C Client ID: %2d\n", list->msp_i2cclient);
 		list = list->next;
 	}
 }
@@ -606,6 +616,11 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->iau_iba_reg = 0;
 	tl880dev->iau_iea_reg = 0;
 	tl880dev->iau_ira_reg = 0;
+
+	/** Audio chip state **/
+	tl880dev->msp_addr = 0;
+	tl880dev->msp_i2cbus = 0;
+	tl880dev->msp_i2cclient = -1;
 
 	/** Video state **/
 

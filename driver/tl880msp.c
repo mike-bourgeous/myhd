@@ -6,17 +6,11 @@
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880msp.c,v $
+ * Revision 1.2  2007/03/29 09:01:20  nitrogen
+ * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
+ *
  * Revision 1.1  2007/03/29 08:38:54  nitrogen
  * Initial MSP configuration support.
- *
- * Revision 1.14  2007/03/28 08:01:30  nitrogen
- * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
- *
- * Revision 1.13  2007/03/26 19:52:14  nitrogen
- * Changed MDP-120/130 code to reflect thse cards' use of VPX GPIO.
- *
- * Revision 1.12  2007/03/26 19:25:06  nitrogen
- * Added CVS log generation and updated copyrights and e-mail addresses.
  *
  */
 #include "tl880.h"
@@ -125,7 +119,7 @@ void tl880_msp_config(struct tl880_dev *tl880dev)
 #endif
 
 	memset(&msp_routing, 0, sizeof(msp_routing));
-	
+
 	// TODO: call only the MSP
 	standard = V4L2_STD_NTSC_M;
 	tl880_call_i2c_clients(tl880dev, VIDIOC_S_STD, (void *)&standard);

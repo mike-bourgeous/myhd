@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.17  2007/03/29 09:01:20  nitrogen
+ * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
+ *
  * Revision 1.16  2007/03/29 08:38:54  nitrogen
  * Initial MSP configuration support.
  *
@@ -214,7 +217,6 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	tl880dev->vpx_i2cbus = 0;
 	tl880dev->msp_addr = 0x40;
 	tl880dev->msp_i2cbus = 0;
-	tl880dev->msp_i2cclient = -1; // This will be set by the I2C client attach notice
 
 	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		tl880_write_regbits(tl880dev, 0x10194, 0x17, 0, 0xeff00);
@@ -282,11 +284,16 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 		udelay(100);
 		
 		cond_resched();
-	}
-	if(tl880dev->msp_i2cclient != -1) {
-		tl880_msp_config(tl880dev);
+		current->state = TASK_INTERRUPTIBLE;
+		schedule_timeout(msecs_to_jiffies(10));
 	}
 
+	if(tl880dev->msp_i2cclient != -1) {
+		tl880_msp_config(tl880dev);
+	} else {
+		printk(KERN_WARNING "tl880: msp didn't attach soon enough (client id is %d)\n",
+			       	tl880dev->msp_i2cclient);
+	}
 	
 	// if(*((char*)cJanus+0x16748) == 1) {
 	// 	SetNtscAudioClock();
