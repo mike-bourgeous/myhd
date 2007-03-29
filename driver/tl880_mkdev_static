@@ -4,7 +4,7 @@
 
 mk_tldev() {
 	# Make sure the tl880 module is loaded
-	lsmod | grep tl880 > /dev/null && echo "tl880 loaded" || return -1
+	lsmod | grep tl880 > /dev/null && echo "tl880 loaded" || return 255
 	
 	# Determine whether video group is available
 	grep '^video:' /etc/group > /dev/null && group="video" || group="wheel"
@@ -40,5 +40,5 @@ mk_tldev() {
 	return 0
 }
 
-mk_tldev
+mk_tldev 
 

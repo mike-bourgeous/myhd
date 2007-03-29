@@ -97,6 +97,8 @@ cJanus+1670c is moved into cJanus+1686c, then 186000 (1.5MB+24KB) is added,
 		and stored in cJanus+16870.
 cJanus+16710 is moved into cJanus+16874.
 
+cJanus+16714 is referenced in MSP initialization, possibly to do with video standard.
+
 cJanus+1673c is SDRAM type (see tl880init.c:init_sdram())
 
 cJanus+16748 and cJanus+16841 appear to be bools related to input mode

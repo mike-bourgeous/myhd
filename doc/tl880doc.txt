@@ -331,15 +331,17 @@ APU (Audio Processing Unit) 3000-307c
      used in cJanus::NtscAudioDpc
 	Sets the audio buffer reset trigger (when buffer reaches here, it resets)
 
-3028 may be ntsc recording offset in sdram
+3028 is ntsc recording offset in sdram
      is used in cJanus::RotateVscCapFrame
      is used in cJanus::InitNtscAudio (0x1000 + gpJanus+167d8 myhd1.54)
      constantly changing while watching NTSC over the air
 	Writing this with a value that is part of the displayed memory buffer causes
 	the buffer to be overwritten.  This value should be between regs 3020 and 3024.
+	This is the offset at which the incoming I2S data is written to SDRAM.
 
 302c written with 0x1000 in cJanus::InitNtscAudio
      constantly changing while watching NTSC over the air
+	This is the offset at which the audio data in SDRAM is being sent via SPDIF.
 
 3030 written with 0x9000 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
@@ -1050,6 +1052,11 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 
 27810 written with _setValue in Demux_UpdatePCR
       written with 0xa000 in cJanus::SetNtscAudioClock
+      Changing the value changes the rate of audio capture from the MSP, possibly also
+      some other I2S parameters.  A value of 0 is very fast.  Only the lower two bytes
+      are updated when this register is written.  A value of 8b00 is very slow. f000 is
+      fast.  Going from 8a00 to 8c00 seems to reverse the direction of the odd noise.
+	
 
 27814 last queued tsd interrupt
 

@@ -6,6 +6,9 @@
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880msp.c,v $
+ * Revision 1.3  2007/03/29 09:27:40  nitrogen
+ * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
+ *
  * Revision 1.2  2007/03/29 09:01:20  nitrogen
  * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
  *
@@ -112,8 +115,6 @@ void tl880_msp_config(struct tl880_dev *tl880dev)
 	
 	printk(KERN_DEBUG "tl880: Configuring the MSP chip\n");
 
-	tl880_msp_init(tl880dev, msp_type);
-
 #ifdef WILLNOTCOMPILE
 	tl880_msp_set_std(tl880dev, /* gpJanus+16714 */ 2);
 #endif
@@ -125,11 +126,17 @@ void tl880_msp_config(struct tl880_dev *tl880dev)
 	tl880_call_i2c_clients(tl880dev, VIDIOC_S_STD, (void *)&standard);
 	tl880_call_i2c_clients(tl880dev, VIDIOC_INT_G_AUDIO_ROUTING, (void *)&msp_routing);
 
-	printk(KERN_DEBUG "tl880: msp routing is %d to %d\n", 
+	printk(KERN_DEBUG "tl880: msp routing is %04x by %04x\n", 
 			msp_routing.input, msp_routing.output);
 
-	msp_routing.input = 6;
+	msp_routing.input = MSP_INPUT(MSP_IN_MUTE, MSP_IN_TUNER1, MSP_DSP_IN_TUNER, MSP_DSP_IN_TUNER);
+	msp_routing.output = MSP_OUTPUT(MSP_SC_IN_MUTE);
+
+	printk(KERN_DEBUG "tl880: setting msp routing to %04x x %04x\n", 
+			msp_routing.input, msp_routing.output);
 
 	tl880_call_i2c_clients(tl880dev, VIDIOC_INT_S_AUDIO_ROUTING, (void *)&msp_routing);
+
+	tl880_msp_init(tl880dev, msp_type);
 }
 

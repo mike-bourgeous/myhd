@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.18  2007/03/29 09:27:40  nitrogen
+ * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
+ *
  * Revision 1.17  2007/03/29 09:01:20  nitrogen
  * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
  *
@@ -402,6 +405,11 @@ static int tl880_i2c_detach_inform(struct i2c_client *client)
 		if(i2cbus->i2c_clients[i] == client) {
 			i2cbus->i2c_clients[i] = NULL;
 		}
+	}
+
+	/* If this is a chip whose client index is stored, reset that index */
+	if(client->driver->id == I2C_DRIVERID_MSP3400) {
+		tl880dev->msp_i2cclient = -1;
 	}
 
 	return 0;

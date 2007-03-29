@@ -16,6 +16,8 @@ Bus|
  1 | GPIO 0x12 | GPIO 0x11 | GPIO 0x12 | GPIO 0x10
  2 | GPIO 0x17 | GPIO 0x16 | GPIO 0x17 | GPIO 0x16
 
+MDP-120 and MDP-130 use only bus #0.
+
 I2C devices MyHD:
 
       |Bus|

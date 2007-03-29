@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.28  2007/03/29 09:27:39  nitrogen
+ * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
+ *
  * Revision 1.27  2007/03/29 08:38:54  nitrogen
  * Initial MSP configuration support.
  *
@@ -226,9 +229,9 @@ struct tl880_dev {
 
 
 	/*** Audio Chip (MSP) State ***/
-	int msp_addr;
-	int msp_i2cbus;
-	int msp_i2cclient;
+	int msp_addr;				/* Set to 0 if no MSP */
+	int msp_i2cbus;				/* Set to index into i2cbuses */
+	int msp_i2cclient;			/* Set to index into i2cbuses.i2c_clients */
 
 	
 	/*** Video State ***/
@@ -236,7 +239,8 @@ struct tl880_dev {
 
 	/*** Video Chip (VPX) State ***/
 	int vpx_addr;				/* Set to 0 if no VPX */
-	int vpx_i2cbus;				/* Set to index of i2cbuses */
+	int vpx_i2cbus;				/* Set to index into i2cbuses */
+	int vpx_i2cclient;			/* Set to index into i2cbuses.i2c_clients */
 	enum video_standard_e {
 		PAL_B = 0,
 		PAL_G = 0,

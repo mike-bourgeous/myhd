@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880msp.h,v $
+ * Revision 1.3  2007/03/29 09:27:40  nitrogen
+ * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
+ *
  * Revision 1.2  2007/03/29 09:01:20  nitrogen
  * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
  *
@@ -16,6 +19,9 @@
 #define _TL880MSP_H_
 
 #ifdef __KERNEL__
+
+/* Necessary includes */
+#include <media/msp3400.h>
 
 /*** Driver definitions ***/
 
