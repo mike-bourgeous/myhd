@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.16  2007/03/29 08:38:54  nitrogen
+ * Initial MSP configuration support.
+ *
  * Revision 1.15  2007/03/28 08:01:30  nitrogen
  * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
  *
@@ -204,10 +207,14 @@ void tl880_init_chip(struct tl880_dev *tl880dev)
 void tl880_init_myhd(struct tl880_dev *tl880dev)
 {
 	int result = 0;
+	int i;
 
 	/* Initialize some card-specific information */
 	tl880dev->vpx_addr = 0x43;
 	tl880dev->vpx_i2cbus = 0;
+	tl880dev->msp_addr = 0x40;
+	tl880dev->msp_i2cbus = 0;
+	tl880dev->msp_i2cclient = -1; // This will be set by the I2C client attach notice
 
 	if(tl880dev->card_type >= TL880_CARD_MYHD_MDP110 && tl880dev->card_type <= TL880_CARD_MYHD_MDP130) {
 		tl880_write_regbits(tl880dev, 0x10194, 0x17, 0, 0xeff00);
@@ -246,9 +253,6 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	tl880_vpx_set_power_register(tl880dev, 2);
 	tl880_vpx_set_power_register(tl880dev, 0);
 	
-	tl880_vpx_config(tl880dev);
-	// ConfigMSP();
-
 	/*
 	// VPX driver screws up VPX state
 	if((result = request_module("vpx322x"))) {
@@ -271,6 +275,18 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	/* Try to attach to the nxt200x */
 	dvb_attach(nxt200x_attach, &nxt200x_demod_config, &tl880dev->i2cbuses[1].i2c_adap);
 #endif
+
+	tl880_vpx_config(tl880dev);
+	// Defer MSP init until after I2C attach
+ 	for(i = 0; tl880dev->msp_i2cclient == -1 && i < 100; i++) {
+		udelay(100);
+		
+		cond_resched();
+	}
+	if(tl880dev->msp_i2cclient != -1) {
+		tl880_msp_config(tl880dev);
+	}
+
 	
 	// if(*((char*)cJanus+0x16748) == 1) {
 	// 	SetNtscAudioClock();

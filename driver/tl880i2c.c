@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.16  2007/03/29 08:38:54  nitrogen
+ * Initial MSP configuration support.
+ *
  * Revision 1.15  2007/03/26 19:55:25  nitrogen
  * Made MDP-130 I2C selection more sensible.
  *
@@ -228,6 +231,9 @@ int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *a
 		oldarg = *(unsigned long *)arg;
 	}
 
+	printk(KERN_DEBUG "tl880: sending command to i2c clients: ");
+	v4l_printk_ioctl(cmd);
+
 	for(j = tl880dev->minbus; j <= tl880dev->maxbus; j++) {
 		for(i = 0; i < I2C_CLIENTS_MAX; i++) {
 			if (!tl880dev->i2cbuses[j].i2c_clients[i]) {
@@ -262,13 +268,9 @@ int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *a
 
 static int tl880_i2c_attach_inform(struct i2c_client *client)
 {
-	/*
-	struct tl880_i2c_bus *i2cbus = (struct tl880_i2c_bus *)client->adapter->data;
-	struct tl880_dev *tl880dev = (struct tl880_dev *)i2cbus->dev;
-	*/
 	struct tl880_i2c_bus *i2cbus;
 	struct tl880_dev *tl880dev;
-	int i;
+	int client_no;
 	int ret = 0; /* Ret is to be used only for this function's return value */
 
 	if(CHECK_NULL(client)) {
@@ -293,15 +295,17 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 		printk(KERN_DEBUG "tl880: I2C client driver is %s (id %d)\n", client->driver->driver.name, client->driver->id);
 	}
 
-	for(i = 0; i < I2C_CLIENTS_MAX; i++) {
-		if(!i2cbus->i2c_clients[i]) {
-			i2cbus->i2c_clients[i] = client;
+	for(client_no = 0; client_no < I2C_CLIENTS_MAX; client_no++) {
+		if(!i2cbus->i2c_clients[client_no]) {
+			i2cbus->i2c_clients[client_no] = client;
 			break;
 		}
 	}
 
-	if(i == I2C_CLIENTS_MAX) {
+	if(client_no == I2C_CLIENTS_MAX) {
 		printk(KERN_ERR "tl880: out of I2C client spaces\n");
+	} else {
+		printk(KERN_DEBUG "tl880: I2C client index is %d\n", client_no);
 	}
 	
 	if(client->driver->id == I2C_DRIVERID_TUNER) {
@@ -331,7 +335,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 				break;
 		}
 
-		cmdval = 211250 * 16 / 1000; /* US channel 13 */
+		cmdval = 61250 * 16 / 1000; /* US channel 3 */
 		client->driver->command(client, VIDIOCSFREQ, &cmdval);
 		tuner = i2c_get_clientdata(client);
 
@@ -342,6 +346,8 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 		struct video_audio audio_state;
 
 		client->driver->command(client, VIDIOCGAUDIO, &audio_state);
+
+		tl880dev->msp_i2cclient = client_no;
 
 		printk(KERN_INFO "tl880: I2C audio client: name: \"%s\", channel: %d, flags: 0x%08x\n",
 			audio_state.name ? audio_state.name : "", audio_state.audio, audio_state.flags);

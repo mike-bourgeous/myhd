@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.27  2007/03/29 08:38:54  nitrogen
+ * Initial MSP configuration support.
+ *
  * Revision 1.26  2007/03/28 08:01:30  nitrogen
  * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
  *
@@ -105,6 +108,7 @@
 #define TL880_CARD_ZERO			0
 
 /* Debug */
+#define TL_ASSERT(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: assertion '%s' failed in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
 #define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
 #define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
 
@@ -219,6 +223,12 @@ struct tl880_dev {
 	unsigned long iau_iba_reg;		/* Register used for base address */
 	unsigned long iau_iea_reg;		/* Register used for end address */
 	unsigned long iau_ira_reg;		/* Register used for base address (2) */
+
+
+	/*** Audio Chip (MSP) State ***/
+	int msp_addr;
+	int msp_i2cbus;
+	int msp_i2cclient;
 
 	
 	/*** Video State ***/
@@ -378,6 +388,7 @@ void tl880_clear_sdram(struct tl880_dev *tl880dev, unsigned long start_addr, uns
 #include "tl880dpc.h"
 #include "tl880osd.h"
 #include "tl880vpx.h"
+#include "tl880msp.h"
 
 #endif /* _TL880_H_ */
 
