@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880vip.c,v $
+ * Revision 1.5  2007/04/24 06:32:14  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.4  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -14,7 +17,7 @@
 /* Set state of VIP port on card? */
 void tl880_set_vip(struct tl880_dev *tl880dev, unsigned long vip_mode)
 {
-	unsigned long value;
+	u32 value;
 
 	switch(vip_mode) {
 		case 0:

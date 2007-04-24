@@ -6,12 +6,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int ifdr, ifd;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
 	unsigned char *memspace;
 	struct stat *dumpstat;
 
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 		len = 0x01000000 - addr;
 	}
 
-	printf("Loading 0x%lx bytes of %s at address 0x%lx\n", len, argv[1], addr);
+	printf("Loading 0x%x bytes of %s at address 0x%x\n", len, argv[1], addr);
 	if(read(ifd, memspace + addr, len) != len) {
 		perror("Failed to load memory dump\n");
 		munmap(memspace, 0x01000000);

@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880reg.h,v $
+ * Revision 1.6  2007/04/24 06:32:14  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.5  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -65,10 +68,10 @@
 /*** Driver functions ***/
 
 /* tl880reg.c */
-unsigned long tl880_read_register(struct tl880_dev *tl880dev, unsigned long reg);
-void tl880_write_register(struct tl880_dev *tl880dev, unsigned long reg, unsigned long value);
-unsigned long tl880_read_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit);
-void tl880_write_regbits(struct tl880_dev *tl880dev, unsigned long reg, long high_bit, long low_bit, unsigned long value);
+u32 tl880_read_register(struct tl880_dev *tl880dev, u32 reg);
+void tl880_write_register(struct tl880_dev *tl880dev, u32 reg, u32 value);
+u32 tl880_read_regbits(struct tl880_dev *tl880dev, u32 reg, int high_bit, int low_bit);
+void tl880_write_regbits(struct tl880_dev *tl880dev, u32 reg, int high_bit, int low_bit, u32 value);
 
 #endif /* __KERNEL__ */
 

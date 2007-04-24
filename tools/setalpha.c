@@ -6,14 +6,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int memfd, i;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
 	unsigned char *memspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc > 3 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Sets all alpha values for pixels when in 32-bit mode to full opacity.\n");
@@ -50,7 +51,7 @@ int main(int argc, char *argv[])
 		close(memfd);
 		return -1;
 	}
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
 	printf("Writing alpha values\n");
 	for(i = addr; i < addr + len; i += 4) {

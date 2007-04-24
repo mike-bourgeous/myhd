@@ -14,9 +14,9 @@
 
 static int regfd = 0;
 
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
+void set_bits(__u32 *value, __u32 reg, int high_bit, int low_bit, __u32 setvalue)
 {
-	register unsigned long mask = 0;
+	register __u32 mask = 0;
 
 	/* set bits from high_bit to low_bit in mask to 1 */
 	mask = ~(0xFFFFFFFF << (high_bit - low_bit + 1)) << low_bit;
@@ -43,9 +43,9 @@ void unmap_regspace()
 	close(regfd);
 }
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
-	unsigned long regval[2] = {reg, value};
+	__u32 regval[2] = {reg, value};
 	if(!regfd)
 		return;
 	
@@ -54,7 +54,7 @@ void write_register(long reg, unsigned long value)
 	}
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
 	if(ioctl(regfd, TL880IOCREADREG, &reg) < 0) {
 		perror("Unable to read register");
@@ -63,7 +63,7 @@ unsigned long read_register(long reg)
 	return reg;
 }
 
-unsigned long read_regbits(long reg, long high_bit, long low_bit)
+__u32 read_regbits(__u32 reg, int high_bit, int low_bit)
 {
 	int shift = high_bit - low_bit + 1;
 	int mask = ~(0xffffffff << shift);
@@ -71,9 +71,9 @@ unsigned long read_regbits(long reg, long high_bit, long low_bit)
 	return (read_register(reg) >> low_bit) & mask;
 }
 
-void write_regbits(long reg, long high_bit, long low_bit, unsigned long value)
+void write_regbits(__u32 reg, int high_bit, int low_bit, __u32 value)
 {
-	unsigned long curval = read_register(reg);
+	__u32 curval = read_register(reg);
 
 	set_bits(&curval, reg, high_bit, low_bit, value);
 

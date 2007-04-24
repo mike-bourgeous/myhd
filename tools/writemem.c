@@ -12,9 +12,9 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long *memspace;
-	long mem;
-	unsigned long value;
+	__u32 *memspace;
+	__u32 mem;
+	__u32 value;
 
 	if(argc != 3) {
 		printf("Usage: %s address value\n", argv[0]);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Modifying memory\n");
-	printf("Setting memory+0x%08lx(%li) to 0x%08lx\n", (unsigned long)mem, mem, value);
+	printf("Setting memory+0x%08x(%d) to 0x%08x\n", (__u32)mem, mem, value);
 
 	memspace[mem / 4] = __cpu_to_le32(value);
 	

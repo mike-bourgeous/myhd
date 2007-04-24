@@ -4,13 +4,16 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880util.c,v $
+ * Revision 1.8  2007/04/24 06:32:14  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.7  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
  */
 #include "tl880.h"
 
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
+void set_bits(u32 *value, u32 reg, int high_bit, int low_bit, u32 setvalue)
 {
 	register unsigned long mask = 0;
 

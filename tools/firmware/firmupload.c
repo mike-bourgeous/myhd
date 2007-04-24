@@ -14,7 +14,7 @@
 #include <linux/byteorder/swab.h>
 #include <linux/byteorder/generic.h>
 
-static unsigned long *regspace = NULL;
+static __u32 *regspace = NULL;
 static int memfd = 0;
 
 int map_regspace()
@@ -38,7 +38,7 @@ void unmap_regspace()
 	close(memfd);
 }
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
 	if(!regspace) {
 		return;
@@ -46,9 +46,9 @@ void write_register(long reg, unsigned long value)
 	regspace[reg / 4] = __cpu_to_le32(value);
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
-	unsigned long value;
+	__u32 value;
 	if(!regspace) {
 		return 0;
 	}
@@ -58,7 +58,7 @@ unsigned long read_register(long reg)
 
 int upload_mcu_firmware(int insfd, int datfd)
 {
-	long inslen = 0, datlen = 0;
+	__u32 inslen = 0, datlen = 0;
 	struct stat statbuf;
 	unsigned short *insbuf, *datbuf;
 	int i;
@@ -138,11 +138,11 @@ int upload_mcu_firmware(int insfd, int datfd)
 
 int upload_tsd_firmware(int insfd, int datfd)
 {
-	long inslen = 0, datlen = 0;
+	__u32 inslen = 0, datlen = 0;
 	struct stat statbuf;
 	unsigned short *insbuf, *datbuf;
 	int i;
-	long reg;
+	__u32 reg;
 
 	if(fstat(insfd, &statbuf)) {
 		perror("Unable to stat insfd");

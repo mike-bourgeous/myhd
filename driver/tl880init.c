@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.18  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.17  2007/03/29 09:01:20  nitrogen
  * Partial MSP init now working, with correct sequence (after MSP3400 I2C attach)
  *
@@ -525,7 +528,7 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	tl880_write_register(tl880dev, 0x10184, 0x012A0000);
 	tl880_write_register(tl880dev, 0x10184, 0x01CB8000);
 
-	printk(KERN_DEBUG "tl880: GPIO at end of init: 0x10190=0x%08lx 0x10194=0x%08lx 0x10198=0x%08lx 0x1019c=0x%08lx\n",
+	printk(KERN_DEBUG "tl880: GPIO at end of init: 0x10190=0x%08x 0x10194=0x%08x 0x10198=0x%08x 0x1019c=0x%08x\n",
 		tl880_read_register(tl880dev, 0x10190), tl880_read_register(tl880dev, 0x10194),
 		tl880_read_register(tl880dev, 0x10198), tl880_read_register(tl880dev, 0x1019c));
 }

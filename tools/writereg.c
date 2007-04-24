@@ -12,9 +12,9 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long *regspace;
-	long reg;
-	unsigned long value;
+	__u32 *regspace;
+	__u32 reg;
+	__u32 value;
 
 	if(argc != 3) {
 		printf("Usage: %s register value\n", argv[0]);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	}
 
 	printf("Modifying register\n");
-	printf("Setting region2+0x%08lx(%li) to 0x%08lx\n", (unsigned long)reg, reg, value);
+	printf("Setting region2+0x%08x(%d) to 0x%08x\n", (__u32)reg, reg, value);
 
 	regspace[reg / 4] = __cpu_to_le32(value);
 	

@@ -1,3 +1,10 @@
+2007-04-23	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Made the driver 64-bit safe (at least, it compiles and works okay on
+	  my Athlon 64 x2).
+	* Updated all tools to use explicit 32-bit kernel types, making the
+	  tools 64-bit compatible.
+
 2007-03-29	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Added separate build rules to tools/Makefile for each tool, to speed

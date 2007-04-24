@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long cursorpos;
+	__u32 cursorpos;
 	unsigned int x, y;
 
 	if(argc != 3) {
@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
 	cursorpos = (x & 0xffff) | ((y & 0xffff) << 16);
 
 	printf("Modifying register\n");
-	printf("Setting register 0x%08x to 0x%08lx\n", 0x10104, cursorpos);
+	printf("Setting register 0x%08x to 0x%08x\n", 0x10104, cursorpos);
 
 	if(ioctl(ifd, TL880IOCSETCURSORPOS, &cursorpos) < 0) {
 		perror("Unable to write cursor position");

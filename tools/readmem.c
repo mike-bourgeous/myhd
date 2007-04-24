@@ -12,9 +12,9 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long *memspace;
-	long mem = 0;
-	unsigned long value;
+	__u32 *memspace;
+	__u32 mem = 0;
+	__u32 value;
 
 	if(argc != 2) {
 		printf("Usage: %s address\n", argv[0]);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	}
 
 	value = __le32_to_cpu(memspace[mem/4]);
-	printf("Memory at 0x%08lx is 0x%08lx\n", mem, value);
+	printf("Memory at 0x%08x is 0x%08x\n", mem, value);
 
 	/* printf("Unmapping memory\n"); */
 	munmap(memspace, 0x01000000);

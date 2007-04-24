@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880audio.c,v $
+ * Revision 1.7  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.6  2007/03/26 19:25:05  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -38,7 +41,7 @@ void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e aud
 	tl880_apu_init_iau_reg(tl880dev);
 	/*
 	long iauP = 0;
-	unsigned long iauCnt = 0;
+	u32 iauCnt = 0;
 	//SetSamplingClock(1);
 	unsigned char startAC3 = 0;
 	*/
@@ -156,7 +159,7 @@ void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev)
 
 void tl880_init_ntsc_audio(struct tl880_dev *tl880dev)
 {
-	unsigned long bitsval = 0;
+	u32 bitsval = 0;
 	
 	tl880_set_ntsc_audio_clock(tl880dev);
 

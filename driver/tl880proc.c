@@ -4,6 +4,9 @@
  * (c) 2005-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880proc.c,v $
+ * Revision 1.7  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.6  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -21,10 +24,10 @@ static int tl880_proc_read(char *page, char **start, off_t offset, int count, in
 	page[0] = '\0';
 
 	while(tl880dev != NULL && count - strlen(page) > 0) {
-		snprintf(page, count - strlen(page), "%s%u: %s\t%04x:%04x\tDMA@%08x\n", page,
+		snprintf(page, count - strlen(page), "%s%u: %s\t%04x:%04x\tDMA@%08lx\n", page,
 			tl880dev->id, tl880dev->name,
 			tl880dev->subsys_vendor_id, tl880dev->subsys_device_id,
-			tl880dev->dmaphys);
+			(unsigned long)tl880dev->dmaphys);
 		tl880dev = tl880dev->next;
 		/* printk(KERN_DEBUG "tl880: so far, page is %s\n", page); */
 	}

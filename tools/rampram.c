@@ -6,16 +6,17 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int memfd;
-	unsigned long i, j;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
-	unsigned long ramplen = 0x100;
+	__u32 i, j;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
+	__u32 ramplen = 0x100;
 	unsigned char *memspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc > 4 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Writes alternating values to TL880 RAM\n");
@@ -58,15 +59,15 @@ int main(int argc, char *argv[])
 		close(memfd);
 		return -1;
 	}
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
 	printf("Writing ramp values\n");
 
 	for(i = addr; i < addr + len; i += ramplen) {
 		for(j = 0; j < ramplen && i + j < addr + len; j += 4) {
-			unsigned long k = j * 0x100 / ramplen;
+			__u32 k = j * 0x100 / ramplen;
 			lmspace[(i + j) / 4] = k | k << 8 | k << 16 | k << 24;
-			printf("writing 0x%08lx to 0x%08lx\n", 
+			printf("writing 0x%08x to 0x%08x\n", 
 				k | k << 8 | k << 16 | k << 24,
 				i + j);
 		}

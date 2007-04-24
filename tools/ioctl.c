@@ -32,27 +32,28 @@ enum v4l2_tuner_type {
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long cmd, arg;
+	__u32 cmd;
+	__u32 arg;
 
 	if(argc != 3) {
 		printf("Usage: %s ioctl_cmd ioctl_arg\n(values in hexadecimal)\n", argv[0]);
 		printf("ex:\n");
 		printf("  tl880 commands:\n");
-		printf("    TL880IOCSETVIP: %s %x num\n", argv[0], TL880IOCSETVIP);
+		printf("    TL880IOCSETVIP: %s %lx num\n", argv[0], TL880IOCSETVIP);
 		printf("  vpx commands:\n");
 		printf("    DECODER_DUMP: %s %x 0\n", argv[0], DECODER_DUMP);
-		printf("    DECODER_GET_STATUS: %s %x 0\n", argv[0], DECODER_GET_STATUS);
-		printf("    DECODER_SET_NORM: %s %x num\n", argv[0], DECODER_SET_NORM);
-		printf("    DECODER_SET_INPUT: %s %x num\n", argv[0], DECODER_SET_INPUT);
-		printf("    DECODER_ENABLE_OUTPUT: %s %x num\n", argv[0], DECODER_ENABLE_OUTPUT);
+		printf("    DECODER_GET_STATUS: %s %lx 0\n", argv[0], DECODER_GET_STATUS);
+		printf("    DECODER_SET_NORM: %s %lx num\n", argv[0], DECODER_SET_NORM);
+		printf("    DECODER_SET_INPUT: %s %lx num\n", argv[0], DECODER_SET_INPUT);
+		printf("    DECODER_ENABLE_OUTPUT: %s %lx num\n", argv[0], DECODER_ENABLE_OUTPUT);
 		printf("  tuner commands:\n");
-		printf("    VIDIOCSFREQ: %s %x num\n", argv[0], VIDIOCSFREQ);
+		printf("    VIDIOCSFREQ: %s %lx num\n", argv[0], VIDIOCSFREQ);
 		printf("    VIDIOC_LOG_STATUS: %s %x 0\n", argv[0], VIDIOC_LOG_STATUS);
-		printf("    VIDIOC_S_STD: %s %x num\n", argv[0], VIDIOC_S_STD);
+		printf("    VIDIOC_S_STD: %s %lx num\n", argv[0], VIDIOC_S_STD);
 		printf("  msp commands:\n");
-		printf("    VIDIOC_INT_I2S_CLOCK_FREQ: %s %x 1024000/2048000\n", argv[0], VIDIOC_INT_I2S_CLOCK_FREQ);
+		printf("    VIDIOC_INT_I2S_CLOCK_FREQ: %s %lx 1024000/2048000\n", argv[0], VIDIOC_INT_I2S_CLOCK_FREQ);
 		printf("    AUDC_SET_RADIO: %s %x 0/1\n", argv[0], AUDC_SET_RADIO);
-		printf("    VIDIOC_INT_S_TUNER_MODE: %s %x 1-3\n", argv[0], VIDIOC_INT_S_TUNER_MODE);
+		printf("    VIDIOC_INT_S_TUNER_MODE: %s %lx 1-3\n", argv[0], VIDIOC_INT_S_TUNER_MODE);
 
 		return -1;
 	}
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("arg after ioctl: %lu (0x%08lx)\n", arg, arg);
+	printf("arg after ioctl: %u (0x%08x)\n", arg, arg);
 	
 	close(ifd);
 

@@ -8,7 +8,7 @@
 
 typedef struct {
 	char name[10];
-	unsigned long freq;
+	__u32 freq;
 } band_entry_t;
 
 // Modified from bands.h in the tvtime source distribution (tvtime.sf.net)
@@ -53,7 +53,7 @@ void usage(char *name)
 int main(int argc, char *argv[])
 {
 	int devfd;
-	unsigned long freq;
+	__u32 freq;
 	int i;
 
 	if((argc >= 2 && !strncmp(argv[1], "--help", 6)) || argc != 2) {
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Changing to channel %s, %0.4f MHz (ioctl value %ld)\n", 
+	printf("Changing to channel %s, %0.4f MHz (ioctl value %u)\n", 
 			argv[1], (float)freq / 1000.0, freq / 16);
 
 	freq *= 16;

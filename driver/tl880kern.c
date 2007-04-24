@@ -3,7 +3,7 @@
  *
  * Copyright (C) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
- * Reverse engineering, all development:
+ * Reverse engineering, development:
  *   Mike Bourgeous <nitrogen at users.sourceforge.net>
  *   
  * Original driver framework (based on Stradis driver, mostly gone):
@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.27  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.26  2007/03/29 09:27:40  nitrogen
  * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
  *
@@ -50,8 +53,8 @@
 #undef  MDEBUG	 		/* debug memory management */
 
 /* Driver global variables */
-unsigned int debug;
-unsigned int tl_major = 0;
+int debug;
+int tl_major = 0;
 
 /*****/
 /* Local variables */
@@ -117,16 +120,16 @@ static void tl880_log_status(void)
 		printk(KERN_INFO "tl880: \t  Interrupt line appears to be %sshared\n", 
 				list->elseint ? "" : "un");
 		printk(KERN_INFO "tl880: \t  Interrupts processed:\n");
-		printk(KERN_INFO "tl880: \t    VSC:   %3ld\n", list->vsc_count);
-		printk(KERN_INFO "tl880: \t    APU:   %3ld\n", list->apu_count);
-		printk(KERN_INFO "tl880: \t    BLT:   %3ld\n", list->blt_count);
-		printk(KERN_INFO "tl880: \t    MCE:   %3ld\n", list->mce_count);
-		printk(KERN_INFO "tl880: \t    MCU:   %3ld\n", list->mcu_count);
-		printk(KERN_INFO "tl880: \t    VPIP:  %3ld\n", list->vpip_count);
-		printk(KERN_INFO "tl880: \t    HPIP:  %3ld\n", list->hpip_count);
-		printk(KERN_INFO "tl880: \t    DPC:   %3ld\n", list->dpc_count);
-		printk(KERN_INFO "tl880: \t    TSD:   %3ld\n", list->tsd_count);
-		printk(KERN_INFO "tl880: \t    Total: %3ld\n", list->int_count);
+		printk(KERN_INFO "tl880: \t    VSC:   %3u\n", list->vsc_count);
+		printk(KERN_INFO "tl880: \t    APU:   %3u\n", list->apu_count);
+		printk(KERN_INFO "tl880: \t    BLT:   %3u\n", list->blt_count);
+		printk(KERN_INFO "tl880: \t    MCE:   %3u\n", list->mce_count);
+		printk(KERN_INFO "tl880: \t    MCU:   %3u\n", list->mcu_count);
+		printk(KERN_INFO "tl880: \t    VPIP:  %3u\n", list->vpip_count);
+		printk(KERN_INFO "tl880: \t    HPIP:  %3u\n", list->hpip_count);
+		printk(KERN_INFO "tl880: \t    DPC:   %3u\n", list->dpc_count);
+		printk(KERN_INFO "tl880: \t    TSD:   %3u\n", list->tsd_count);
+		printk(KERN_INFO "tl880: \t    Total: %3u\n", list->int_count);
 		printk(KERN_INFO "tl880: \t  VPX info:\n");
 		printk(KERN_INFO "tl880: \t    I2C Addr:      %2x\n", list->vpx_addr);
 		printk(KERN_INFO "tl880: \t    I2C Bus:       %2d\n", list->vpx_i2cbus);
@@ -167,22 +170,28 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 		printk(KERN_ERR "tl880: invalid arg parameter to tl880_ioctl\n");
 		return -EINVAL;
 	}
-	
+
 	switch (cmd) {
 		/* The do {} while(0); allows the use of very local variables */
 		case TL880IOCREADREG:
 			/* Read from TL880 register */
-			argl = (u32 *)arg;
-			__put_user(tl880_read_register(tl880dev, *argl), argl);
+			do {
+				u32 value;
+				argl = (u32 *)arg;
+				value = tl880_read_register(tl880dev, *argl);
+				printk(KERN_DEBUG "tl880: ioctl: read %08x from register %08x\n", value, *argl);
+				__put_user(value, argl);
+			} while(0);
 			break;
 		case TL880IOCWRITEREG:
 			/* Write to TL880 register */
 			do {
 				u32 wrprm[2];
 				argl = (u32 *)arg;
-				if(copy_from_user(wrprm, argl, sizeof(u32) * 2)) {
+				if(copy_from_user(wrprm, argl, sizeof(wrprm))) {
 					printk(KERN_ERR "tl880: copy from user returned nonzero for writereg\n");
 				}
+				printk(KERN_DEBUG "tl880: ioctl: writing %08x to register %08x (wrprm size %lu)\n", wrprm[1], wrprm[0], sizeof(wrprm));
 				tl880_write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
@@ -427,7 +436,7 @@ static struct file_operations tl880_fops =
 
 void tl880_detect_card(struct tl880_dev *tl880dev)
 {
-	unsigned long value;
+	u32 value;
 
 	if(!tl880dev) {
 		return;
@@ -459,7 +468,7 @@ void tl880_detect_card(struct tl880_dev *tl880dev)
 							snprintf(tl880dev->name, 64, "%s MDP-100B", tl880dev->name);
 							tl880dev->card_type = TL880_CARD_MYHD_MDP100;
 						} else {
-							snprintf(tl880dev->name, 64, "%s Unknown (0x%04lx)",
+							snprintf(tl880dev->name, 64, "%s Unknown (0x%04x)",
 								tl880dev->name, value);
 							tl880dev->card_type = TL880_CARD_ZERO;
 						}

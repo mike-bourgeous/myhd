@@ -6,6 +6,9 @@
  * (c) 2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880vpx.c,v $
+ * Revision 1.15  2007/04/24 06:32:14  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.14  2007/03/28 08:01:30  nitrogen
  * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
  *
@@ -20,53 +23,53 @@
 
 static unsigned int gfAutoInit = 0;
 static unsigned char gbVPX_Adr = 0x86;
-static unsigned short gwVPX_Type = 0x7230;
-static unsigned short gwVPX_Mode = 1;
-static unsigned short gwVPX_Format = 8;
-static unsigned short gwVPX_Vact = 0;
-static unsigned short gwVPX_Hrefpol = 0;
-static unsigned short gwVPX_Vrefpol = 0;
-static unsigned short gwVPX_Prefpol = 0;
-static unsigned short gwVPX_Keypol = 0;
-static unsigned short gwVPX_Llc2pol = 0;
-static unsigned short gwVPX_Vlen = 0;
-static unsigned short gwVPX_Clkio = 1;
-static unsigned short gwVPX_Slope = 0;
-static unsigned short gwVPX_Delay = 0;
-static unsigned short gwVPX_Pixclk = 1;
-static unsigned short gwVPX_UVSwap = 1;
-static unsigned short gwVPX_Shuffler = 0;
-static unsigned short gwVPX_Byteorder = 0;
-static unsigned short gwVPX_Prefsel = 0;
-static unsigned short gwVPX_Twosq = 1;
-static unsigned short gwVPX_Aen = 1;
-static unsigned short gwVPX_Ben = 1;
-static unsigned short gwVPX_Zen = 1;
-static unsigned short gwVPX_Llcen = 1;
-static unsigned short gwVPX_Llc2en = 0;
-static unsigned short gwVPX_Ffres = 0;
-static unsigned short gwVPX_Stra1 = 7;
-static unsigned short gwVPX_Stra2 = 7;
-static unsigned short gwVPX_Strb1 = 7;
-static unsigned short gwVPX_Strb2 = 7;
-static unsigned short gwVPX_Strpixclk = 3;
-static unsigned short gwVPX_Hfull = 0x10;
-static unsigned short gwVPX_Oldllc = 1;
-static unsigned short gwVPX_Prefilter = 0;
-static unsigned short gwVPX_Disquit = 0;
-static unsigned short gwVPX_Dcen = 0;
-static unsigned short gwVPX_Acen = 1;
-static unsigned short gwVPX_Acaden = 1;
-static unsigned short gwVPX_Fltaden = 1;
-static unsigned short gwVPX_Syncslicer = 0x73;
-static unsigned short gwVPX_Coeff = 7;
-static unsigned short gwVPX_DataLevel = 0x40;
-static unsigned short gwVPX_Hsup = 0;
-static unsigned short gwVPX_Flagdel = 0;
-static unsigned short gwVPX_SplitDis = 0;
-static unsigned short gwVPX_DisLim = 0;
-static unsigned short gwVPX_VactMode = 0;
-static unsigned short gwVPX_Cache = 0;
+static u16 gwVPX_Type = 0x7230;
+static u16 gwVPX_Mode = 1;
+static u16 gwVPX_Format = 8;
+static u16 gwVPX_Vact = 0;
+static u16 gwVPX_Hrefpol = 0;
+static u16 gwVPX_Vrefpol = 0;
+static u16 gwVPX_Prefpol = 0;
+static u16 gwVPX_Keypol = 0;
+static u16 gwVPX_Llc2pol = 0;
+static u16 gwVPX_Vlen = 0;
+static u16 gwVPX_Clkio = 1;
+static u16 gwVPX_Slope = 0;
+static u16 gwVPX_Delay = 0;
+static u16 gwVPX_Pixclk = 1;
+static u16 gwVPX_UVSwap = 1;
+static u16 gwVPX_Shuffler = 0;
+static u16 gwVPX_Byteorder = 0;
+static u16 gwVPX_Prefsel = 0;
+static u16 gwVPX_Twosq = 1;
+static u16 gwVPX_Aen = 1;
+static u16 gwVPX_Ben = 1;
+static u16 gwVPX_Zen = 1;
+static u16 gwVPX_Llcen = 1;
+static u16 gwVPX_Llc2en = 0;
+static u16 gwVPX_Ffres = 0;
+static u16 gwVPX_Stra1 = 7;
+static u16 gwVPX_Stra2 = 7;
+static u16 gwVPX_Strb1 = 7;
+static u16 gwVPX_Strb2 = 7;
+static u16 gwVPX_Strpixclk = 3;
+static u16 gwVPX_Hfull = 0x10;
+static u16 gwVPX_Oldllc = 1;
+static u16 gwVPX_Prefilter = 0;
+static u16 gwVPX_Disquit = 0;
+static u16 gwVPX_Dcen = 0;
+static u16 gwVPX_Acen = 1;
+static u16 gwVPX_Acaden = 1;
+static u16 gwVPX_Fltaden = 1;
+static u16 gwVPX_Syncslicer = 0x73;
+static u16 gwVPX_Coeff = 7;
+static u16 gwVPX_DataLevel = 0x40;
+static u16 gwVPX_Hsup = 0;
+static u16 gwVPX_Flagdel = 0;
+static u16 gwVPX_SplitDis = 0;
+static u16 gwVPX_DisLim = 0;
+static u16 gwVPX_VactMode = 0;
+static u16 gwVPX_Cache = 0;
 static unsigned char gbStandard = 1;
 
 int tl880_vpx_read(struct tl880_dev *tl880dev, unsigned char reg)
@@ -113,11 +116,11 @@ static int tl880_vpx_fp_status(struct tl880_dev *tl880dev)
 	return -1;
 }
 
-// VPX FP registers are 12-bits long, so a return value of 0xffff ((short)-1) always indicates error.
-unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpaddr)
+// VPX FP registers are 12-bits long, so a return value of 0xffff ((s16)-1) always indicates error.
+u16 tl880_vpx_read_fp(struct tl880_dev *tl880dev, u16 fpaddr)
 {
 	int result;
-	unsigned short data;
+	u16 data;
 
 	/* Write the 16-bit address to the FPRD register */
 	if((result = tl880_i2c_write_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
@@ -134,7 +137,7 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 	/* Read the 16-bit data from the FPDAT register */
 	data = tl880_i2c_read_word_data(&tl880dev->i2cbuses[tl880dev->vpx_i2cbus],
 					tl880dev->vpx_addr, VPX_I2C_FPDAT);
-	if(data == (unsigned short)-1) {
+	if(data == (u16)-1) {
 		printk(KERN_WARNING "tl880: Failed to read VPX FP data\n");
 		return -1;
 	}
@@ -142,7 +145,7 @@ unsigned short tl880_vpx_read_fp(struct tl880_dev *tl880dev, unsigned short fpad
 	return __be16_to_cpu(data);
 }
 
-int tl880_vpx_write_fp(struct tl880_dev *tl880dev, unsigned short fpaddr, unsigned short data)
+int tl880_vpx_write_fp(struct tl880_dev *tl880dev, u16 fpaddr, u16 data)
 {
 	int result;
 
@@ -202,7 +205,7 @@ int tl880_vpx_set_power_status(struct tl880_dev *tl880dev, int status)
 int tl880_vpx_set_video_standard(struct tl880_dev *tl880dev, enum video_standard_e standard)
 {
 	static int cachefirst = 0; // Set to 1 once the chip has been initialized once
-	unsigned short tmp;
+	u16 tmp;
 	
 	// If VPX mode cache enabled and chip has been initialized, check for different state
 	if(gwVPX_Cache && cachefirst) {
@@ -222,7 +225,7 @@ vpx3226:
 
 	/* Read the current VPX chip stae */
 	tmp = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT); // VPX standard select register
-	if(tmp == (unsigned short)-1) {
+	if(tmp == (u16)-1) {
 		return -1;
 	}
 	tmp &= 0x7f0;	// Preserve standard select option bits, wipe out standard select bits,
@@ -309,7 +312,7 @@ vpx3226:
 	retval = tl880_vpx_write_fp(tl880dev, VPX_FP_INSEL, (tmp1 & 0x7f8) | tmp2);
 
 	tmp1 = tl880_vpx_read_fp(tl880dev, VPX_FP_SDT);
-	retval |= (tmp1 == (unsigned short)-1); // Checking status of read_fp
+	retval |= (tmp1 == (u16)-1); // Checking status of read_fp
 	tmp1 &= 0x7ff; // Clear the latch bit (telling the VPX to activate the new parameters)
 
 	if(chroma_source & 1) {
@@ -364,7 +367,7 @@ vpx3226:
 			}
 
 			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval = (tmp == (unsigned short)-1);
+			retval = (tmp == (u16)-1);
 
 			retval |= tl880_vpx_write_fp(tl880dev, fpreg,
 					(value >> 2) | (tmp & 0xfc0));
@@ -442,7 +445,7 @@ vpx3226:
 			}
 
 			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval = (tmp == (unsigned short)-1);
+			retval = (tmp == (u16)-1);
 
 			retval |= tl880_vpx_write_fp(tl880dev, fpreg, 
 					((value >> 5) << 2) | (tmp & 0xfe3));
@@ -461,7 +464,7 @@ vpx3226:
 			}
 
 			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval = (tmp == (unsigned short)-1);
+			retval = (tmp == (u16)-1);
 
 			// Scale 8-bit value to 0..16
 			tmp = (tmp & 0xffc) | (value >> 6);
@@ -474,7 +477,7 @@ vpx3226:
 			return 4;
 		case 7:
 			tmp = tl880_vpx_read_fp(tl880dev, VPX_FP_INSEL);
-			retval = (tmp == (unsigned short)-1);
+			retval = (tmp == (u16)-1);
 
 			tmp = ((value >> 6) << 5) | (tmp & 0x79f);
 
@@ -492,7 +495,7 @@ vpx3226:
 			}
 
 			tmp = tl880_vpx_read_fp(tl880dev, fpreg);
-			retval = (tmp == (unsigned short)-1);
+			retval = (tmp == (u16)-1);
 			tmp2 = value >> 6;
 
 			/* Is this toggling something */

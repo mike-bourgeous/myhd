@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.29  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.28  2007/03/29 09:27:39  nitrogen
  * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
  *
@@ -57,7 +60,7 @@
 #include <media/tuner.h>
 #include <media/v4l2-common.h>
 #include <media/tvaudio.h>
-#include <../drivers/media/dvb/frontends/nxt200x.h>
+//#include <../drivers/media/dvb/frontends/nxt200x.h>
 
 /*** Driver definitions ***/
 
@@ -132,17 +135,17 @@ struct tl880_dev {
 	/** Housekeeping stuff **/
 	struct tl880_dev *next;			/* Linked list pointer */
 	struct pci_dev *pcidev;			/* PCI device structure */
-	unsigned int id;			/* Card number */
-	unsigned short subsys_vendor_id;	/* Card vendor ID */
-	unsigned short subsys_device_id;	/* Card device ID */
-	unsigned short card_type;		/* Card type identifier */
+	u32 id;					/* Card number */
+	u16 subsys_vendor_id;			/* Card vendor ID */
+	u16 subsys_device_id;			/* Card device ID */
+	u16 card_type;				/* Card type identifier */
 	char name[64];				/* Card model name */
 	struct semaphore *sem;			/* For reentry protection */
 
 	/* Character device stuff */
 	struct cdev *char_device;		/* Kernel character device handle */
-	unsigned int major;			/* Major number for all tl880 devices (for convenience) */
-	unsigned int minor;			/* First minor number for this card */
+	u32 major;				/* Major number for all tl880 devices (for convenience) */
+	u32 minor;				/* First minor number for this card */
 
 
 	/** Card's I/O and memory space **/
@@ -171,50 +174,50 @@ struct tl880_dev {
 	/** Interrupt stuff **/
 	struct tasklet_struct tasklet;		/* Tasklet for interrupt work */
 
-	unsigned char irq;			/* Interrupt line */
+	u32 irq;				/* Interrupt line */
 
 	int elseint;				/* Do we share an interrupt? */
 
-	unsigned long old_mask;			/* Previously used interrupt mask */
-	unsigned long int_mask;			/* Global interrupt enable mask */
-	unsigned long int_type;			/* Type of interrupt to service */
-	unsigned long int_count;		/* Number of interrupts received */
+	u32 old_mask;				/* Previously used interrupt mask */
+	u32 int_mask;				/* Global interrupt enable mask */
+	u32 int_type;				/* Type of interrupt to service */
+	u32 int_count;				/* Number of interrupts received */
 
-	unsigned long vsc_mask;			/* VSC interrupt mask */
-	unsigned long vsc_type;			/* Type of VSC interrupt received */
-	unsigned long vsc_count;		/* Number of VSC interrupts received */
+	u32 vsc_mask;				/* VSC interrupt mask */
+	u32 vsc_type;				/* Type of VSC interrupt received */
+	u32 vsc_count;				/* Number of VSC interrupts received */
 	
-	unsigned long apu_mask;			/* APU interrupt mask */
-	unsigned long apu_type;			/* Type of APU interrupt received */
-	unsigned long apu_count;		/* Number of APU interrupts received */
+	u32 apu_mask;				/* APU interrupt mask */
+	u32 apu_type;				/* Type of APU interrupt received */
+	u32 apu_count;				/* Number of APU interrupts received */
 
-	unsigned long blt_mask;			/* BLT interrupt mask */
-	unsigned long blt_type;			/* Type of BLT interrupt received */
-	unsigned long blt_count;		/* Number of BLT interrupts received */
+	u32 blt_mask;				/* BLT interrupt mask */
+	u32 blt_type;				/* Type of BLT interrupt received */
+	u32 blt_count;				/* Number of BLT interrupts received */
 
-	unsigned long mce_mask;			/* MCE interrupt mask */
-	unsigned long mce_type;			/* Type of MCE interrupt received */
-	unsigned long mce_count;		/* Number of MCE interrupts received */
+	u32 mce_mask;				/* MCE interrupt mask */
+	u32 mce_type;				/* Type of MCE interrupt received */
+	u32 mce_count;				/* Number of MCE interrupts received */
 
-	unsigned long mcu_mask;			/* MCU interrupt mask */
-	unsigned long mcu_type;			/* Type of MCU interrupt received */
-	unsigned long mcu_count;		/* Number of MCU interrupts received */
+	u32 mcu_mask;				/* MCU interrupt mask */
+	u32 mcu_type;				/* Type of MCU interrupt received */
+	u32 mcu_count;				/* Number of MCU interrupts received */
 
-	unsigned long vpip_mask;		/* VPIP interrupt mask */
-	unsigned long vpip_type;		/* Type of VPIP interrupt received */
-	unsigned long vpip_count;		/* Number of VPIP interrupts received */
+	u32 vpip_mask;				/* VPIP interrupt mask */
+	u32 vpip_type;				/* Type of VPIP interrupt received */
+	u32 vpip_count;				/* Number of VPIP interrupts received */
 
-	unsigned long hpip_mask;		/* HPIP interrupt mask */
-	unsigned long hpip_type;		/* Type of HPIP interrupt received */
-	unsigned long hpip_count;		/* Number of HPIP interrupts received */
+	u32 hpip_mask;				/* HPIP interrupt mask */
+	u32 hpip_type;				/* Type of HPIP interrupt received */
+	u32 hpip_count;				/* Number of HPIP interrupts received */
 
-	unsigned long dpc_mask;			/* DPC interrupt mask */
-	unsigned long dpc_type;			/* Type of DPC interrupt received */
-	unsigned long dpc_count;		/* Number of DPC interrupts received */
+	u32 dpc_mask;				/* DPC interrupt mask */
+	u32 dpc_type;				/* Type of DPC interrupt received */
+	u32 dpc_count;				/* Number of DPC interrupts received */
 
-	unsigned long tsd_mask;			/* TSD interrupt mask */
-	unsigned long tsd_type;			/* Type of TSD interrupt received */
-	unsigned long tsd_count;		/* Number of TSD interrupts received */
+	u32 tsd_mask;				/* TSD interrupt mask */
+	u32 tsd_type;				/* Type of TSD interrupt received */
+	u32 tsd_count;				/* Number of TSD interrupts received */
 
 
 	/** Audio (APU) State **/
@@ -222,10 +225,10 @@ struct tl880_dev {
 		ZERO = 0, ONE, TWO 
 	} audio_mode;				/* Current audio mode */
 
-	unsigned long iau_base;			/* Base card memory address for audio unit */
-	unsigned long iau_iba_reg;		/* Register used for base address */
-	unsigned long iau_iea_reg;		/* Register used for end address */
-	unsigned long iau_ira_reg;		/* Register used for base address (2) */
+	u32 iau_base;				/* Base card memory address for audio unit */
+	u32 iau_iba_reg;			/* Register used for base address */
+	u32 iau_iea_reg;			/* Register used for end address */
+	u32 iau_ira_reg;			/* Register used for base address (2) */
 
 
 	/*** Audio Chip (MSP) State ***/
@@ -258,9 +261,16 @@ struct tl880_dev {
 	} vpx_video_standard;			/* Currently active video standard */
 };
 
+#else /* __KERNEL__ */
+
+/*** Userspace-exclusive definitions and declarations ***/
+
+/* Userspace includes */
+#include <linux/types.h>
+
 #endif /* __KERNEL__ */
 
-/*** Userspace definitions such as ioctls ***/
+/*** Userspace/kernel space shared definitions such as ioctls ***/
 
 /* ioctl definitions are subject to change */
 
@@ -268,59 +278,59 @@ struct tl880_dev {
  * Read register IOCTL - register is read from parameter, then the value read
  * is written back to the parameter.  Single unsigned long.
  */
-#define TL880IOCREADREG		_IOWR(0xdd, 0, unsigned int *)
+#define TL880IOCREADREG		_IOWR(0xdd, 0, __u32 *)
 
 /*
  * Write register IOCTL - register is read from parameter[0], the value to
- * write is read from parameter[1].  Array [2] unsigned int.
+ * write is read from parameter[1].  Array [2] __u32.
  */
-#define TL880IOCWRITEREG	_IOW(0xdd, 1, unsigned int *)
+#define TL880IOCWRITEREG	_IOW(0xdd, 1, __u32 *)
 
 /*
  * VIP state IOCTL - parameter is a pointer to VIP state int (0 off, 1 on, 2
  * special?)
  */
-#define TL880IOCSETVIP		_IOW(0xdd, 2, unsigned int *)
+#define TL880IOCSETVIP		_IOW(0xdd, 2, __u32 *)
 
 /*
- * Set cursor position IOCTL - cursor position is packed into unsigned int
+ * Set cursor position IOCTL - cursor position is packed into __u32
  * as two shorts - i.e. (x & 0xffff) | (y << 16)
  */
-#define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, unsigned int *)
+#define TL880IOCSETCURSORPOS	_IOW(0xdd, 3, __u32 *)
 
 /*
- * Set card GPIO state - pass two unsigned ints.
+ * Set card GPIO state - pass two __u32s.
  * parameter[0] = gpio_line
  * parameter[1] = state
  */
-#define TL880IOCSETGPIO		_IOW(0xdd, 4, unsigned int *)
+#define TL880IOCSETGPIO		_IOW(0xdd, 4, __u32 *)
 
 
 #ifdef __KERNEL__
 
 /*** Driver variables ***/
-extern unsigned int debug;
+extern int debug;
 extern dev_t device_number;
 extern int n_tl880s;
 extern struct tl880_dev *tl880_list;
 
 /*** Driver functions ***/
 /* tl880util.c */
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue);
+void set_bits(u32 *value, u32 reg, int high_bit, int low_bit, u32 setvalue);
 struct tl880_dev *find_tl880(unsigned long tl880_id);
 struct tl880_dev *find_tl880_pci(struct pci_dev *dev);
 
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);
 void tl880_deinit_i2c(struct tl880_dev *tl880dev);
-int tl880_call_i2c_clients(struct tl880_dev *tl880dev, unsigned int cmd, void *arg);
+int tl880_call_i2c_clients(struct tl880_dev *tl880dev, u32 cmd, void *arg);
 /* I2C access functions for features not handled by external chip drivers */
-int tl880_i2c_read_byte(struct tl880_i2c_bus *i2cbus, unsigned short addr);
-int tl880_i2c_write_byte(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char value);
-int tl880_i2c_read_byte_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command);
-int tl880_i2c_write_byte_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command, unsigned char value);
-int tl880_i2c_read_word_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command);
-int tl880_i2c_write_word_data(struct tl880_i2c_bus *i2cbus, unsigned short addr, unsigned char command, unsigned short value);
+int tl880_i2c_read_byte(struct tl880_i2c_bus *i2cbus, u16 addr);
+int tl880_i2c_write_byte(struct tl880_i2c_bus *i2cbus, u16 addr, u8 value);
+int tl880_i2c_read_byte_data(struct tl880_i2c_bus *i2cbus, u16 addr, u8 command);
+int tl880_i2c_write_byte_data(struct tl880_i2c_bus *i2cbus, u16 addr, u8 command, u8 value);
+int tl880_i2c_read_word_data(struct tl880_i2c_bus *i2cbus, u16 addr, u8 command);
+int tl880_i2c_write_word_data(struct tl880_i2c_bus *i2cbus, u16 addr, u8 command, u16 value);
 
 /* tl880init.c */
 void tl880_init_myhd(struct tl880_dev *tl880dev);
@@ -329,8 +339,8 @@ void tl880_init_chip(struct tl880_dev *tl880dev);
 void tl880_init_dev(struct tl880_dev *tl880dev);
 
 /* tl880gpio.c */
-unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line, unsigned char state);
-void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, unsigned char state, unsigned char b, int c);
+u8 tl880_set_gpio(struct tl880_dev *tl880dev, u32 gpio_line, u8 state);
+void tl880_write_gpio1_wintv_hd(struct tl880_dev *tl880dev, u8 state, u8 b, int c);
 
 /* tl880int.c */
 #ifdef PRE_2619 /* Pre-2.6.19 compatibility */
@@ -346,7 +356,7 @@ void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 void tl880_set_vip(struct tl880_dev *tl880dev, unsigned long vip_mode);
 
 /* tl880input.c */
-void tl880_set_video_source(struct tl880_dev *tl880dev, unsigned char a, unsigned char b);
+void tl880_set_video_source(struct tl880_dev *tl880dev, u8 a, u8 b);
 void tl880_set_ntsc_input(struct tl880_dev *tl880dev, int input);
 
 /* tl880audio.c */
@@ -366,8 +376,8 @@ void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev);
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);
 
 /* tl880dma.c */
-unsigned int tl880_aux_dma_allocate(void);
-void tl880_aux_dma_free(unsigned int dma);
+u32 tl880_aux_dma_allocate(void);
+void tl880_aux_dma_free(u32 dma);
 extern unsigned long dma_bitmask;
 
 int tl880_dma_vop_on(struct tl880_dev *tl880dev);
@@ -377,11 +387,11 @@ int tl880_create_proc_entry(void);
 void tl880_remove_proc_entry(void);
 
 /* tl880mem.c */
-unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem);
-void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value);
-unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit);
-void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value);
-void tl880_clear_sdram(struct tl880_dev *tl880dev, unsigned long start_addr, unsigned long end_addr, unsigned long value);
+u32 tl880_read_memory(struct tl880_dev *tl880dev, u32 mem);
+void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value);
+u32 tl880_read_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit);
+void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit, u32 value);
+void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value);
 
 #endif /* __KERNEL__ */
 

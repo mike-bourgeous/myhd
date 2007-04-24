@@ -2,7 +2,6 @@ Add functions to set interrupt masks
 Get rid of temporary static and/or global variables (move to tl880_dev, etc.)
 Add ioctl interface for mode switch function and other functions
 Use request_firmware() when the firmware is available and needed
-Replace all ints/longs with appropriate u32/s32/u16/s16 etc. types (?)
 Replace osdmem stuff with a proven public domain malloc algorithm
 Use CHECK_NULL and CHECK_NULL_W more
 Add read() function to tl880/mem? device to allow hexedit to work on TL880 memory
@@ -16,6 +15,7 @@ What if top half gets called multiple times before bottom half executes?  Make
   a new struct that contains information about each interrupt state, kmalloc it
   in top half, free it in bottom half.  If necessary.
 Make the "someone else's interrupt" code more robust (it gives false alarms).
+Add a compat_ioctl to allow 32-bit programs to interface with the tl880.
 
 vim: tw=80
 

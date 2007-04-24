@@ -30,9 +30,9 @@ void unmap_regspace()
 	close(regfd);
 }
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
-	unsigned long regval[2] = {reg, value};
+	__u32 regval[2] = {reg, value};
 	if(!regfd)
 		return;
 	
@@ -41,7 +41,7 @@ void write_register(long reg, unsigned long value)
 	}
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
 	if(ioctl(regfd, TL880IOCREADREG, &reg) < 0) {
 		perror("Unable to read register");
@@ -51,7 +51,7 @@ unsigned long read_register(long reg)
 }
 
 
-unsigned long read_regbits(long reg, long high_bit, long low_bit)
+__u32 read_regbits(__u32 reg, int high_bit, int low_bit)
 {
 	int shift = high_bit - low_bit + 1;
 	int mask = ~(0xffffffff << shift);
@@ -59,9 +59,9 @@ unsigned long read_regbits(long reg, long high_bit, long low_bit)
 	return (read_register(reg) >> low_bit) & mask;
 }
 
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
+void set_bits(__u32 *value, __u32 reg, int high_bit, int low_bit, __u32 setvalue)
 {
-	register unsigned long mask = 0;
+	register __u32 mask = 0;
 
 	/* set bits from high_bit to low_bit in mask to 1 */
 	mask = ~(0xFFFFFFFF << (high_bit - low_bit + 1)) << low_bit;
@@ -74,9 +74,9 @@ void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsig
 
 
 
-void write_regbits(long reg, long high_bit, long low_bit, unsigned long value)
+void write_regbits(__u32 reg, int high_bit, int low_bit, __u32 value)
 {
-	unsigned long curval = read_register(reg);
+	__u32 curval = read_register(reg);
 
 	set_bits(&curval, reg, high_bit, low_bit, value);
 
@@ -90,7 +90,7 @@ void write_regbits(long reg, long high_bit, long low_bit, unsigned long value)
  * Range: 0-255 all channels
  * Return: value suitable for writing to regs 10140-1017c (cursor palette)
  */
-unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsigned long a)
+__u32 rgb2ypbpr(__u32 r, __u32 g, __u32 b, __u32 a)
 {
 	float red = (float)r / 255.0;
 	float green = (float)g / 255.0;
@@ -133,11 +133,11 @@ unsigned long rgb2ypbpr(unsigned long r, unsigned long g, unsigned long b, unsig
 
 	/* Use r, g, b, a as temporary storage variables to save namespace */
 	/* New Y */
-	r = (unsigned long)(y * 255.0);
+	r = (__u32)(y * 255.0);
 	/* New Pb */
-	g = (unsigned long)(pb * 255.0);
+	g = (__u32)(pb * 255.0);
 	/* New Pr */
-	b = (unsigned long)(pr * 255.0);
+	b = (__u32)(pr * 255.0);
 	/* New A */
 	a = alpha * 127.0;
 
@@ -150,7 +150,7 @@ void read_image(char *filename, unsigned char *memspace)
 	FILE *image;
 	struct stat imgstat;
 	int size;
-	unsigned long buf = 0, *memlong = (unsigned long *)memspace;
+	__u32 buf = 0, *mem_32 = (__u32 *)memspace;
 	int i;
 	
 	if(!filename) {
@@ -180,7 +180,7 @@ void read_image(char *filename, unsigned char *memspace)
 	for(i = 0; i < size; i += 4)
 	{
 		fread(&buf, 1, 4, image);
-		memlong[i / 4] = __cpu_to_be32(buf);
+		mem_32[i / 4] = __cpu_to_be32(buf);
 	}
 
 	fclose(image);
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 {
 	int memfd, i;
 	unsigned char *memspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc != 2) {
 		printf("Attempts to draw a 768x364x8 image on the TL880 OSD\n");
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 		unmap_regspace();
 		return -1;
 	}
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
 	for(i = 0x10088; i <= 0x100ac; i += 4) {
 		write_register(i, 0x0);

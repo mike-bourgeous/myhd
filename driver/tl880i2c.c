@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.19  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.18  2007/03/29 09:27:40  nitrogen
  * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
  *
@@ -490,6 +493,7 @@ int tl880_init_i2c(struct tl880_dev *tl880dev)
 		memcpy(&bus[j].i2c_adap, &tl880_i2c_adap_template, sizeof(struct i2c_adapter));
 		memcpy(&bus[j].i2c_algo, &tl880_i2c_algo_template, sizeof(struct i2c_algo_bit_data));
 		bus[j].dev = tl880dev;
+		bus[j].i2c_adap.dev.parent = &tl880dev->pcidev->dev;
 
 		for(k = 0; k < I2C_CLIENTS_MAX; k++) {
 			tl880dev->i2cbuses[i].i2c_clients[k] = NULL;
@@ -522,7 +526,8 @@ void tl880_deinit_i2c(struct tl880_dev *tl880dev)
 	}
 
 	for(i = tl880dev->minbus; i <= tl880dev->maxbus; i++) {
-		i2c_bit_del_bus(&tl880dev->i2cbuses[i - tl880dev->minbus].i2c_adap);
+		//i2c_bit_del_bus(&tl880dev->i2cbuses[i - tl880dev->minbus].i2c_adap);
+		i2c_del_adapter(&tl880dev->i2cbuses[i - tl880dev->minbus].i2c_adap);
 	}
 
 	kfree(tl880dev->i2cbuses);

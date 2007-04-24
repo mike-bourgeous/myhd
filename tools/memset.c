@@ -6,18 +6,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int memfd;
-	unsigned long i, j;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
-	unsigned long value = 0x0;
-	unsigned long valsize = 4;
+	__u32 i;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
+	__u32 value = 0x0;
+	__u32 valsize = 4;
 	unsigned char *memspace;
 	unsigned short *smspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc > 5 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Writes repeated values to TL880 RAM\n");
@@ -69,24 +70,24 @@ int main(int argc, char *argv[])
 	}
 
 	smspace = (unsigned short *)memspace;
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
-	printf("Writing value %08lx from %lx to %lx\n", value, addr, addr + len);
+	printf("Writing value %08x from %x to %x\n", value, addr, addr + len);
 
 	switch(valsize) {
 		default:
-			fprintf(stderr, "Broken valsize %ld\n", valsize);
+			fprintf(stderr, "Broken valsize %d\n", valsize);
 			break;
 		case 1:
 			for(i = addr; i < addr + len; i += valsize) {
 				memspace[i] = value & 0xff;
-				fprintf(stderr, "uchar mem[%lx] = %08lx\r", i, value & 0xff);
+				fprintf(stderr, "uchar mem[%x] = %08x\r", i, value & 0xff);
 			}
 			break;
 		case 2:
 			for(i = addr; i < addr + len; i += valsize) {
 				smspace[i / 2] = value & 0xffff;
-				fprintf(stderr, "ushort mem[%lx] = %04lx\r", i, value & 0xffff);
+				fprintf(stderr, "ushort mem[%x] = %04x\r", i, value & 0xffff);
 			}
 			break;
 		case 3:
@@ -94,13 +95,13 @@ int main(int argc, char *argv[])
 				memspace[i] = (value >> 16) & 0xff;
 				memspace[i + 1] = (value >> 8) & 0xff;
 				memspace[i + 2] = value & 0xff;
-				fprintf(stderr, "uchar mem[%lx-%lx] = %06lx\r", i, i+2, value & 0xffffff);
+				fprintf(stderr, "uchar mem[%x-%x] = %06x\r", i, i+2, value & 0xffffff);
 			}
 			break;
 		case 4:
 			for(i = addr; i < addr + len; i += valsize) {
 				lmspace[i / 4] = value;
-				fprintf(stderr, "ushort mem[%lx] = %08lx\r", i, value);
+				fprintf(stderr, "ushort mem[%x] = %08x\r", i, value);
 			}
 			break;
 	}

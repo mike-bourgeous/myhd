@@ -6,15 +6,13 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
-#include <asm/byteorder.h>
-#include <linux/byteorder/swab.h>
-#include <linux/byteorder/generic.h>
+#include <linux/types.h>
 #include "tl880.h"
 
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long value;
+	__u32 value;
 
 	if(argc != 2) {
 		printf("Usage: %s register\n", argv[0]);
@@ -35,7 +33,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("Register 0x%08lx is 0x%08lx\n", strtoul(argv[1], NULL, 16), value);
+	printf("Register 0x%08x is 0x%08x\n", (__u32)strtoul(argv[1], NULL, 16), value);
 
 	close(ifd);
 

@@ -7,13 +7,14 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <asm/byteorder.h>
+#include <linux/types.h>
 
-void read_data(char *filename, unsigned char *memspace, unsigned long len)
+void read_data(char *filename, unsigned char *memspace, __u32 len)
 {
 	FILE *image;
 	struct stat imgstat;
 	int size;
-	unsigned long buf = 0, *memlong = (unsigned long *)memspace;
+	__u32 buf = 0, *mem_32 = (__u32 *)memspace;
 	int i;
 	
 	if(!filename) {
@@ -45,7 +46,7 @@ void read_data(char *filename, unsigned char *memspace, unsigned long len)
 	for(i = 0; i < size; i += 4)
 	{
 		fread(&buf, 1, 4, image);
-		memlong[i / 4] = __cpu_to_be32(buf);
+		mem_32[i / 4] = __cpu_to_be32(buf);
 	}
 
 	fclose(image);
@@ -56,10 +57,10 @@ void read_data(char *filename, unsigned char *memspace, unsigned long len)
 int main(int argc, char *argv[])
 {
 	int ifdr;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
 	unsigned char *memspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc < 2 || argc > 4) {
 		printf("Loads tl880 memory\n");
@@ -86,7 +87,7 @@ int main(int argc, char *argv[])
 		close(ifdr);
 		return -1;
 	}
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
 	addr &= 0xfffffffc;
 	len &= 0xfffffffc;
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 		len = 0x01000000 - addr;
 	}
 
-	printf("Loading 0x%lx bytes of %s at address 0x%lx\n", len, argv[1], addr);
+	printf("Loading 0x%x bytes of %s at address 0x%x\n", len, argv[1], addr);
 	read_data(argv[1], memspace + addr, len);
 
 	printf("Unmapping memory space\n");

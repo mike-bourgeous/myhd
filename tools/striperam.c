@@ -6,15 +6,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int memfd, i, j;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
-	unsigned long width = 0x100;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
+	__u32 width = 0x100;
 	unsigned char *memspace;
-	unsigned long *lmspace;
+	__u32 *lmspace;
 
 	if(argc > 4 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Writes alternating values to TL880 RAM\n");
@@ -57,7 +58,7 @@ int main(int argc, char *argv[])
 		close(memfd);
 		return -1;
 	}
-	lmspace = (unsigned long *)memspace;
+	lmspace = (__u32 *)memspace;
 
 	printf("Writing stripe values\n");
 #if 0

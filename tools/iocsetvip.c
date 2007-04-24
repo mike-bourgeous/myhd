@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long vipstate;
+	__u32 vipstate;
 
 	if(argc != 2) {
 		printf("Usage: %s vipstate(0,1,2)\n", argv[0]);

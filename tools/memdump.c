@@ -6,12 +6,13 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int ifdr, ofd;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
 	unsigned char *memspace;
 
 	if(argc < 2 || argc > 4) {
@@ -51,7 +52,7 @@ int main(int argc, char *argv[])
 		len = 0x01000000 - addr;
 	}
 	
-	printf("Writing 0x%lx bytes starting at offset 0x%lx to %s\n", len, addr, argv[1]);
+	printf("Writing 0x%x bytes starting at offset 0x%x to %s\n", len, addr, argv[1]);
 	if((ofd = open(argv[1], O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)) < 0) {
 		fprintf(stderr, "Failed to open output file %s: %s\n", argv[1], strerror(errno));
 		munmap(memspace, 0x01000000);

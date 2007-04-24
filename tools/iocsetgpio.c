@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
 	int fd;
-	unsigned long regval[2];
+	__u32 regval[2];
 
 	if(argc != 3) {
 		printf("Usage: %s gpio_line state\n", argv[0]);

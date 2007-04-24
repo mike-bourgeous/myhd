@@ -17,10 +17,10 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long *buf2;
+	__u32 *buf2;
 	int i;
-	long reg = 0;
-	unsigned long value[4] = {0, 0, 0, 0};
+	__u32 reg = 0;
+	__u32 value[4] = {0, 0, 0, 0};
 
 	if(argc != 6) {
 		printf("Usage: %s register value value value value\n", argv[0]);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 		 * Note: this isn't safe for all registers, as reading from some registers can cause a state
 		 * change on the card
 		 */
-		printf("reg: 0x%08lx old: 0x%08lx new: 0x%08lx\n", reg + i * 4, buf2[i + reg / 4], value[i]);
+		printf("reg: 0x%08x old: 0x%08x new: 0x%08x\n", reg + i * 4, buf2[i + reg / 4], value[i]);
 		buf2[i + reg / 4] = value[i];
 	}
 	

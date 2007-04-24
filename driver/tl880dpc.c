@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880dpc.c,v $
+ * Revision 1.19  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.18  2007/03/26 19:25:05  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -85,9 +88,9 @@ void tl880_init_dpc_pll(struct tl880_dev *tl880dev)
 
 void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 {
-	unsigned long reg;
-	unsigned long savereg;
-	unsigned long value = 0;
+	u32 reg;
+	u32 savereg;
+	u32 value = 0;
 
 	if(CHECK_NULL(tl880dev) || CHECK_NULL(mode)) {
 		printk(KERN_ERR "tl880: NULL value passed to tl880_set_mode\n");
@@ -110,7 +113,7 @@ void tl880_set_mode(struct tl880_dev *tl880dev, struct tl880_mode_def *mode)
 	set_bits(&value, reg, 0x1e, 0x1e, mode->j);
 	tl880_write_register(tl880dev, reg, value);
 
-	reg = 10018;
+	reg = 0x10018;
 	value = 0;
 	set_bits(&value, reg, 8, 0, mode->h_backporch); 
 	set_bits(&value, reg, 9, 9, mode->inv_hsync);

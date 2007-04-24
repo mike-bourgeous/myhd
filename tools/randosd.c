@@ -6,13 +6,14 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <sys/ioctl.h>
+#include <linux/types.h>
 #include "tl880.h"
 
 static int regfd = 0;
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
-	unsigned long regval[2] = {reg, value};
+	__u32 regval[2] = {reg, value};
 	if(!regfd)
 		return;
 	
@@ -21,7 +22,7 @@ void write_register(long reg, unsigned long value)
 	}
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
 	if(ioctl(regfd, TL880IOCREADREG, &reg) < 0) {
 		perror("Unable to read register");
@@ -36,7 +37,7 @@ unsigned long read_register(long reg)
 int main(int argc, char *argv[])
 {
 	int i;
-	unsigned long rv;
+	__u32 rv;
 
 	if(argc != 1) {
 		printf("Randomizes the OSD context (registers 10080 to 100ac)\n");
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 	srand(time(0));
 	for(i = 0x10080; i < 0x100ac; i += 4) {
 		rv = rand();
-		fprintf(stderr, "ulong reg[%x] = 0x%lx\r", i, rv);
+		fprintf(stderr, "u__u32 reg[%x] = 0x%x\r", i, rv);
 		write_register(i, rv);
 		usleep(200000);
 	}

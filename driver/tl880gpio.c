@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880gpio.c,v $
+ * Revision 1.11  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.10  2007/03/28 08:01:30  nitrogen
  * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
  *
@@ -261,10 +264,10 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				break;
 		}
 	} else if (tl880dev->card_type == TL880_CARD_MYHD_MDP120 || tl880dev->card_type == TL880_CARD_MYHD_MDP130) {
-		int gpio_value;
+		u32 gpio_value;
 		if (gpio_line != 0) {
 			/* The MDP-120 uses the GPIO lines on the VPX chip */
-			if((gpio_value = tl880_vpx_read_fp(tl880dev, 0x154)) == (short)(-1)) {
+			if((gpio_value = tl880_vpx_read_fp(tl880dev, 0x154)) == (s16)(-1)) {
 				return 0;
 			} else {
 				switch(gpio_line) {
@@ -336,7 +339,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 		} else {
 			/* Something to do with audio */
 			if(state == 0) {
-				unsigned long value;
+				u32 value;
 
 				tl880_write_register(tl880dev, 0x3004, 0);
 				tl880_write_register(tl880dev, 0x306C, 0xC30000C3);

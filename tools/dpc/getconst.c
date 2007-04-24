@@ -14,9 +14,9 @@
 
 static int memfd = 0;
 
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
+void set_bits(__u32 *value, __u32 reg, int high_bit, int low_bit, __u32 setvalue)
 {
-	register unsigned long mask = 0;
+	register __u32 mask = 0;
 
 	/* set bits from high_bit to low_bit in mask to 1 */
 	mask = ~(0xFFFFFFFF << (high_bit - low_bit + 1)) << low_bit;
@@ -41,9 +41,9 @@ void unmap_regspace()
 	close(memfd);
 }
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
-	unsigned long regval[2] = {reg, value};
+	__u32 regval[2] = {reg, value};
 	if(!memfd)
 		return;
 	
@@ -52,7 +52,7 @@ void write_register(long reg, unsigned long value)
 	}
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
 	if(ioctl(memfd, TL880IOCREADREG, &reg) < 0) {
 		perror("Unable to read register");
@@ -61,7 +61,7 @@ unsigned long read_register(long reg)
 	return reg;
 }
 
-unsigned long read_regbits(long reg, long high_bit, long low_bit)
+__u32 read_regbits(__u32 reg, int high_bit, int low_bit)
 {
 	int shift = high_bit - low_bit + 1;
 	int mask = ~(0xffffffff << shift);
@@ -70,21 +70,21 @@ unsigned long read_regbits(long reg, long high_bit, long low_bit)
 }
 
 
-void write_regbits(long reg, long high_bit, long low_bit, unsigned long value)
+void write_regbits(__u32 reg, int high_bit, int low_bit, __u32 value)
 {
-	unsigned long curval = read_register(reg);
+	__u32 curval = read_register(reg);
 
 	set_bits(&curval, reg, high_bit, low_bit, value);
 
 	write_register(reg, curval);
 }
 
-unsigned long tl880_calc_dpc_pll_const(unsigned long a, unsigned char b, unsigned char c)
+__u32 tl880_calc_dpc_pll_const(__u32 a, unsigned char b, unsigned char c)
 {
 	return (((((a & 0x3ff) << 8) | (b & 0x1f)) << 4) | (c & 3)) << 4;
 }
 
-void tl880_uncalc_dpc_pll_const(unsigned long dpcconst, unsigned long *a, unsigned char *b, unsigned char *c)
+void tl880_uncalc_dpc_pll_const(__u32 dpcconst, __u32 *a, unsigned char *b, unsigned char *c)
 {
 	*a = (dpcconst >> 0x10) & 0x3ff;
 	*b = (dpcconst >> 8) & 0x1f;
@@ -93,8 +93,8 @@ void tl880_uncalc_dpc_pll_const(unsigned long dpcconst, unsigned long *a, unsign
 
 int main(int argc, char *argv[])
 {
-	unsigned long dpcconst;
-	unsigned long a = 0;
+	__u32 dpcconst;
+	__u32 a = 0;
 	unsigned char b = 0, c = 0;
 	
 	if(argc == 2) {
@@ -116,7 +116,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
-	printf("0x%08lx: a = 0x%03lx, b = 0x%02x, c = 0x%x\n", dpcconst, a, b, c);
+	printf("0x%08x: a = 0x%03x, b = 0x%02x, c = 0x%x\n", dpcconst, a, b, c);
 	
 	return 0;
 }

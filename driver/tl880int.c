@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880int.c,v $
+ * Revision 1.19  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.18  2007/03/26 19:25:06  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -16,7 +19,7 @@ void tl880_vpip_handler(struct tl880_dev *tl880dev)
 {
 	static unsigned int row_cnt = 0; /* evil - put in struct */
 	static unsigned int field_cnt = 0; /* evil - put in struct */
-	unsigned long bitsval = 0;
+	u32 bitsval = 0;
 	
 	/* cJanus->0x10f94 is a pointer to struct tagVpipProgList */
 	
@@ -71,7 +74,7 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 {
 	tl880dev->vpip_type = tl880_read_register(tl880dev, 0x7008) & tl880_read_register(tl880dev, 0x7004);
 	
-	printk(KERN_DEBUG "tl880: vpip interrupt: 0x%08lx\n", tl880dev->vpip_type);
+	printk(KERN_DEBUG "tl880: vpip interrupt: 0x%08x\n", tl880dev->vpip_type);
 
 	if(tl880dev->vpip_type & 1 /* || !cJanus[0x10388][0x284] */) {
 		tl880_vpip_handler(tl880dev);
@@ -131,13 +134,13 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	
 	if(debug || tl880dev->int_count == 1) {
-		printk(KERN_DEBUG "tl880: in bottom half for card %i, int type 0x%08lx\n", tl880dev->id, tl880dev->int_type);
+		printk(KERN_DEBUG "tl880: in bottom half for card %i, int type 0x%08x\n", tl880dev->id, tl880dev->int_type);
 	}
 
 	/* I think this is a legitimate use of goto (first time for me!) */
 	if(tl880dev->int_type & 0x80) {
 		if((debug && tl880dev->vpip_count % 100 == 0) || tl880dev->vpip_count == 1) {
-			printk(KERN_DEBUG "tl880: vpip interrupt bh: count %ld\n", tl880dev->vpip_count);
+			printk(KERN_DEBUG "tl880: vpip interrupt bh: count %d\n", tl880dev->vpip_count);
 		}
 
 		tl880dev->int_type &= ~0x80;
@@ -147,7 +150,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x400) {
 		if((debug && tl880dev->tsd_count % 100 == 0) || tl880dev->tsd_count == 1) {
-			printk(KERN_DEBUG "tl880: tsd interrupt bh: count %ld\n", tl880dev->tsd_count);
+			printk(KERN_DEBUG "tl880: tsd interrupt bh: count %d\n", tl880dev->tsd_count);
 		}
 
 		tl880dev->tsd_type = 0;
@@ -159,7 +162,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x40) {
 		if((debug && tl880dev->mce_count % 100 == 0) || tl880dev->mce_count == 1) {
-			printk(KERN_DEBUG "tl880: mce interrupt bh: count %ld\n", tl880dev->mce_count);
+			printk(KERN_DEBUG "tl880: mce interrupt bh: count %d\n", tl880dev->mce_count);
 		}
 
 		tl880dev->int_type &= ~0x40;
@@ -169,7 +172,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x8) {
 		if((debug && tl880dev->dpc_count % 100 == 0) || tl880dev->dpc_count == 1) {
-			printk(KERN_DEBUG "tl880: dpc interrupt bh: count %ld type %08lx\n", 
+			printk(KERN_DEBUG "tl880: dpc interrupt bh: count %d type %08x\n", 
 					tl880dev->dpc_count, tl880dev->dpc_type);
 		}
 
@@ -180,7 +183,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x10) {
 		if((debug && tl880dev->vsc_count % 100 == 0) || tl880dev->vsc_count == 1) {
-			printk(KERN_DEBUG "tl880: vsc interrupt bh: count %ld\n", tl880dev->vsc_count);
+			printk(KERN_DEBUG "tl880: vsc interrupt bh: count %d\n", tl880dev->vsc_count);
 		}
 
 		tl880dev->int_type &= ~0x10;
@@ -190,7 +193,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x1) {
 		if((debug && tl880dev->apu_count % 100 == 0) || tl880dev->apu_count == 1) {
-			printk(KERN_DEBUG "tl880: apu interrupt bh: count %ld\n", tl880dev->apu_count);
+			printk(KERN_DEBUG "tl880: apu interrupt bh: count %d\n", tl880dev->apu_count);
 		}
 
 		tl880dev->int_type &= ~0x1;
@@ -200,7 +203,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x2) {
 		if((debug && tl880dev->blt_count % 100 == 0) || tl880dev->blt_count == 1) {
-			printk(KERN_DEBUG "tl880: blt interrupt bh: count %ld\n", tl880dev->blt_count);
+			printk(KERN_DEBUG "tl880: blt interrupt bh: count %d\n", tl880dev->blt_count);
 		}
 
 		tl880dev->int_type &= ~0x2;
@@ -210,7 +213,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x100) {
 		if((debug && tl880dev->hpip_count % 100 == 0) || tl880dev->hpip_count == 1) {
-			printk(KERN_DEBUG "tl880: hpip interrupt bh: count %ld\n", tl880dev->hpip_count);
+			printk(KERN_DEBUG "tl880: hpip interrupt bh: count %d\n", tl880dev->hpip_count);
 		}
 
 		tl880dev->int_type &= ~0x100;
@@ -220,7 +223,7 @@ void tl880_bh(unsigned long tl880_id)
 	}
 	if(tl880dev->int_type & 0x200) {
 		if((debug && tl880dev->mcu_count % 100 == 0) || tl880dev->mcu_count == 1) {
-			printk(KERN_DEBUG "tl880: mcu interrupt bh: count %ld\n", tl880dev->mcu_count);
+			printk(KERN_DEBUG "tl880: mcu interrupt bh: count %d\n", tl880dev->mcu_count);
 		}
 
 		tl880dev->int_type &= ~0x200;
@@ -236,7 +239,7 @@ done:
 	tl880_write_register(tl880dev, 4, tl880dev->int_mask);
 
 	if(debug) {
-		printk(KERN_DEBUG "tl880: leaving bh with int_mask %08lx\n", tl880dev->int_mask);
+		printk(KERN_DEBUG "tl880: leaving bh with int_mask %08x\n", tl880dev->int_mask);
 	}
 }
 
@@ -277,7 +280,7 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	/* If this card is already processing an interrupt, return with interrupts disabled */
 	if(tl880dev->int_type) {
 		/* This should never get executed */
-		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04lx - disabling interrupts\n", 
+		printk(KERN_DEBUG "tl880: already handling interrupt: 0x%04x - disabling interrupts\n", 
 				tl880dev->int_type);
 		tl880_disable_interrupts(tl880dev);
 		return IRQ_HANDLED;
@@ -310,7 +313,7 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 		tl880dev->tsd_count++;
 		//tl880dev->int_mask &= ~0x400;	/* Clear TSD interrupt bit */
 		if(debug > 0 || tl880dev->tsd_count == 1) {
-			printk(KERN_DEBUG "tl880: tsd interrupt: 0x%08lx\n", 
+			printk(KERN_DEBUG "tl880: tsd interrupt: 0x%08x\n", 
 					(tl880dev->tsd_type = tl880_read_register(tl880dev, 0x27814)));
 		}
 
@@ -375,7 +378,7 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 		}
 	}
 	if(tl880dev->int_type & 0x824) {
-		printk(KERN_WARNING "tl880: unknown interrupt 0x%08lx- disabling unknown interrupts\n",
+		printk(KERN_WARNING "tl880: unknown interrupt 0x%08x- disabling unknown interrupts\n",
 			tl880dev->int_type);
 
 		tl880dev->int_mask &= ~0x824;

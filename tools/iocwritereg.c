@@ -14,7 +14,7 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long regval[2];
+	__u32 regval[2];
 
 	if(argc != 3) {
 		printf("Usage: %s register value\n", argv[0]);
@@ -29,10 +29,8 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	/*
 	printf("Modifying register\n");
-	printf("Setting register 0x%08lx to 0x%08lx\n", (unsigned long)regval[0], regval[1]);
-	*/
+	printf("Setting register 0x%08x to 0x%08x\n", regval[0], regval[1]);
 
 	if(ioctl(ifd, TL880IOCWRITEREG, regval) < 0) {
 		perror("Unable to write register");

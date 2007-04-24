@@ -11,7 +11,7 @@
 #include <linux/byteorder/generic.h>
 
 /*
-void __stdcall	SetBits(unsigned long *,long,long,long,unsigned	long)
+void __stdcall	SetBits(__u32 *,long,long,long,unsigned	long)
 arg_0	       = dword ptr  8 value
 high_bit	       = dword ptr  10h 
 low_bit	       = dword ptr  14h
@@ -23,7 +23,7 @@ i.e.:	SetBits(&somevalue, 0x3008, 0, 0, 1);
 	SetBits(&somevalue, 0x10008, 0xe, 0xd, 0);
 */
 
-static unsigned long *regspace = NULL;
+static __u32 *regspace = NULL;
 static int memfd = 0;
 
 int map_regspace()
@@ -51,7 +51,7 @@ void unmap_regspace()
 	}
 }
 
-void write_register(long reg, unsigned long value)
+void write_register(__u32 reg, __u32 value)
 {
 	if(!regspace) {
 		return;
@@ -59,9 +59,9 @@ void write_register(long reg, unsigned long value)
 	regspace[reg / 4] = __cpu_to_le32(value);
 }
 
-unsigned long read_register(long reg)
+__u32 read_register(__u32 reg)
 {
-	unsigned long value;
+	__u32 value;
 	if(!regspace) {
 		return 0;
 	}
@@ -70,9 +70,9 @@ unsigned long read_register(long reg)
 }
 
 
-void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsigned long setvalue)
+void set_bits(__u32 *value, __u32 reg, int high_bit, int low_bit, __u32 setvalue)
 {
-	register unsigned long mask = 0;
+	register __u32 mask = 0;
 
 	/* set bits from high_bit to low_bit in mask to 1 */
 	mask = ~(0xFFFFFFFF << (high_bit - low_bit + 1)) << low_bit;
@@ -85,7 +85,7 @@ void set_bits(unsigned long *value, long reg, long high_bit, long low_bit, unsig
 
 int main(int argc, char *argv[])
 {
-	unsigned long value;
+	__u32 value;
 
 	if(argc != 5) {
 		fprintf(stderr, "Usage: %s oldvalue(hex) high_bit(hex) low_bit(hex) bitvalue(hex)\n", argv[0]);
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 
 	set_bits(&value, 0, strtoul(argv[2], NULL, 16), strtoul(argv[3], NULL, 16), strtoul(argv[4], NULL, 16));
 
-	printf("New value is 0x%08lx\n", value);
+	printf("New value is 0x%08x\n", value);
 
 	unmap_regspace();
 

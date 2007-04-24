@@ -997,6 +997,8 @@ Zeros for bi-level (VGA) sync, something else for tri-level sync:
 1d810 is MCU status (?)
 
 20000 tsd firmware start
+	Reading from any register in this range causes video glitches, and
+	possible system restart
 
 24000-25800 used in demux_init
 

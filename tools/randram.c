@@ -6,14 +6,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <linux/types.h>
 
 int main(int argc, char *argv[])
 {
 	int memfd, i;
-	unsigned long addr = 0;
-	unsigned long len = 0x01000000;
-	unsigned long randval;
-	unsigned long *memspace;
+	__u32 addr = 0;
+	__u32 len = 0x01000000;
+	__u32 randval;
+	__u32 *memspace;
 
 	if(argc > 3 || (argc >= 2 && !strncmp(argv[1], "--help", 6))) {
 		printf("Randomizes all or part of TL880 RAM\n");
@@ -56,7 +57,7 @@ int main(int argc, char *argv[])
 	for(i = addr; i < addr + len; i += 4) {
 		randval = rand();
 		if(i % 64 == 0) {
-			fprintf(stderr, "ulong mem[%x] = %08lx\r", i, randval);
+			fprintf(stderr, "u__u32 mem[%x] = %08x\r", i, randval);
 		}
 		memspace[i / 4] = randval;
 	}

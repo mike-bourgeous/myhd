@@ -12,9 +12,9 @@
 int main(int argc, char *argv[])
 {
 	int ifd;
-	unsigned long *regspace;
-	long reg = 0;
-	unsigned long value;
+	__u32 *regspace;
+	__u32 reg = 0;
+	__u32 value;
 
 	if(argc != 2) {
 		printf("Usage: %s register\n", argv[0]);
@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	}
 
 	value = __le32_to_cpu(regspace[reg/4]);
-	printf("Register 0x%08lx is 0x%08lx\n", reg, value);
+	printf("Register 0x%08x is 0x%08x\n", reg, value);
 
 	printf("Unmapping region 2\n");
 	munmap(regspace, 0x00100000);

@@ -5,13 +5,16 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880mem.c,v $
+ * Revision 1.4  2007/04/24 06:32:13  nitrogen
+ * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
+ *
  * Revision 1.3  2007/03/26 19:23:56  nitrogen
  * Added GPIO patch by Jason P. Matthews.
  *
  */
 #include "tl880.h"
 
-void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned long value)
+void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value)
 {
 	if(!tl880dev || !tl880dev->memspace) {
 		return;
@@ -19,9 +22,9 @@ void tl880_write_memory(struct tl880_dev *tl880dev, unsigned long mem, unsigned 
 	writel(value, (void *)(tl880dev->memspace + mem));
 }
 
-unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem)
+u32 tl880_read_memory(struct tl880_dev *tl880dev, u32 mem)
 {
-	unsigned long value;
+	u32 value;
 	if(!tl880dev || !tl880dev->memspace) {
 		return 0;
 	}
@@ -29,7 +32,7 @@ unsigned long tl880_read_memory(struct tl880_dev *tl880dev, unsigned long mem)
 	return value;
 }
 
-unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit)
+u32 tl880_read_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit)
 {
 	int shift = high_bit - low_bit + 1;
 	int mask = ~(0xffffffff << shift);
@@ -37,9 +40,9 @@ unsigned long tl880_read_membits(struct tl880_dev *tl880dev, unsigned long mem, 
 	return (tl880_read_memory(tl880dev, mem) >> low_bit) & mask;
 }
 
-void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long high_bit, long low_bit, unsigned long value)
+void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit, u32 value)
 {
-	unsigned long curval;
+	u32 curval;
 
 	// printk(KERN_DEBUG "tl880: tl880_write_membits 0x%08lx 0x%lx 0x%lx %08lx\n", mem, high_bit, low_bit, value);
 
@@ -50,7 +53,7 @@ void tl880_write_membits(struct tl880_dev *tl880dev, unsigned long mem, long hig
 	tl880_write_memory(tl880dev, mem, curval);
 }
 
-void tl880_clear_sdram(struct tl880_dev *tl880dev, unsigned long start_addr, unsigned long end_addr, unsigned long value)
+void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value)
 {
    while (start_addr < end_addr)
    {
