@@ -1,0 +1,18 @@
+Information on the digital audio output of the MyHD
+---------------------------------------------------
+
+SPDIF Clock Frequencies:
+
+Sample rate	SPDIF Clock
+-----------	-----------
+32.0kHz		4.0960MHz
+44.1kHz		5.6448MHz
+48.0kHz		6.1440MHz
+
+The MK2770-01 on the MyHD MDP-110 has an audio clock line, with
+selectable frequencies matching 2x the frequencies in the above table.
+There is also an exact match for the 5.6448MHz clock.
+
+
+vim: tw=72
+

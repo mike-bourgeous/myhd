@@ -358,7 +358,7 @@ APU (Audio Processing Unit) 3000-307c
 3048 written with 0x00001020 during MDP-130 init
 
 304c-3054 appear to contain memory offsets.  When stuck in looping Dolby Digital audio,
-	writing data to the value in 304c+4 bytes silenced the audio.
+	writing data to (memory location in 304c)+4 bytes silenced the audio.
 
 304c
 	Start of Dolby Digital buffer in card memory
@@ -632,7 +632,7 @@ DPC 10000-10200
 	bit 9 may be preview client/aux video?
 	bit 0xa may be capture client/aux video?
 
-10014-10028: Sync registers: see tools/dpc/dpcaux.c
+10014-10028: Sync registers: see tools/dpc/dpcsync.c
 
 10014 DPC sync register 1
 
@@ -769,18 +769,12 @@ and external display.
 registers 10080 to 100AC are the OSD context
 
 register 10080 changes palettes(?)
-register 10084 changes OSD image(?) - something like "sdram offset" - used in
-	overlay display lists - written with return value of getSDRAMoffset in
-	in showOverlays - card ignores lowest four bits
+
+10084 points to the location of the OSD context in card memory.
 
 registers 1008c and 10090 seem to take turns being zero and some value
 	example: 1008c = eb848609 when 10090 = 0,
 		 1008c = 0 when 10090 = 014e0882
-		 when eb848609 is stored in bigendian format at the
-		 offset in card memory pointed to by register 10084
-		 writing to that offset causes the displayed osd image
-		 to stretch or shrink
-		 
 
 10094 used in showOverlays
 
@@ -950,18 +944,28 @@ bit 0x13 is set to zero then one to reset the Nxt2000 in NxtCheckChannel
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
+	00000000|00000000|00000000|000??000	SetVIP (VESA interface)
+	00000000|00000000|00000000|0?000000	SetDpcClock (may be tied
+						to pin 6 of the MK2716,
+						which selects between
+						74.25MHz/60Hz and 74.175
+						MHz/59.94Hz clocks)
+	00000000|00000000|000000??|00000000	Audio sampling clock (I
+						believe these lines are
+						connected to pins 1 and
+						20 of the MK2770 chip)
 	00000000|00000000|00000100|00000000	Video passthrough
 	00000000|00000001|00000000|00000000	SDA Read 1
 	00000000|00000010|00000000|00000000	SDA Write 1
 	00000000|00000100|00000000|00000000	SCL Write 1, SCL Read 1
 	00000000|00001000|00000000|00000000	cNxtVsb::NxtCheckChannel
+						(NXT2000 reset line?)
 	00000000|01000000|00000000|00000000	SDA Write 2, SDA Read 2
 	00000000|10000000|00000000|00000000	SCL Write 2, SCL Read 2
 	00000100|00000000|00000000|00000000	SCL Write 0, SCL Read 0
 	00001000|00000000|00000000|00000000	SDA Write 0, SDA Read 0
 	
 
-GPIO also controls sampling clock
 SetGPIO used in (MyHD):
 	DebugProperty::SetProperty (line 2)
 	cJanus::SetDpcClock (line 6)
@@ -1108,4 +1112,6 @@ Some of the values sometimes written to a few registers:
 
 The OSD addresses all get OR'd with 0x52300000.
 
+
+vim: ai nobackup
 
