@@ -292,32 +292,58 @@ APU (Audio Processing Unit) 3000-307c
      Setting to 0x397 speeds up raw audio playback in Linux significantly,
      when using SPDIF output.
 
-	0x00100001 when playing Dolby Digital audio
+	0x00100001 when playing Dolby Digital audio, and 3028 and 302c stop
+	updating.  Using various values, it is possible to get only one or the
+	other to run (i.e. capture from MSP stops while playback continues, or
+	vice versa).
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio
+						(enable audio playback)
 	00000000|00000000|00000000|0nnnnnn0	3 in cJanus::InitNtscAudio
+						This seems to control the rate
+						at which 302c is incremented (in
+						other words, it controls the
+						playback speed).
 	00000000|00000000|00000000|10000000	1 in cJanus::InitNtscAudio
+						(enable I2S recording)
 	00000000|00000000|00000001|00000000	1 in cJanus::InitNtscAudio
 	00000000|00000000|00000nn0|00000000	1 in cJanus::InitNtscAudio
 
 3008 used in cJanus::InitNtscAudio
      zero while watching NTSC over the air with Wave audio.  0xnn001029 with
-     SPDIF audio and NTSC over the air.
+     SPDIF audio and NTSC over the air, where nn is incremented by 1
+     continually.
+     When NTSC is paused, set to 0xnn001001.
+     When set to 1031, left channel plays before right channel, creating an
+     echo-type effect.
+     When set to 1049, right channel plays before left channel.
+     Set to 1051, audio is from somewhere other than the 3020/3024 buffer, and a
+     bit louder.  NTSC audio is at 32kHz.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio
+						(audio enable?)
 	00000000|00000000|00000000|000nn000	1 in cJanus::InitNtscAudio
+						(left channel source?) 0 - no
+						left channel audio, 1 - left
+						channel audio from memory buffer
+						(3024-3028), 2 - left channel
+						audio from I2S
 	00000000|00000000|00000000|0nn00000	1 in cJanus::InitNtscAudio
+						(right channel source?) 0 - no
+						right channel audio, 1 - right
+						channel audio from memory buffer
+						(3020-3024), 2 - right channel
+						audio from I2S
 	00000000|00000000|00000nnn|00000000	0 in cJanus::InitNtscAudio
 	00000000|00000000|0nnn0000|00000000	1 in cJanus::InitNtscAudio
 
 300c,3010 written with 0x3000000
-	Very, very small chance that these are AES status bits.
 	0x02000006 when Dolby Digital is playing back.
 
 3014 is APU interrupt mask
@@ -326,10 +352,12 @@ APU (Audio Processing Unit) 3000-307c
 3020 written with 0x1000 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
 	Sets the audio buffer reset point (buffer resets to here)
+	In other words, this is the start of the audio buffer.
 
 3024 written with 0x10fe0 in cJanus::InitNtscAudio
      used in cJanus::NtscAudioDpc
 	Sets the audio buffer reset trigger (when buffer reaches here, it resets)
+	In other words, this is the end of the audio buffer.
 
 3028 is ntsc recording offset in sdram
      is used in cJanus::RotateVscCapFrame
@@ -337,14 +365,18 @@ APU (Audio Processing Unit) 3000-307c
      constantly changing while watching NTSC over the air
 	Writing this with a value that is part of the displayed memory buffer causes
 	the buffer to be overwritten.  This value should be between regs 3020 and 3024.
-	This is the offset at which the incoming I2S data is written to SDRAM.
+
+	* This is the offset at which the incoming I2S data is written to SDRAM.
 
 302c written with 0x1000 in cJanus::InitNtscAudio
      constantly changing while watching NTSC over the air
-	This is the offset at which the audio data in SDRAM is being sent via SPDIF.
+
+	* This is the offset at which the audio data in SDRAM is being sent via SPDIF.
 
 3030 written with 0x9000 in cJanus::InitNtscAudio
-     used in cJanus::NtscAudioDpc
+     used in cJanus::NtscAudioDpc (in which it is toggled between the start of
+     and midpoint of the audio buffer)
+     	This is likely the point where an audio interrupt is triggered.
 
 3034 APU_IAU_IBA_REG - written with _IAU_BASE
 3038 APU_IAU_IRA_REG - written with _IAU_BASE + 0x77fc
@@ -489,7 +521,7 @@ VPIP 7000-7030
 7008 is VPIP interrupt type
 
 700c is used in cJanus::DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting,
-     cJanus::UpdateVpipBufReg, cJanus::DeinterlaceBottom
+     cJanus::UpdateVpipBufReg, cJanus::DeinterlaceBot
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -627,7 +659,7 @@ DPC 10000-10200
 	00000000|00000000|00000000|00000100 	isr_VideoSync (unknown function - perhaps analog input's sync)
 	00000000|00000000|00000000|00100000	IntDpcEof0 (Vertical sync - top field)
 	00000000|00000000|00000000|01000000	IntDpcEof1 (Vertical sync - bottom field)
-	00000000|00000000|00000010|00000000	Horizontal sync interrupt ? (very fast)
+	00000000|00000000|00000010|00000000	Horizontal sync interrupt? (very fast)
 
 	bit 9 may be preview client/aux video?
 	bit 0xa may be capture client/aux video?
@@ -641,7 +673,9 @@ DPC 10000-10200
 	--------+--------+--------+--------
 	00000000|00000000|00000000|00000001	A
 	00000000|00000000|00000000|00000010	B
-	00000000|00000000|00000000|00000100	C
+	00000000|00000000|00000000|00000100	C - Slightly shifts the
+						video left or right when
+						enabled or disabled.
 	00000000|00000000|00000000|00001000	D - Progressive Scan
 	00000000|00000000|nnnnnnnn|nn000000	E
 	00000nnn|nnnnnnnn|00000000|00000000	F - Horizontal Size
@@ -688,7 +722,9 @@ DPC 10000-10200
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
 	00000000|00nnnnnn|nnnnnnnn|nnnnnnnn	Y
-	00000001|00000000|00000000|00000000	Z
+	00000001|00000000|00000000|00000000	Z - All video processing
+						seems to stop when this is
+						set to zero.
 	nnnn0000|00000000|00000000|00000000	AA
 
 10028 DPC sync register 5
@@ -700,6 +736,8 @@ DPC 10000-10200
 	00000001|00000000|00000000|00000000	CC
 
   0x5800 is DD
+
+10034 set to 0x184014 in DefaultDpcReg
 
 10040 bottom two bits used in DoProgressiveFrame as a bitfield, maybe some
       kind of register selection for 10068,1006c
@@ -716,7 +754,9 @@ DPC 10000-10200
 	00000000|00000000|00nn0000|00000000	Repeats the left side of the image 
 						multiple times across the screen
 	
-10044 is YUV color value used as background for video.
+10044 is YUV color value used as background for video.  0x108080 is the default.
+	It appears from this that Y values used by the TL880 are in the 16..235
+	range.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -726,13 +766,18 @@ DPC 10000-10200
 	00000000|00000000|00000000|nnnnnnnn	Pr
 
 10048 is DispBufReg(?) or NtscDispFrame?
+      Bits 0-3 and 4-7 rapidly change between 10, 32, 54, and 76 while watching NTSC OTA.
+      		between 98, ba, and dc while watching recorded 720p.
+      
+      
       bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|0000nnnn
+	00000000|00000000|00000000|0000nnnn	Used in GetCurrentPTS
 	00000000|00000000|00000000|nnnn0000
 	00000000|000000nn|nnnnnnnn|00000000
+	00000000|00001100|00000000|00000000	These bits are always(?) set.
 	0nnnnnnn|nnnn0000|00000000|00000000
 
 Values in 1004c-10054 are relative to the external display resolution, and affect both overlay
@@ -801,15 +846,20 @@ Aux Scaler: 100c0-100d8
 	bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo
 	bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
 
-100c4 - auxSetPictureOrigion
+100c4 - auxSetPictureOrigin
 
 	00000nnn - horizontal input offset
 	0nnn0000 - vertical input offset
 
 100c8, 100d0 - auxSetHrzScaler
 
-100c8
-	Normally 40080 when watching 720 .tp
+100c8 Seems to be dependent on output resolution, not source resolution.
+	Normally 0x40080 when watching 720p .tp or NTSC OTA at 1024x1024 or 1024x768
+	0xd60080a3 when watching NTSC OTA at 800x600
+	0xe0035060 when watching NTSC OTA at 1360x768
+	0xda010097 when watching NTSC OTA at 848x480
+
+      At 1024x1024:
 	Changing the last digit really screws up the video ("horizontal hold")
 	Changing the 4 to a 0 seems to have no effect.
 	Changing to 40000 makes the VGA overlay about 150% its normal width (cropping right side of image)
@@ -934,6 +984,54 @@ MDP-120 and MDP-130 use VPX GPIOs.  Use set_gpio function.
 1019C	GPIO input	i2c input (see i2c.txt)
 
 
+MDP-110 sample clock:
+
+     22.5kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00000000
+	0x10198: 00000000
+     32kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008200
+	0x10198: 00000000
+     44.1kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008000
+	0x10198: 00000000
+     48kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00000200
+	0x10198: 00000000
+     64kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008200
+	0x10198: 00000200
+     ~66kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008200
+	0x10198: 00008000
+     72kHz:
+     	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008000
+	0x10198: 00008000
+     88.2kHz:
+    	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00008200
+	0x10198: 00008200
+     96kHz:
+	0x3000:  01050000
+	0x3004:  00000307
+	0x10194: 00000200
+	0x10198: 00000200
+
 10198 used in GPIO, I2C, cNxtVSB::NxtCheckChannel
 
 bit 0x13 is set to zero then one to reset the Nxt2000 in NxtCheckChannel
@@ -950,11 +1048,12 @@ bit 0x13 is set to zero then one to reset the Nxt2000 in NxtCheckChannel
 						which selects between
 						74.25MHz/60Hz and 74.175
 						MHz/59.94Hz clocks)
-	00000000|00000000|000000??|00000000	Audio sampling clock (I
+	00000000|00000000|00000010|00000000	Audio sampling clock (I
 						believe these lines are
 						connected to pins 1 and
 						20 of the MK2770 chip)
 	00000000|00000000|00000100|00000000	Video passthrough
+	00000000|00000000|10000000|00000000	Audio sampling clock
 	00000000|00000001|00000000|00000000	SDA Read 1
 	00000000|00000010|00000000|00000000	SDA Write 1
 	00000000|00000100|00000000|00000000	SCL Write 1, SCL Read 1
@@ -1113,5 +1212,5 @@ Some of the values sometimes written to a few registers:
 The OSD addresses all get OR'd with 0x52300000.
 
 
-vim: ai nobackup
+vim: ai nobackup tw=80
 
