@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880audio.c,v $
+ * Revision 1.9  2007/09/06 06:23:50  nitrogen
+ * Working on set_crossfade
+ *
  * Revision 1.8  2007/09/06 05:22:05  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -149,7 +152,6 @@ void tl880_apu_stop_ioc(struct tl880_dev *tl880dev)
 int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 arg_0, s32 arg_4, u8 arg_8, u8 arg_C,
 							  u8 arg_10, u8 arg_14, u8 arg_18, u8 arg_1C)
 {
-#if 0
 	eax = arg_0;
 	ecx = 0;
 	eax -= ecx;
@@ -173,59 +175,34 @@ int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 arg_0, s32 arg_4, 
 	if(arg_4 != 1) {
 		return 0;
 	}
-	arg_4 = tl880_read_register(tl880dev, 0x3074);
-	arg_4 = eax;
 
-	ebx = 0x3078;
-	arg_0 = tl880_read_register(tl880dev, 0x3078);
-	arg_0 = eax;
+	reg3074 = tl880_read_register(tl880dev, 0x3074);
+	reg3078 = tl880_read_register(tl880dev, 0x3078);
+	reg307c = tl880_read_register(tl880dev, 0x307C);
+	
+	tl880_write_register(tl880dev, 0x3074, 
+			((arg_C << 24) | 
+			 (arg_8 << 16)) | 
+			(reg3074 & 0xffff));
 
-	edi = 0x307c;
-	eax = tl880_read_register(tl880dev, 0x307c);
+	tl880_write_register(tl880dev, 0x3078, 
+			(arg_14 << 24) | 
+			(arg_10 << 16) | 
+			(reg3078 & 0xffff));
 
-	ecx = 0;
-	ecx |= (arg_1C) << 8;
+	tl880_write_register(tl880dev, 0x307C, 
+			(arg_1C << 24) | 
+			(arg_18 << 16) | 
+			(reg307c & 0xffff));
+	return 0;
 
-	esi = 0xffff;
-	eax &= esi;
-
-	ecx |= arg_18;
-	ecx <<= 16;
-
-	eax |= ecx;
-	ecx = 0;
-
-	ecx &= ~0xff00;
-	ecx |= arg_C << 8;
-
-	arg_1C = eax;
-	eax = arg_4;
-	eax &= esi;
-
-	ecx &= ~0xff;
-	ecx |= arg_8;
-
-	ecx <<= 16;
-	ecx |= eax;
-
-	tl880_write_register(tl880dev, 0x3074, ecx);
-
-	eax = arg_0;
-	ecx = 0;
-
-	ecx = (arg_14 << 8) | arg_10;
-	ecx <<= 16;
-	eax &= esi;
-	goto loc_2AFA1
 
 loc_2AF37:
 
-	eax = tl880_read_register(tl880dev, 0x3074);
-	ebx = 0x3078;
+	reg3074 = /* arg_4 */ = tl880_read_register(tl880dev, 0x3074);
 	arg_4 = eax;
 
 	eax = tl880_read_register(tl880dev, 0x3078);
-	edi = 0x307c;
 	arg_0 = eax;
 
 	eax = tl880_read_register(tl880dev, 0x307c);
@@ -237,17 +214,12 @@ loc_2AF37:
 	
 	ecx = arg_18;
 	eax |= ecx;
-	ecx = 0;
-
-	ecx = arg_C << 8;
 	arg_1C = eax;
-	eax = arg_4;
-	eax &= esi;
+
+	ecx = (arg_C << 8) | arg_8;
+	eax = arg_4 & 0xffff0000;
 	ecx |= eax;
 	
-	eax = arg_8;
-	ecx |= eax;
-
 	tl880_write_register(tl880dev, 0x3074, ecx);
 
 	eax = arg_0;
@@ -258,13 +230,11 @@ loc_2AF37:
 
 	eax = arg_10;
 
-loc_2AFA1:
-
 	ecx |= eax;
-	tl880_write_register(tl880dev, ebx, ecx);
+	tl880_write_register(tl880dev, 0x3078, ecx);
 
 	push arg_1C;
-	tl880_write_register(tl880dev, edi, stackarg);
+	tl880_write_register(tl880dev, 0x307c, stackarg);
 	return 0;
 
 
@@ -319,7 +289,15 @@ loc_2AFB2:
 	ecx <<= 16;
 	eax &= esi;
 
-	goto loc_2B096;
+	ecx |= eax;
+		push    ecx
+		push    ebx
+	tl880_write_register(tl880dev, ebx, ecx);
+
+	push arg_1C;
+	tl880_write_register(tl880dev, edi, stackarg);
+	return 0;
+
 
 loc_2B02C:
 	eax = tl880_read_register(tl880dev, 0x3068);
@@ -357,10 +335,7 @@ loc_2B02C:
 	ecx |= eax;
 	eax = arg_10;
 
-loc_2B096:
 	ecx |= eax;
-		push    ecx
-		push    ebx
 	tl880_write_register(tl880dev, ebx, ecx);
 
 	push arg_1C;
@@ -371,95 +346,71 @@ loc_2B0A7:
 	eax = arg_4;
 	eax -= ecx;
 	if(arg_4 == ecx) {
-		goto loc_2B121;
+		eax = tl880_read_register(tl880dev, 0x305C);
+		ebx = 0x3060;
+		arg_4 = eax;
+
+		eax = tl880_read_register(tl880dev, 0x3060);
+		edi = 0x3064;
+		arg_0 = eax;
+
+		eax = tl880_read_register(tl880dev, 0x3064);
+
+		ecx = 0;
+		ecx = arg_1C << 8;
+		esi = 0xffff0000;
+		eax &= esi;
+		eax |= ecx;
+		ecx = arg_18;
+		eax |= ecx;
+
+		ecx = 0;
+		ecx = arg_C << 8;
+		arg_1C = eax;
+		eax = arg_4;
+		eax &= esi;
+		ecx |= eax;
+		eax = arg_8;
+		ecx |= eax;
+		tl880_write_register(tl880dev, 0x305C, ecx);
+
+		eax = arg_0
+		ecx = arg_14 << 8;
+		eax &= esi;
+		ecx |= eax;
+		eax = arg_10;
+
+		ecx |= eax;
+		tl880_write_register(tl880dev, ebx, ecx);
+
+		push arg_1C;
+
+		tl880_write_register(tl880dev, edi, stackarg);
+		return 0;
 	}
 	eax--;
 	if(arg_4 != ecx + 1) {
 		return 0;
 	}
 
-	eax = tl880_read_register(tl880dev, 0x305C);
-	ebx = 0x3060;
-	arg_4 = eax;
+	reg305c = tl880_read_register(tl880dev, 0x305C);
+	reg3060 = tl880_read_register(tl880dev, 0x3060);
+	reg3064 = tl880_read_register(tl880dev, 0x3064);
 
-	eax = tl880_read_register(tl880dev, 0x3060);
-	edi = 0x3064;
-	arg_0 = eax;
+	tl880_write_register(tl880dev, 0x305C, 
+			(arg_C << 24) | 
+			(arg_8 << 16) | 
+			(reg305c & 0xffff));
 
-	eax = tl880_read_register(tl880dev, 0x3064);
+	tl880_write_register(tl880dev, 0x3060, 
+			(arg_14 << 24) | 
+			(arg_10 << 16) | 
+			(reg3060 & 0xffff));
 
-	ecx = 0;
-	ecx = arg_1C << 8;
-	esi = 0xffff;
-	eax &= esi;
-	ecx |= arg_18
-	ecx <<= 16;
-	eax |= ecx;
-
-	ecx = 0;
-	ecx = arg_C << 8;
-	arg_1C = eax;
-	eax = arg_4
-	eax &= esi;
-	ecx |= arg_8;
-	ecx <<= 16;
-	ecx |= eax;
-	tl880_write_register(tl880dev, 0x305C, ecx);
-
-	eax = arg_0
-	ecx = 0;
-	ecx = arg_14 << 8;
-	ecx |= arg_10;
-	ecx <<= 16;
-	eax &= esi;
-
-	goto loc_2B18B;
-
-loc_2B121:
-	eax = tl880_read_register(tl880dev, 0x305C);
-	ebx = 0x3060;
-	arg_4 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x3060);
-	edi = 0x3064;
-	arg_0 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x3064);
-
-	ecx = 0;
-	ecx = arg_1C << 8;
-	esi = 0xffff0000;
-	eax &= esi;
-	eax |= ecx;
-	ecx = arg_18;
-	eax |= ecx;
-
-	ecx = 0;
-	ecx = arg_C << 8;
-	arg_1C = eax;
-	eax = arg_4;
-	eax &= esi;
-	ecx |= eax;
-	eax = arg_8;
-	ecx |= eax;
-	tl880_write_register(tl880dev, 0x305C, ecx);
-
-	eax = arg_0
-	ecx = 0;
-	ecx = arg_14 << 8;
-	eax &= esi;
-	ecx |= eax;
-	eax = arg_10;
-
-loc_2B18B:
-
-	ecx |= eax;
-	tl880_write_register(tl880dev, ebx, ecx);
-
-	push arg_1C;
-
-	tl880_write_register(tl880dev, edi, stackarg);
-#endif /* 0 */
+	tl880_write_register(tl880dev, 0x3064, 
+			(arg_1C << 24) | 
+			(arg_18 << 16) |
+			(reg3064 & 0xffff));
 	return 0;
 }	
 
