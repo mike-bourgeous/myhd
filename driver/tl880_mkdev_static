@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script for making tl880 devices
-# (C) 2005 Mike Bourgeous
+# (C) 2005-2007 Mike Bourgeous
 
 mk_tldev() {
 	# Make sure the tl880 module is loaded

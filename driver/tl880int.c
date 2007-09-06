@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880int.c,v $
+ * Revision 1.20  2007/09/06 05:22:05  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.19  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -87,6 +90,10 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 
 int tl880_apu_int(struct tl880_dev *tl880dev)
 {
+	if(debug > 0 || tl880dev->apu_count == 1) {
+		printk(KERN_DEBUG "tl880: apu interrupt\n");
+	}
+
 	if(tl880_read_register(tl880dev, 0x3018) &
 			tl880_read_register(tl880dev, 0x3014) &
 			0x1) {
@@ -196,6 +203,8 @@ void tl880_bh(unsigned long tl880_id)
 			printk(KERN_DEBUG "tl880: apu interrupt bh: count %d\n", tl880dev->apu_count);
 		}
 
+		tl880_ntsc_audio_dpc(tl880dev);
+
 		tl880dev->int_type &= ~0x1;
 		if(!tl880dev->int_type) {
 			goto done;
@@ -294,6 +303,10 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	 * TODO: only schedule worker for tasks that take too long to do in interrupt time.
 	 */
 
+	/*
+	 * TODO: split up bh by chip function, as in the Windows driver (i.e. APU BH, DPC BH, etc.)
+	 */
+
 	if(tl880dev->int_type & 0x80) {
 		tl880dev->vpip_count++;
 		/* tl880_write_regbits(tl880dev, 4, 7, 7, 0); */
@@ -346,8 +359,11 @@ irqreturn_t tl880_irq(int irq, void *dev_id)
 	if(tl880dev->int_type & 0x1) {
 		tl880dev->apu_count++;
 		//tl880_write_regbits(tl880dev, 4, 0, 0, 0);
-		if(debug > 0 || tl880dev->apu_count == 1) {
-			printk(KERN_DEBUG "tl880: apu interrupt\n");
+		if(tl880_apu_int(tl880dev)) {
+			/* Need BH */
+		} else {
+			/* Don't need BH */
+			tl880dev->int_type &= ~0x1;
 		}
 	}
 	if(tl880dev->int_type & 0x2) {

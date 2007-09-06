@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880dpc.h,v $
+ * Revision 1.6  2007/09/06 05:22:05  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.5  2007/03/26 19:25:05  nitrogen
  * Added CVS log generation and updated copyrights and e-mail addresses.
  *
@@ -82,6 +85,11 @@ void tl880_set_dpc_pll_const(struct tl880_dev *tl880dev, unsigned long a, unsign
 void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigned long yres, long interlace);
 void tl880_init_dpc_pll(struct tl880_dev *tl880dev);
 int tl880_dpc_int(struct tl880_dev *tl880dev);
+
+void tl880_enable_bvdo(struct tl880_dev *tl880dev);
+void tl880_disable_bvdo(struct tl880_dev *tl880dev);
+void tl880_enable_aux(struct tl880_dev *tl880dev);
+void tl880_disable_aux(struct tl880_dev *tl880dev);
 
 /* tl880modes.c */
 

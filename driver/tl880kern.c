@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.28  2007/09/06 05:22:05  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.27  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -179,7 +182,6 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 				u32 value;
 				argl = (u32 *)arg;
 				value = tl880_read_register(tl880dev, *argl);
-				printk(KERN_DEBUG "tl880: ioctl: read %08x from register %08x\n", value, *argl);
 				__put_user(value, argl);
 			} while(0);
 			break;
@@ -191,7 +193,6 @@ static int tl880_ioctl(struct inode *inode, struct file *file,
 				if(copy_from_user(wrprm, argl, sizeof(wrprm))) {
 					printk(KERN_ERR "tl880: copy from user returned nonzero for writereg\n");
 				}
-				printk(KERN_DEBUG "tl880: ioctl: writing %08x to register %08x (wrprm size %lu)\n", wrprm[1], wrprm[0], sizeof(wrprm));
 				tl880_write_register(tl880dev, wrprm[0], wrprm[1]);
 			} while(0);
 			break;
@@ -630,7 +631,14 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->iau_iea_reg = 0;
 	tl880dev->iau_ira_reg = 0;
 
-	/** Audio chip state **/
+	/** Audio state **/
+	tl880dev->audio_mode = ZERO;
+	tl880dev->iec_buf = NULL;
+	tl880dev->iau_base = 0;
+	tl880dev->iau_iba_reg = 0;
+	tl880dev->iau_iea_reg = 0;
+	tl880dev->iau_ira_reg = 0;
+
 	tl880dev->msp_addr = 0;
 	tl880dev->msp_i2cbus = 0;
 	tl880dev->msp_i2cclient = -1;

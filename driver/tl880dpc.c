@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880dpc.c,v $
+ * Revision 1.20  2007/09/06 05:22:05  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.19  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -35,8 +38,6 @@ void tl880_set_dpc_clock(struct tl880_dev *tl880dev, unsigned long xres, unsigne
 
 	switch(xres) {
 		case 1024:
-			/* This value makes 1024x768p exactly 60Hz 48.3kHz */
-			/* tl880_write_register(tl880dev, 0x5800, 0x00160320); */
 			val = 0x01151bb0;
 			break;
 		case 1440:
@@ -253,14 +254,14 @@ loc_29511:
 	if(delay_cnt <= 0) {
 		/* ebp = &(cJanus->0x10377); */
 		if(0 /* cJanus->0x10377 != 0 */) /* byte */ {
-			/* EnableBVDO() */
+			tl880_enable_bvdo(tl880dev);
 			
 			//(cJanus->0x10377)->0 = 0; /* byte */
 		}
 	
 		/* ebp = &(cJanus->0x10364); */
 		if(0 /* cJanus->0x10364 != 0 */) /* byte */ {
-			/* EnableAux() */
+			tl880_enable_aux(tl880dev);
 			
 			//(cJanus->0x10364) = 0; /* byte */
 		}
@@ -357,7 +358,7 @@ void tl880_dpc_video_sync(struct tl880_dev *tl880dev)
 	}
 }
 
-void tl880_dpc_field0(struct tl880_dev *tl880dev)
+void tl880_dpc_field0(struct tl880_dev *tl880dev) /* {{{ */
 {
 	static unsigned long dpc_eof0_count = 0;
 	static unsigned long last_jiffies = 0;
@@ -393,9 +394,9 @@ void tl880_dpc_field0(struct tl880_dev *tl880dev)
 		printk(KERN_DEBUG "tl880: dpc field0 interrupt - count %lu, time ~%lums\n", dpc_eof0_count, (this_jiffies - last_jiffies) * 1000 / HZ);
 	}
 	last_jiffies = this_jiffies;
-}
+} /* }}} */
 
-void tl880_dpc_field1(struct tl880_dev *tl880dev)
+void tl880_dpc_field1(struct tl880_dev *tl880dev) /* {{{ */
 {
 	static unsigned long dpc_eof1_count = 0;
 	static unsigned long last_jiffies = 0;
@@ -416,9 +417,12 @@ void tl880_dpc_field1(struct tl880_dev *tl880dev)
 		printk(KERN_DEBUG "tl880: dpc field1 interrupt - count %lu, time ~%lums\n", dpc_eof1_count, (this_jiffies - last_jiffies) * 1000 / HZ);
 	}
 	last_jiffies = this_jiffies;
-}
+} /* }}} */
 
-int tl880_dpc_int(struct tl880_dev *tl880dev)
+/*
+ * DPC interrupt handler
+ */
+int tl880_dpc_int(struct tl880_dev *tl880dev) /* {{{ */
 {
 	static unsigned long first_jiffies = 0;
 
@@ -460,6 +464,45 @@ int tl880_dpc_int(struct tl880_dev *tl880dev)
 	}
 
 	return 0;
-}
+} /* }}} */
 
+
+/* Video display enable */
+void tl880_enable_bvdo(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 1, 1, 1);
+} /* }}} */
+
+/* Video display disable */
+void tl880_disable_bvdo(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 1, 1, 0);
+} /* }}} */
+
+
+/* Overlay video enable */
+void tl880_enable_aux(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 4, 4, 1);
+} /* }}} */
+
+/* Overlay video disable */
+void tl880_disable_aux(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 4, 4, 0);
+} /* }}} */
+
+#if 0
+/* Overlay video enable */
+void tl880_enable_aux(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 4, 4, 1);
+} /* }}} */
+
+/* Overlay video disable */
+void tl880_disable_aux(struct tl880_dev *tl880dev) /* {{{ */
+{
+	tl880_write_regbits(tl880dev, 0x10000, 4, 4, 0);
+} /* }}} */
+#endif
 

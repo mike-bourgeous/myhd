@@ -16,6 +16,7 @@ What if top half gets called multiple times before bottom half executes?  Make
   in top half, free it in bottom half.  If necessary.
 Make the "someone else's interrupt" code more robust (it gives false alarms).
 Add a compat_ioctl to allow 32-bit programs to interface with the tl880.
+Change tl880_clear_sdram to use length rather than end address.
 
 vim: tw=80
 

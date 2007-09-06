@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880gpio.c,v $
+ * Revision 1.12  2007/09/06 05:22:05  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.11  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -30,7 +33,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 		printk(KERN_DEBUG "tl880: gpio %i set to %i\n", gpio_line, state);
 	}
 	
-	state = state ? 1 : 0;
+	//state = state ? 1 : 0;
 	
 	if(tl880dev->card_type == TL880_CARD_JANUS) {
 		switch(gpio_line) {
@@ -83,35 +86,37 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				}
 				break;
 			case 8:
-				if(state == 0) {
-					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 0);
-					return 1;
-				}
-				
-				if(state == 1) {
-					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 1);
-					return 1;
-				} else {
-					tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 0);
-					return 1;
+				switch(state) {
+					case 0:
+						tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 0);
+						return 1;
+
+					case 1:
+						tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xc, 0xc, 1);
+						return 1;
+
+					default:
+						tl880_write_regbits(tl880dev, 0x10194, 0xc, 0xc, 0);
+						return 1;
 				}
 				break;
 			case 9:
-				if(state == 0) {
-					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 0);
-					return 1;
-				}
-				
-				if(state == 1) {
-					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 1);
-					return 1;
-				} else {
-					tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 0);
-					return 1;
+				switch(state) {
+					case 0:
+						tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 0);
+						return 1;
+
+					case 1:
+						tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xd, 0xd, 1);
+						return 1;
+
+					default:
+						tl880_write_regbits(tl880dev, 0x10194, 0xd, 0xd, 0);
+						return 1;
 				}
 				break;
 			default:
@@ -231,35 +236,35 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 				return 1;
 				break;
 			case 8:
-				if(state == 0) {
-					tl880_write_regbits(tl880dev, 0x10194, 9, 9, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 9, 9, 0);
-					return 1;
-				} else {
-					if(state == 1) {
+				switch(state) {
+					case 0:
+						tl880_write_regbits(tl880dev, 0x10194, 9, 9, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 9, 9, 0);
+						return 1;
+
+					case 1:
 						tl880_write_regbits(tl880dev, 0x10194, 9, 9, 1);
 						tl880_write_regbits(tl880dev, 0x10198, 9, 9, 1);
 						return 1;
-					} else {
+
+					default:
 						tl880_write_regbits(tl880dev, 0x10194, 9, 9, 0);
 						return 1;
-					}
 				}
 				break;
 			case 9:
-				if(state == 0) {
-					tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
-					tl880_write_regbits(tl880dev, 0x10198, 0xf, 0xf, 0);
-					return 1;
-				} else {
-					if(state == 1) {
+				switch(state) {
+					case 0:
+						tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
+						tl880_write_regbits(tl880dev, 0x10198, 0xf, 0xf, 0);
+						return 1;
+					case 1:
 						tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 1);
 						tl880_write_regbits(tl880dev, 0x10198, 0xf, 0xf, 1);
 						return 1;
-					} else {
+					default:
 						tl880_write_regbits(tl880dev, 0x10194, 0xf, 0xf, 0);
 						return 1;
-					}
 				}
 				break;
 		}
@@ -376,7 +381,7 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 		}
 	} else {
 		printk(KERN_WARNING "tl880: Attempt to set GPIO on card for which GPIO routines not yet written\n");
-		printk(KERN_WARNING "tl880: card_type=%i\n", tl880dev->card_type);
+		printk(KERN_WARNING "tl880: name=%s card_type=%i\n", tl880dev->name, tl880dev->card_type);
 	}
 
 	return 1;

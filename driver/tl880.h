@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.30  2007/09/06 05:22:03  nitrogen
+ * Improvements to audio support, documentation, and card memory management.
+ *
  * Revision 1.29  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -35,6 +38,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/delay.h>
 #include <linux/errno.h>
+#include <linux/genalloc.h>
 #include <linux/fs.h>
 #include <linux/proc_fs.h>
 #include <linux/cdev.h>
@@ -159,6 +163,8 @@ struct tl880_dev {
 	unsigned long unkphys;			/* Physical unknown address */
 	unsigned long unklen;			/* Unknown space length */
 
+	struct gen_pool *pool;			/* Generic memory allocation pool */
+
 
 	/** DMA buffer **/
 	void *dmavirt;				/* System-side DMA buffer pointer */
@@ -225,22 +231,23 @@ struct tl880_dev {
 		ZERO = 0, ONE, TWO 
 	} audio_mode;				/* Current audio mode */
 
+	void *iec_buf;				/* Audio buffer in system RAM */
 	u32 iau_base;				/* Base card memory address for audio unit */
 	u32 iau_iba_reg;			/* Register used for base address */
 	u32 iau_iea_reg;			/* Register used for end address */
 	u32 iau_ira_reg;			/* Register used for base address (2) */
 
 
-	/*** Audio Chip (MSP) State ***/
+	/** Audio Chip (MSP) State **/
 	int msp_addr;				/* Set to 0 if no MSP */
 	int msp_i2cbus;				/* Set to index into i2cbuses */
 	int msp_i2cclient;			/* Set to index into i2cbuses.i2c_clients */
 
 	
-	/*** Video State ***/
+	/** Video State **/
 
 
-	/*** Video Chip (VPX) State ***/
+	/** Video Chip (VPX) State **/
 	int vpx_addr;				/* Set to 0 if no VPX */
 	int vpx_i2cbus;				/* Set to index into i2cbuses */
 	int vpx_i2cclient;			/* Set to index into i2cbuses.i2c_clients */
@@ -308,6 +315,9 @@ struct tl880_dev {
 
 #ifdef __KERNEL__
 
+/*** Kernel definitions which depend on the above ***/
+
+
 /*** Driver variables ***/
 extern int debug;
 extern dev_t device_number;
@@ -372,6 +382,12 @@ void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 void tl880_ntsc_audio_dpc(struct tl880_dev *tl880dev);
 void tl880_set_ntsc_audio_clock(struct tl880_dev *tl880dev);
 
+void tl880_set_sampling_clock(struct tl880_dev *tl880dev, int rate); /* should be an enum */
+
+int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 arg_0, s32 arg_4, u8 arg_8, u8 arg_C,
+							  u8 arg_10, u8 arg_14, u8 arg_18, u8 arg_1C);
+
+
 /* tl880demux.c */
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);
 
@@ -392,6 +408,12 @@ void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value);
 u32 tl880_read_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit, u32 value);
 void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value);
+
+int tl880_init_memory(struct tl880_dev *tl880dev);
+void tl880_deinit_memory(struct tl880_dev *tl880dev);
+unsigned long tl880_alloc_memory(struct tl880_dev *tl880dev, size_t bytes);
+void tl880_free_memory(struct tl880_dev *tl880dev, unsigned long addr, size_t bytes);
+
 
 #endif /* __KERNEL__ */
 
