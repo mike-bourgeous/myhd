@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880mem.c,v $
+ * Revision 1.6  2007/09/08 09:20:34  nitrogen
+ * Fixed memory pool allocation.
+ *
  * Revision 1.5  2007/09/06 05:22:05  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -76,20 +79,24 @@ void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr,
  */
 int tl880_init_memory(struct tl880_dev *tl880dev) /* {{{ */
 {
+	int result;
+
 	if(CHECK_NULL(tl880dev) || TL_ASSERT(tl880dev->pool == NULL)) {
-		return -1;
+		return -EINVAL;
 	}
 
-	tl880dev->pool = gen_pool_create(2, -1);
+	tl880dev->pool = gen_pool_create(6, -1);
 	if(TL_ASSERT(tl880dev->pool != NULL)) {
-		return -1;
+		return -ENOMEM;
 	}
 
 	/* Should I specify a specific NUMA node here ever? */
 	/* The pool starts at 0x11000 because earlier points in RAM are used for something already */
-	if(TL_ASSERT(gen_pool_add(tl880dev->pool, 0x11000, tl880dev->memlen - 0x11000, -1) == 0)) {
+	if(TL_ASSERT((result = gen_pool_add(tl880dev->pool, 0x11000, tl880dev->memlen - 0x11000, -1)) == 0)) {
+		printk(KERN_ERR "tl880: Failed to add card %d's memory to its memory pool\n", tl880dev->id);
 		gen_pool_destroy(tl880dev->pool);
-		return -1;
+		tl880dev->pool = NULL;
+		return result;
 	}
 
 	return 0;

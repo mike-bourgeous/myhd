@@ -33,13 +33,15 @@ int main(int argc, char *argv[])
 {
 	int ifd;
 	__u32 cmd;
-	__u32 arg;
+	__u32 arg[argc - 2];
+	int i;
 
-	if(argc != 3) {
-		printf("Usage: %s ioctl_cmd ioctl_arg\n(values in hexadecimal)\n", argv[0]);
+	if(argc < 3) {
+		printf("Usage: %s ioctl_cmd ioctl_arg...\n(values in hexadecimal)\n", argv[0]);
 		printf("ex:\n");
 		printf("  tl880 commands:\n");
 		printf("    TL880IOCSETVIP: %s %lx num\n", argv[0], TL880IOCSETVIP);
+		printf("    TL880IOCSETGPIO: %s %lx num num\n", argv[0], TL880IOCSETGPIO);
 		printf("  vpx commands:\n");
 		printf("    DECODER_DUMP: %s %x 0\n", argv[0], DECODER_DUMP);
 		printf("    DECODER_GET_STATUS: %s %lx 0\n", argv[0], DECODER_GET_STATUS);
@@ -59,20 +61,23 @@ int main(int argc, char *argv[])
 	}
 	
 	cmd = strtoul(argv[1], NULL, 16);
-	arg = strtoul(argv[2], NULL, 16);
+
+	for(i = 2; i < argc; i++) {
+		arg[i - 2] = strtoul(argv[i], NULL, 16);
+	}
 
 	if((ifd = open("/dev/tl880/reg0", O_RDWR)) < 0) {
 		perror("Unable to open /dev/tl880/reg0");
 		return -1;
 	}
 
-	if(ioctl(ifd, cmd, &arg) < 0) {
+	if(ioctl(ifd, cmd, arg) < 0) {
 		perror("Error executing ioctl");
 		close(ifd);
 		return -1;
 	}
 
-	printf("arg after ioctl: %u (0x%08x)\n", arg, arg);
+	printf("arg[0] after ioctl: %u (0x%08x)\n", arg[0], arg[0]);
 	
 	close(ifd);
 

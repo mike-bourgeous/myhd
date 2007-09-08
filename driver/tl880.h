@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.31  2007/09/08 09:20:33  nitrogen
+ * Fixed memory pool allocation.
+ *
  * Revision 1.30  2007/09/06 05:22:03  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -118,9 +121,9 @@
 #define TL880_CARD_ZERO			0
 
 /* Debug */
-#define TL_ASSERT(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: assertion '%s' failed in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
-#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
-#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u\n", #a, __FUNCTION__, __LINE__), (1)) )
+#define TL_ASSERT(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: assertion '%s' failed in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
+#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
+#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
 
 
 /*** Driver types ***/

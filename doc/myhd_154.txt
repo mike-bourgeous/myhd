@@ -65,7 +65,15 @@ cJanus+0 may be a struct tagContext?
 
 cJanus+8 may be offset to NTSC audio buffer (first parameter given to READ_REGISTER_BUFFER_ULONG)
 
-cJanus+0b9c may be _last_p_picture_cnt
+cJanus+b9c (tagContext+b9c)
+	Used in InitNTSCAudio 			(compared with zero)
+		TpOutputStream::OnOpen		(compared with zero)
+		cJanus::isr_NonSlice_Tv		(compared with zero)
+		cJanus::CountPictureType	(written with value from +b94, which was compared with _last_p_picture_count)
+		CCaptureStream::BufferHandler	(compared with zero)
+		cJanus::DecodeFirstPicture	(set to zero)
+
+cJanus+b9c and +f00 are used in InitNTSCAudio and TpOutputStream::OnOpen
 
 cJanus+10388 is a pointer to tagContext used in VpipIntHandler and elsewhere
 	
@@ -110,6 +118,12 @@ cJanus+167e4 is NTSC input
 
 cJanus+16814 is OSD context (48 bytes)
 
+cJanus+16848, 1684C, 16850 are used in SetDefaultPid
+	16848 and 16850 are set to 0xfcc
+	1684C is set to 0xfcf
+	
+	16850 is passed to SetPCRPid (i.e. it's probably the PCR program ID).
+
 cJanus+1686c is memory length (or start address?)
 cJanus+16870 is OSD memory physical address (base address + 0x186000?)
 cJanus+16874 is OSD memory length
@@ -126,13 +140,14 @@ struct tagContext
 -----------------
 dword[000c] may be source aspect ratio
 dword[00a8] may be display aspect ratio
-dword[0264] may be horizontal resolution
-dword[0268] may be vertical resolution
+dword[0264] may be horizontal resolution (xres)
+dword[0268] may be vertical resolution (yres)
 dword[026c] may be interlaced flag
 dword[0284] == 0 then don't run VpipHandler
 dword[034c] may be field order for non-DVD playback
 dword[0350] may be repeat_first_field flag
 dword[0370-037c] have something to do with caption buffers
+dword{0b90] may be related to P-frame decode count
 dword[0ba8] may be display aspect ratio - is tagContext an array?
 dword[0bb0] may be current field
 
@@ -275,4 +290,5 @@ Interrupt function pointers are stored in an array.
 	0x14f: V_tsd_collision
 
 
+vim: ai tw=80
 

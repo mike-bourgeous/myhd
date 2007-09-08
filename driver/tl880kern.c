@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.29  2007/09/08 09:20:34  nitrogen
+ * Fixed memory pool allocation.
+ *
  * Revision 1.28  2007/09/06 05:22:05  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -566,6 +569,8 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->unkphys = 0;
 	tl880dev->unklen = 0;
 
+	tl880dev->pool = NULL;
+
 	/** DMA **/
 	tl880dev->dmavirt = NULL;
 	tl880dev->dmaphys = 0;
@@ -800,6 +805,14 @@ static int tl880_configure(struct pci_dev *dev)
 		return result;
 	}
 
+	/* Initialize card memory management */
+	if(tl880_init_memory(tl880dev)) {
+		printk(KERN_ERR "tl880: unable to initialize memory management\n");
+		//tl880_unconfigure(tl880dev);
+		//tl880_delete_dev(tl880dev);
+		//return -EFAULT;
+	}
+
 	/* Initialize card- and chip-specific functions */
 	tl880_init_dev(tl880dev);
 
@@ -837,10 +850,8 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 	cdev_del(tl880dev->char_device);
 	tl880dev->char_device = NULL;
 
+	/* Remove the interrupt handler */
 	tl880_disable_interrupts(tl880dev);
-
-	tl880_deinit_i2c(tl880dev);
-
 	if(tl880dev->irq) {
 		free_irq(tl880dev->pcidev->irq, tl880dev);
 		tl880dev->irq = 0;
@@ -848,6 +859,9 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 
 	/* Kill the tasklet */
 	tasklet_kill(&tl880dev->tasklet);
+
+	/* Disable I2C */
+	tl880_deinit_i2c(tl880dev);
 
 	/* Unmap memory regions */
 	if(tl880dev->memspace) {
@@ -869,6 +883,9 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 		tl880dev->dmavirt = NULL;
 		tl880dev->dmaphys = 0;
 	}
+
+	/* Free generic allocation stuff */
+	tl880_deinit_memory(tl880dev);
 
 	/* Inform the kernel that this device is no longer in use */
 	/* pci_dev_put(tl880dev->pcidev);

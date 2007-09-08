@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.19  2007/09/08 09:20:33  nitrogen
+ * Fixed memory pool allocation.
+ *
  * Revision 1.18  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -326,7 +329,10 @@ void tl880_init_myhd(struct tl880_dev *tl880dev)
 	// 	 */
 	// 	_VPXWriteFP(0x154, 0x350);
 	// }
-	tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x350);
+	
+
+	tl880_set_ntsc_audio_clock(tl880dev);
+	//tl880_vpx_write_fp(tl880dev, VPX_FP_OUTMUX, 0x350);
 	
 	if(tl880dev->card_type == TL880_CARD_MYHD_MDP100A) {
 		tl880_set_gpio(tl880dev, 5, 0);
@@ -493,8 +499,10 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	}
 
 	/* Set NTSC input */
+	/*
 	tl880_init_hardware_audio(tl880dev, 1);
 	tl880_apu_start_ioc(tl880dev);
+	*/
 	tl880_init_ntsc_audio(tl880dev);
 	tl880_set_ntsc_input(tl880dev, 0);
 

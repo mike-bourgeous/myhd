@@ -1,97 +1,109 @@
-all: randram striperam setalpha rampram regload regdump memdump memload memloadswab \
+# Build the MyHD tools
+
+CC = gcc
+CFLAGS=-O0 -ggdb3
+LOCAL_CFLAGS = -std=gnu99 -Wall -I../driver/
+COMPILE = ${CC} ${LOCAL_CFLAGS} ${CFLAGS}
+
+all: scripts striperam setalpha rampram regload regdump memdump memload memloadswab \
 	memset readmem writemem readreg writereg setbits write4reg randreg iocsetvip \
 	iocreadreg iocwritereg iocsetgpio cursor rgb2ypbpr ioccursor randosd osdtest \
-	osdimage hexcount ioctl channel scripts
+	osdimage hexcount ioctl channel randram regloadslow
 
 randram: randram.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall randram.c -o randram -ggdb3
+	${COMPILE} randram.c -o randram
 
 striperam: striperam.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall striperam.c -o striperam -ggdb3
+	${COMPILE} striperam.c -o striperam
 
 setalpha: setalpha.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall setalpha.c -o setalpha -ggdb3
+	${COMPILE} setalpha.c -o setalpha
 
 rampram: rampram.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall rampram.c -o rampram -ggdb3
+	${COMPILE} rampram.c -o rampram
 
 regload: regload.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall regload.c -o regload -ggdb3
+	${COMPILE} regload.c -o regload
 
 regdump: regdump.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall regdump.c -o regdump -ggdb3
+	${COMPILE} regdump.c -o regdump
 
 memdump: memdump.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall memdump.c -o memdump -ggdb3
+	${COMPILE} memdump.c -o memdump
 
 memload: memload.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall memload.c -o memload -ggdb3
+	${COMPILE} memload.c -o memload
 
 memloadswab: memloadswab.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall memloadswab.c -o memloadswab -ggdb3
+	${COMPILE} memloadswab.c -o memloadswab
 
 memset: memset.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall memset.c -o memset -ggdb3
+	${COMPILE} memset.c -o memset
 	
 readmem: readmem.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall readmem.c -o readmem -ggdb3
+	${COMPILE} readmem.c -o readmem
 
 writemem: writemem.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall writemem.c -o writemem -ggdb3
+	${COMPILE} writemem.c -o writemem
 
 readreg: readreg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall readreg.c -o readreg -ggdb3
+	${COMPILE} readreg.c -o readreg
 
 writereg: writereg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall writereg.c -o writereg -ggdb3
+	${COMPILE} writereg.c -o writereg
 
 setbits: setbits.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall setbits.c -o setbits -ggdb3
+	${COMPILE} setbits.c -o setbits
 
 write4reg: write4reg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall write4reg.c -o write4reg -ggdb3
+	${COMPILE} write4reg.c -o write4reg
 	
 randreg: randreg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall randreg.c -o randreg -ggdb3
+	${COMPILE} randreg.c -o randreg
 
 iocsetvip: iocsetvip.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall iocsetvip.c -o iocsetvip -ggdb3 -I../driver/
+	${COMPILE} iocsetvip.c -o iocsetvip
 
 iocreadreg: iocreadreg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall iocreadreg.c -o iocreadreg -ggdb3 -I../driver/
+	${COMPILE} iocreadreg.c -o iocreadreg
 
 iocwritereg: iocwritereg.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall iocwritereg.c -o iocwritereg -ggdb3 -I../driver/
+	${COMPILE} iocwritereg.c -o iocwritereg
 
 iocsetgpio: iocsetgpio.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall iocsetgpio.c -o iocsetgpio -ggdb3 -I../driver/
+	${COMPILE} iocsetgpio.c -o iocsetgpio
 
 cursor: cursor.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall cursor.c -o cursor -ggdb3 -I../driver/
+	${COMPILE} cursor.c -o cursor
 
 rgb2ypbpr: rgb2ypbpr.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall rgb2ypbpr.c -o rgb2ypbpr -ggdb3
+	${COMPILE} rgb2ypbpr.c -o rgb2ypbpr
 
 ioccursor: ioccursor.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall ioccursor.c -o ioccursor -ggdb3 -I../driver/
+	${COMPILE} ioccursor.c -o ioccursor
 
 randosd: randosd.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall randosd.c -o randosd -ggdb3 -I../driver/
+	${COMPILE} randosd.c -o randosd
 
 osdtest: osdtest.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall osdtest.c -o osdtest -ggdb3 -I../driver/
+	${COMPILE} osdtest.c -o osdtest
 
 osdimage: osdimage.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall osdimage.c -o osdimage -ggdb3 -I../driver/
+	${COMPILE} osdimage.c -o osdimage
 
 hexcount: hexcount.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall hexcount.c -o hexcount -s
+	${COMPILE} hexcount.c -o hexcount
 
 ioctl: ioctl.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall ioctl.c -o ioctl -ggdb3 -I../driver/
+	${COMPILE} ioctl.c -o ioctl
 
 channel: channel.c
-	gcc ${CFLAGS} -std=gnu99 -Os -Wall channel.c -o channel -ggdb3 -I../driver/
+	${COMPILE} channel.c -o channel
+
+regloadslow: regloadslow.c
+	${COMPILE} regloadslow.c -o regloadslow
+
+
 
 scripts:
 	chmod +x testdpcint.sh dpc2dump.sh dpc2rand.sh osd.sh \
@@ -102,7 +114,7 @@ clean:
 	writereg iocsetvip iocreadreg iocwritereg cursor rgb2ypbpr \
 	striperam ioccursor randosd osdtest memdump osdimage \
 	memload rampram hexcount readmem writemem randreg setalpha \
-	memloadswab memset iocsetgpio ioctl channel
+	memloadswab memset iocsetgpio ioctl channel regloadslow
 
 #	make -C dpc clean
 #	make -C example clean

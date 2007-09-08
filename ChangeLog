@@ -1,9 +1,50 @@
+2007-09-08	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Changed TL_ASSERT and CHECK_NULL* macros to include the source file
+	  in the error message.
+	* Decreased the resolution of the memory pool bitmap, as allocation of
+	  the memory pool was failing.
+
+2007-09-06	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Made minor initialization tweaks.
+	* Added genalloc init/cleanup to module init/cleanup.
+	* Started tracking down genalloc init problems.
+
+2007-09-05	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Added a complete table of the supported sample rates of the MDP-110.
+	* Made other progress on the audio front.
+	* Added genalloc.c temporarily until its presence can be confirmed in
+	  most distribution-compiled kernels.
+
+2007-08-13	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+	
+	* Finished the SetSamplingClock function.
+	* Added a new file for frontend-related code.
+	* Improved audio interrupt handling.
+	* Added some DPC utility functions to be used by other parts of the
+	  driver.
+
+2007-08-12	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+	
+	* Improved some documentation.
+	* Started switching card memory allocation to use genalloc.
+	* Minor improvements to the audio code comments.
+	* Added initialization of new fields to tl880_create_dev.
+	* Started interpreting the SetSamplingClock function.
+
+2007-07-15	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
+
+	* Added some information about the audio/video clock chips to doc/*.
+
 2007-04-23	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 
 	* Made the driver 64-bit safe (at least, it compiles and works okay on
 	  my Athlon 64 x2).
 	* Updated all tools to use explicit 32-bit kernel types, making the
 	  tools 64-bit compatible.
+	* Removed unknown region support and added offset support to regload.
 
 2007-03-29	Mike Bourgeous		<i_am_nitrogen at hotmail.com>
 

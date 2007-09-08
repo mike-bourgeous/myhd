@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880audio.c,v $
+ * Revision 1.10  2007/09/08 09:20:33  nitrogen
+ * Fixed memory pool allocation.
+ *
  * Revision 1.9  2007/09/06 06:23:50  nitrogen
  * Working on set_crossfade
  *
@@ -39,9 +42,12 @@ void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e aud
 		 * This used to be yGetTL850Memory(0x7800, 0) -- The second parameter seems to control
 		 * where the memory comes from (top or bottom of pool).
 		 */
-		if(TL_ASSERT(tl880dev->iau_base = tl880_alloc_memory(tl880dev, 0x7800) != 0)) {
+		/*
+		if(TL_ASSERT((tl880dev->iau_base = tl880_alloc_memory(tl880dev, 0x7800)) != 0)) {
 			return;
 		}
+		*/
+		tl880dev->iau_base = 0x196000;
 	}
 
 	if(tl880dev->iec_buf == NULL) {
@@ -74,14 +80,14 @@ void tl880_deinit_hardware_audio(struct tl880_dev *tl880dev)
 	tl880_write_register(tl880dev, tl880dev->iau_ira_reg, 0);
 	
 	if(tl880dev->iau_base != 0) {
-		tl880_free_memory(tl880dev, tl880dev->iau_base, 0x7800);
+		/* tl880_free_memory(tl880dev, tl880dev->iau_base, 0x7800); */
 		tl880dev->iau_base = 0;
 	}
 
 	if(tl880dev->iec_buf != NULL) {
 		/* ExFreePool(g_IECbuf); */
 		kfree(tl880dev->iec_buf);
-		tl880dev->iec_buf = 0;
+		tl880dev->iec_buf = NULL;
 	}
 }
 
@@ -125,7 +131,7 @@ void tl880_apu_start_ioc(struct tl880_dev *tl880dev)
 		tl880_write_register(tl880dev, 0x3004, 0x10001);
 	} else if(tl880dev->audio_mode == 1) {
 		tl880_write_register(tl880dev, 0x3058, 0xc3000010);
-		tl880_write_register(tl880dev, 0x3004, 0x100001);
+		tl880_write_register(tl880dev, 0x3004, 0x100001); // This is the dolby digital value
 	}
 	tl880_write_register(tl880dev, 0x3000, 0x01240000);
 
@@ -149,268 +155,162 @@ void tl880_apu_stop_ioc(struct tl880_dev *tl880dev)
 }
 
 /* Original function returned enum ErrCode */
-int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 arg_0, s32 arg_4, u8 arg_8, u8 arg_C,
-							  u8 arg_10, u8 arg_14, u8 arg_18, u8 arg_1C)
+int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 a, s32 b, u8 c, u8 d,
+							  u8 e, u8 f, u8 g, u8 h)
 {
-	eax = arg_0;
-	ecx = 0;
-	eax -= ecx;
-	if(arg_0 == 0) {
-		goto loc_2B0A7;
-	}
-	eax--;
-	if(arg_0 == 1) {
-		goto loc_2AFB2;
-	}
-	eax--;
-	if(arg_0 != 2) {
-		return 0;
-	}
-	eax = arg_4;
-	eax -= 0;
-	if(arg_4 == 0) {
-		goto loc_2AF37;
-	}
-	eax--;
-	if(arg_4 != 1) {
-		return 0;
+	u32 reg305c;
+	u32 reg3060;
+	u32 reg3064;
+	u32 reg3068;
+	u32 reg306c;
+	u32 reg3070;
+	u32 reg3074;
+	u32 reg3078;
+	u32 reg307c;
+
+	if(CHECK_NULL(tl880dev)) {
+		return -1;
 	}
 
-	reg3074 = tl880_read_register(tl880dev, 0x3074);
-	reg3078 = tl880_read_register(tl880dev, 0x3078);
-	reg307c = tl880_read_register(tl880dev, 0x307C);
-	
-	tl880_write_register(tl880dev, 0x3074, 
-			((arg_C << 24) | 
-			 (arg_8 << 16)) | 
-			(reg3074 & 0xffff));
+	switch(a) {
+		case 0:
+			if(b == 0) {
+				reg305c = tl880_read_register(tl880dev, 0x305c);
+				reg3060 = tl880_read_register(tl880dev, 0x3060);
+				reg3064 = tl880_read_register(tl880dev, 0x3064);
 
-	tl880_write_register(tl880dev, 0x3078, 
-			(arg_14 << 24) | 
-			(arg_10 << 16) | 
-			(reg3078 & 0xffff));
+				tl880_write_register(tl880dev, 0x305c,
+						(reg305c & 0xffff0000) |
+						(d << 8) | c);
 
-	tl880_write_register(tl880dev, 0x307C, 
-			(arg_1C << 24) | 
-			(arg_18 << 16) | 
-			(reg307c & 0xffff));
-	return 0;
+				tl880_write_register(tl880dev, 0x3060,
+						(reg3060 & 0xffff0000) |
+						(f << 8) | e);
 
+				tl880_write_register(tl880dev, 0x3064,
+						(reg3064 & 0xffff0000) |
+						(h << 8) | g);
 
-loc_2AF37:
+				break;
+			}
+			if(b != 1) {
+				break;
+			}
 
-	reg3074 = /* arg_4 */ = tl880_read_register(tl880dev, 0x3074);
-	arg_4 = eax;
+			reg305c = tl880_read_register(tl880dev, 0x305c);
+			reg3060 = tl880_read_register(tl880dev, 0x3060);
+			reg3064 = tl880_read_register(tl880dev, 0x3064);
 
-	eax = tl880_read_register(tl880dev, 0x3078);
-	arg_0 = eax;
+			tl880_write_register(tl880dev, 0x305c, 
+					(d << 24) | 
+					(c << 16) | 
+					(reg305c & 0xffff));
 
-	eax = tl880_read_register(tl880dev, 0x307c);
-	ecx = 0;
-	ecx = arg_1C << 8;
-	esi = 0xffff0000;
-	eax &= esi;
-	eax |= ecx;
-	
-	ecx = arg_18;
-	eax |= ecx;
-	arg_1C = eax;
+			tl880_write_register(tl880dev, 0x3060, 
+					(f << 24) | 
+					(e << 16) | 
+					(reg3060 & 0xffff));
 
-	ecx = (arg_C << 8) | arg_8;
-	eax = arg_4 & 0xffff0000;
-	ecx |= eax;
-	
-	tl880_write_register(tl880dev, 0x3074, ecx);
+			tl880_write_register(tl880dev, 0x3064, 
+					(h << 24) | 
+					(g << 16) |
+					(reg3064 & 0xffff));
+			break;
+			
+		case 1:
+			if(b == 0) {
+				reg3068 = tl880_read_register(tl880dev, 0x3068);
+				reg306c = tl880_read_register(tl880dev, 0x306c);
+				reg3070 = tl880_read_register(tl880dev, 0x3070);
 
-	eax = arg_0;
-	ecx = 0;
-	ecx = arg_14 << 8;
-	eax &= esi;
-	ecx |= eax;
+				tl880_write_register(tl880dev, 0x3068,
+						(reg3068 & 0xffff0000) |
+						(d << 8) | c);
 
-	eax = arg_10;
+				tl880_write_register(tl880dev, 0x306c,
+						(reg306c & 0xffff0000) |
+						(f << 8) | e);
 
-	ecx |= eax;
-	tl880_write_register(tl880dev, 0x3078, ecx);
+				tl880_write_register(tl880dev, 0x3070, 
+						(reg3070 & 0xffff0000) |
+						(h << 8) | g);
 
-	push arg_1C;
-	tl880_write_register(tl880dev, 0x307c, stackarg);
-	return 0;
+				break;
+			}
 
+			if(b != 1) {
+				break;
+			}
 
-loc_2AFB2:
+			reg3068 = tl880_read_register(tl880dev, 0x3068);
+			reg306c = tl880_read_register(tl880dev, 0x306c);
+			reg3070 = tl880_read_register(tl880dev, 0x3070);
 
-	eax = arg_4;
-	//eax -= ecx;
-	if(eax == ecx) {
-		goto loc_2B02C;
+			tl880_write_register(tl880dev, 0x3068, 
+					(d << 24) |
+					(c << 16) |
+					(reg3068 & 0xffff));
+
+			tl880_write_register(tl880dev, 0x306c, 
+					(f << 24) |
+					(e << 16) |
+					(reg306c & 0xffff));
+
+			tl880_write_register(tl880dev, 0x3070,
+					(h << 24) |
+					(g << 16) |
+					(reg3070 & 0xffff));
+			break;
+
+		case 2:
+			if(b == 0) {
+				reg3074 = tl880_read_register(tl880dev, 0x3074);
+				reg3078 = tl880_read_register(tl880dev, 0x3078);
+				reg307c = tl880_read_register(tl880dev, 0x307c);
+
+				tl880_write_register(tl880dev, 0x3074, 
+						(reg3074 & 0xffff0000) |
+						(d << 8) | c);
+
+				tl880_write_register(tl880dev, 0x3078, 
+						(reg3078 & 0xffff0000) |
+						(f << 8) | e);
+
+				tl880_write_register(tl880dev, 0x307c, 
+						(reg307c & 0xffff0000) |
+						(h << 8) | g);
+
+				break;
+			}
+			if(b != 1) {
+				break;
+			}
+
+			reg3074 = tl880_read_register(tl880dev, 0x3074);
+			reg3078 = tl880_read_register(tl880dev, 0x3078);
+			reg307c = tl880_read_register(tl880dev, 0x307C);
+
+			tl880_write_register(tl880dev, 0x3074, 
+					((d << 24) | 
+					 (c << 16)) | 
+					(reg3074 & 0xffff));
+
+			tl880_write_register(tl880dev, 0x3078, 
+					(f << 24) | 
+					(e << 16) | 
+					(reg3078 & 0xffff));
+
+			tl880_write_register(tl880dev, 0x307C, 
+					(h << 24) | 
+					(g << 16) | 
+					(reg307c & 0xffff));
+
+			break;
+
+		default:
+			break;
 	}
 
-	//eax--;
-	if(eax != ecx + 1) {
-		return 0;
-	}
-
-	eax = tl880_read_register(tl880dev, 0x3068);
-
-	ebx = 0x306c;
-	arg_4 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x306C);
-
-	edi = 0x3070;
-	arg_0 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x3070);
-
-	ecx = 0;
-	ecx = arg_1C << 8;
-	esi = 0xffff;
-	eax &= esi;
-	ecx |= arg_18;
-	ecx <<= 16;
-	eax |= ecx;
-
-	ecx = 0;
-	ecx = arg_C << 8;
-	arg_1C = eax;
-	eax = arg_4;
-	eax &= esi;
-	ecx |= arg_8;
-	ecx <<= 16;
-	ecx |= eax;
-
-	tl880_write_register(tl880dev, 0x3068, ecx);
-
-	eax = arg_0;
-	ecx = 0;
-	ecx = arg_14 << 8;
-	ecx |= arg_10;
-	ecx <<= 16;
-	eax &= esi;
-
-	ecx |= eax;
-		push    ecx
-		push    ebx
-	tl880_write_register(tl880dev, ebx, ecx);
-
-	push arg_1C;
-	tl880_write_register(tl880dev, edi, stackarg);
-	return 0;
-
-
-loc_2B02C:
-	eax = tl880_read_register(tl880dev, 0x3068);
-	ebx = 0x306C;
-	arg_4 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x306C);
-	edi = 0x3070;
-	arg_0 = eax;
-
-	eax = tl880_read_register(tl880dev, 0x3070);
-
-	ecx = 0;
-	ecx = arg_1C << 8;
-	esi = 0xffff0000;
-	eax &= esi;
-	eax |= ecx;
-	ecx |= arg_18
-	eax |= ecx;
-
-	ecx = 0;
-	ecx = arg_C << 8;
-	arg_1C = eax;
-	eax = arg_4;
-	eax &= esi;
-	ecx |= eax;
-	eax = arg_8;
-	ecx |= eax;
-	tl880_write_register(tl880dev, 0x3068, ecx);
-
-	eax = arg_0
-	ecx = 0;
-	ecx = arg_14 << 8;
-	eax &= esi;
-	ecx |= eax;
-	eax = arg_10;
-
-	ecx |= eax;
-	tl880_write_register(tl880dev, ebx, ecx);
-
-	push arg_1C;
-	tl880_write_register(tl880dev, edi, stackarg);
-	return 0;
-
-loc_2B0A7:
-	eax = arg_4;
-	eax -= ecx;
-	if(arg_4 == ecx) {
-		eax = tl880_read_register(tl880dev, 0x305C);
-		ebx = 0x3060;
-		arg_4 = eax;
-
-		eax = tl880_read_register(tl880dev, 0x3060);
-		edi = 0x3064;
-		arg_0 = eax;
-
-		eax = tl880_read_register(tl880dev, 0x3064);
-
-		ecx = 0;
-		ecx = arg_1C << 8;
-		esi = 0xffff0000;
-		eax &= esi;
-		eax |= ecx;
-		ecx = arg_18;
-		eax |= ecx;
-
-		ecx = 0;
-		ecx = arg_C << 8;
-		arg_1C = eax;
-		eax = arg_4;
-		eax &= esi;
-		ecx |= eax;
-		eax = arg_8;
-		ecx |= eax;
-		tl880_write_register(tl880dev, 0x305C, ecx);
-
-		eax = arg_0
-		ecx = arg_14 << 8;
-		eax &= esi;
-		ecx |= eax;
-		eax = arg_10;
-
-		ecx |= eax;
-		tl880_write_register(tl880dev, ebx, ecx);
-
-		push arg_1C;
-
-		tl880_write_register(tl880dev, edi, stackarg);
-		return 0;
-	}
-	eax--;
-	if(arg_4 != ecx + 1) {
-		return 0;
-	}
-
-	reg305c = tl880_read_register(tl880dev, 0x305C);
-	reg3060 = tl880_read_register(tl880dev, 0x3060);
-	reg3064 = tl880_read_register(tl880dev, 0x3064);
-
-	tl880_write_register(tl880dev, 0x305C, 
-			(arg_C << 24) | 
-			(arg_8 << 16) | 
-			(reg305c & 0xffff));
-
-	tl880_write_register(tl880dev, 0x3060, 
-			(arg_14 << 24) | 
-			(arg_10 << 16) | 
-			(reg3060 & 0xffff));
-
-	tl880_write_register(tl880dev, 0x3064, 
-			(arg_1C << 24) | 
-			(arg_18 << 16) |
-			(reg3064 & 0xffff));
 	return 0;
 }	
 
@@ -520,7 +420,7 @@ loc_32C87:
 	set_bits(&bitsval, 0x3008, 0xe, 0xc, 1);
 	tl880_write_register(tl880dev, 0x3008, bitsval);
 
-loc_32D19:
+/* loc_32D19: */
 	// Clear 64KB of memory
 	tl880_clear_sdram(tl880dev, 0x1000, 0x11000, 0);
 
@@ -551,7 +451,7 @@ loc_32D19:
 	bitsval = 0;
 	set_bits(&bitsval, 0x3004, 0, 0, 1);
 	set_bits(&bitsval, 0x3004, 6, 1, 3);
-	set_bits(&bitsval, 0x3004, 7, 7, 1);
+	//set_bits(&bitsval, 0x3004, 7, 7, 1); // Enables I2S recording
 	set_bits(&bitsval, 0x3004, 8, 8, 1);
 	set_bits(&bitsval, 0x3004, 0xa, 9, 1);
 	tl880_write_register(tl880dev, 0x3004, bitsval);

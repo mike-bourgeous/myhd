@@ -256,6 +256,10 @@ APU (Audio Processing Unit) 3000-307c
 	set to 01050000 in MDP-130 init
      set to zero in cJanus::DisableAPU
      0x01050000 while watching NTSC over the air
+     
+     If I change this to 00050000, the receiver says PCM 88.
+     If I change it to 0, the receiver says PCM 96, but the audio is
+     slowed down significantly.
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -273,14 +277,10 @@ APU (Audio Processing Unit) 3000-307c
 	00000000|00nn0000|00000000|00000000	0 in cJanus::InitNtscAudio
 	00000000|nn000000|00000000|00000000	0 in cJanus::InitNtscAudio
 	000000nn|00000000|00000000|00000000	1 in cJanus::InitNtscAudio
-						controls the sample rate (when set to 0
-						my receiver shows PCM 88, and DD audio
-						plays at double speed.  Set to 1, DD
-						audio plays normally.  Set to 2, DD is
-						slowed down about 33%.  Set to 3, my
-						receiver no longer locks onto audio)
-						(setting the SampleClock GPIO lines to
-						0x300 requires me to set this to 3)
+						This seems to be a clock
+						divider, as the final sample
+						rate depends on both this and
+						the sample rate GPIO below.
 
 3004 bit 2 -- stereo/mono NTSC audio
 	Set to 0x00040001 and 0x00000001 in MDP-130 init
@@ -290,7 +290,8 @@ APU (Audio Processing Unit) 3000-307c
      pitch without changing speed (as well as other variations on the lowest
      byte) - sounds pretty cool.  That's when using PC soundcard playback.
      Setting to 0x397 speeds up raw audio playback in Linux significantly,
-     when using SPDIF output.
+     when using SPDIF output.  Setting to 0x307 sometimes disables I2S recording
+     while keeping SPDIF playback enabled (a good thing).
 
 	0x00100001 when playing Dolby Digital audio, and 3028 and 302c stop
 	updating.  Using various values, it is possible to get only one or the
@@ -344,7 +345,9 @@ APU (Audio Processing Unit) 3000-307c
 	00000000|00000000|0nnn0000|00000000	1 in cJanus::InitNtscAudio
 
 300c,3010 written with 0x3000000
-	0x02000006 when Dolby Digital is playing back.
+	0x02000006 when Dolby Digital is playing back.  Setting back to
+	0x03000000 allowed raw pcm data to be played in the DD buffer, which
+	would normally have been silenced with these set to 02000006.
 
 3014 is APU interrupt mask
 3018 is last queued APU interrupt
@@ -393,7 +396,7 @@ APU (Audio Processing Unit) 3000-307c
 	writing data to (memory location in 304c)+4 bytes silenced the audio.
 
 304c
-	Start of Dolby Digital buffer in card memory
+	Start of Dolby Digital buffer in card memory (typically 0x196000)
 
 3050
 	Playback position in buffer pointed to by 304c

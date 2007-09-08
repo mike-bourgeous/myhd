@@ -55,8 +55,15 @@ int gen_pool_add(struct gen_pool *pool, unsigned long addr, size_t size,
 				(nbits + BITS_PER_BYTE - 1) / BITS_PER_BYTE;
 
 	chunk = kmalloc_node(nbytes, GFP_KERNEL, nid);
-	if (unlikely(chunk == NULL))
+	if (unlikely(chunk == NULL)) {
+		printk(KERN_ERR "Unable to add to the generic memory pool "
+			       "because an allocation of %d bytes failed\n",
+			       nbytes);
 		return -1;
+	} else {
+		printk(KERN_INFO "Successfully allocated %d bytes for the genpool\n", nbytes);
+	}
+
 
 	memset(chunk, 0, nbytes);
 	spin_lock_init(&chunk->lock);
