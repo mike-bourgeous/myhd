@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880util.c,v $
+ * Revision 1.9  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.8  2007/04/24 06:32:14  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -25,7 +28,6 @@ void set_bits(u32 *value, u32 reg, int high_bit, int low_bit, u32 setvalue)
 	setvalue |= mask;
 	*value = setvalue;
 }
-
 
 /* Find a tl880_dev by card number */
 struct tl880_dev *find_tl880(unsigned long tl880_id)
@@ -66,6 +68,14 @@ struct tl880_dev *find_tl880_pci(struct pci_dev *dev)
 	return list;
 }
 
+/* Return the number of tl880s */
+int tl880_card_count()
+{
+	return n_tl880s;
+}
+
 EXPORT_SYMBOL(set_bits);
 EXPORT_SYMBOL(find_tl880);
+EXPORT_SYMBOL(find_tl880_pci);
+EXPORT_SYMBOL(tl880_card_count);
 

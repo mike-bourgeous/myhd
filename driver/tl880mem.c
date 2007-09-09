@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880mem.c,v $
+ * Revision 1.7  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.6  2007/09/08 09:20:34  nitrogen
  * Fixed memory pool allocation.
  *
@@ -60,6 +63,18 @@ void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int 
 }
 
 /*
+ * Copies the given data to the given offset in card memory.
+ */
+void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length) /* {{{ */
+{
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(src)) {
+		return;
+	}
+
+	memcpy(tl880dev->memspace + addr, src, length);
+} /* }}} */
+
+/*
  * This is basically like memset() but it operates on card memory.
  */
 void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value) /* {{{ */
@@ -92,7 +107,8 @@ int tl880_init_memory(struct tl880_dev *tl880dev) /* {{{ */
 
 	/* Should I specify a specific NUMA node here ever? */
 	/* The pool starts at 0x11000 because earlier points in RAM are used for something already */
-	if(TL_ASSERT((result = gen_pool_add(tl880dev->pool, 0x11000, tl880dev->memlen - 0x11000, -1)) == 0)) {
+	/* XXX:TODO: Changed to 0x100000 temporarily to allow the ALSA driver to use the memory without allocating it */
+	if(TL_ASSERT((result = gen_pool_add(tl880dev->pool, 0x100000, tl880dev->memlen - 0x11000, -1)) == 0)) {
 		printk(KERN_ERR "tl880: Failed to add card %d's memory to its memory pool\n", tl880dev->id);
 		gen_pool_destroy(tl880dev->pool);
 		tl880dev->pool = NULL;
@@ -148,6 +164,7 @@ EXPORT_SYMBOL(tl880_write_memory);
 EXPORT_SYMBOL(tl880_read_memory);
 EXPORT_SYMBOL(tl880_write_membits);
 EXPORT_SYMBOL(tl880_read_membits);
+EXPORT_SYMBOL(tl880_memcpy);
 EXPORT_SYMBOL(tl880_clear_sdram);
 
 EXPORT_SYMBOL(tl880_alloc_memory);

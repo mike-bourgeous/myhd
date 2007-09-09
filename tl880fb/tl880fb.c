@@ -688,7 +688,7 @@ void tl880fb_sync(struct fb_info *info)
 
 void set_aux_horizontal_scaler(int width, int a)
 {
-	unsigned long value;
+	u32 value;
 
 	value  = (((((a << 8) / width) & 0xff) * width + (a * 0xf00)) << 0x14) & 0xfff00000;
 	value |= ((((((a << 8) / width) & 0xff) + 1) * width - (a << 8)) << 8) & 0x000fff00;
@@ -697,9 +697,9 @@ void set_aux_horizontal_scaler(int width, int a)
 	tl880_write_register(current_par.tl880dev, 0x100d0, (0x6b3 - a * 2) | 0x75a000);
 }
 
-void set_aux_vertical_scaler(unsigned long height, unsigned long a, unsigned long interlace)
+void set_aux_vertical_scaler(u32 height, u32 a, u32 interlace)
 {
-	unsigned long value;
+	u32 value;
 
 	value  = (((((a << 8) / height) & 0xff) * height + (a * 0xf00)) << 0x14) & 0xfff00000;
 	value |= ((((((a << 8) / height) & 0xff) + 1) * height - (a << 8)) << 8) & 0x000fff00;
@@ -718,17 +718,17 @@ void set_aux_vertical_scaler(unsigned long height, unsigned long a, unsigned lon
 }
 
 
-void set_aux_picture_origin(unsigned long x, unsigned long y)
+void set_aux_picture_origin(u32 x, u32 y)
 {
 	tl880_write_register(current_par.tl880dev, 0x100c4, x | (y << 0xc));
 }
 
-unsigned long test_aux_dscr_mbox_empty(void)
+u32 test_aux_dscr_mbox_empty(void)
 {
 	return (tl880_read_register(current_par.tl880dev, 0x25728) ? 0 : 1);
 }
 
-unsigned long test_aux_current_line_count(void)
+u32 test_aux_current_line_count(void)
 {
 	return tl880_read_register(current_par.tl880dev, 0x2573c);
 }
@@ -752,7 +752,7 @@ void aux_reset(void)
 
 void set_aux_1024x768p(int srcw, int srch, int full, int component_video)
 {
-	unsigned long value = 0;
+	u32 value = 0;
 	long reg = 0x100c0;
 
 	set_bits(&value, reg, 0, 0, 0);
@@ -773,7 +773,7 @@ void set_aux_1024x768p(int srcw, int srch, int full, int component_video)
 
 void set_sync_1024x768p(int invert_hsync, int invert_vsync)
 {
-	unsigned long value = 0;
+	u32 value = 0;
 	long reg;
 	
 	reg = 0x10014;
@@ -1000,10 +1000,10 @@ int tl880fb_setup(char *options)
 /* Memory map function - called by the kernel when a userspace app mmaps our device(s) in /dev */
 static int tl880fb_mmap(struct fb_info *info, struct file *file, struct vm_area_struct *vma)
 {
-	unsigned long start = 0;
-	unsigned long length = 0;
+	u32 start = 0;
+	u32 length = 0;
 	struct tl880_dev *tl880dev;
-	unsigned long offset;
+	u32 offset;
 	struct tl880fb_par *par;
 
 
@@ -1018,7 +1018,7 @@ static int tl880fb_mmap(struct fb_info *info, struct file *file, struct vm_area_
 	start = (info->fix.smem_start & PAGE_MASK) + offset;
 	length = PAGE_ALIGN((info->fix.smem_len & ~PAGE_MASK) + info->fix.smem_len - offset);
 
-	printk(KERN_DEBUG "tl880fb: tl880fb_mmap: start: 0x%08lx, length: 0x%08lx, offset: 0x%08lx\n", start, length, offset);
+	printk(KERN_DEBUG "tl880fb: tl880fb_mmap: start: 0x%08x, length: 0x%08x, offset: 0x%08x\n", start, length, offset);
 
 	par = (struct tl880fb_par *)info->par;
 	tl880dev = par->tl880dev;

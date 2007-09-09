@@ -1,5 +1,5 @@
-MODULE_NAME = tl880fb
-#$(MODULE_NAME)-objs = tl880.o
+MODULE_NAME = snd-tl880
+$(MODULE_NAME)-objs = tl880alsa.o
 
 RM	= @rm -rf
 JUNK	= *~ *.bak
@@ -9,7 +9,7 @@ ifneq ($(KERNELRELEASE),)
 obj-m := $(MODULE_NAME).o
 
 # EXTRA_CFLAGS += -I$(PWD)/../include # for extra include dir if needed
-EXTRA_CFLAGS += -I$(PWD)/../driver/
+EXTRA_CFLAGS += -Wall -Werror -I$(PWD)/../
 
 # Second pass, the actual build.
 else

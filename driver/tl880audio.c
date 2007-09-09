@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880audio.c,v $
+ * Revision 1.11  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.10  2007/09/08 09:20:33  nitrogen
  * Fixed memory pool allocation.
  *
@@ -42,18 +45,16 @@ void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e aud
 		 * This used to be yGetTL850Memory(0x7800, 0) -- The second parameter seems to control
 		 * where the memory comes from (top or bottom of pool).
 		 */
-		/*
 		if(TL_ASSERT((tl880dev->iau_base = tl880_alloc_memory(tl880dev, 0x7800)) != 0)) {
 			return;
 		}
-		*/
-		tl880dev->iau_base = 0x196000;
+		/* tl880dev->iau_base = 0x196000; */
 	}
 
 	if(tl880dev->iec_buf == NULL) {
 		/* g_IECbuf = ExAllocatePoolWithTag(NonPagedPool, 0x1800, 'W''d''m'' '); */
 		/* Linux kernel memory is always non-paged */
-		tl880dev->iec_buf = kmalloc(0x1800, GFP_KERNEL);
+		tl880dev->iec_buf = kmalloc(0x1800, GFP_KERNEL); // 0x1800 = 6144 - the size of an AC3-in-PCM frame
 	}
 
 	tl880_apu_init_ioc(tl880dev);
@@ -80,7 +81,7 @@ void tl880_deinit_hardware_audio(struct tl880_dev *tl880dev)
 	tl880_write_register(tl880dev, tl880dev->iau_ira_reg, 0);
 	
 	if(tl880dev->iau_base != 0) {
-		/* tl880_free_memory(tl880dev, tl880dev->iau_base, 0x7800); */
+		tl880_free_memory(tl880dev, tl880dev->iau_base, 0x7800);
 		tl880dev->iau_base = 0;
 	}
 
@@ -384,7 +385,8 @@ void tl880_init_ntsc_audio(struct tl880_dev *tl880dev)
 	 * eax += 0x1000;
 	 * var_8 = eax;
 	 */
-	tl880_write_register(tl880dev, 0x3028, 0x3800 /* eax */);
+	//tl880_write_register(tl880dev, 0x3028, 0x3800 /* eax */);
+	tl880_write_register(tl880dev, 0x3028, 0);
 	tl880_write_register(tl880dev, 0x302c, 0x1000);
 	tl880_write_register(tl880dev, 0x3030, 0x9000);
 

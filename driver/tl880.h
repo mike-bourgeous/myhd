@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.32  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.31  2007/09/08 09:20:33  nitrogen
  * Fixed memory pool allocation.
  *
@@ -121,9 +124,13 @@
 #define TL880_CARD_ZERO			0
 
 /* Debug */
-#define TL_ASSERT(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: assertion '%s' failed in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
-#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "tl880: NULL %s in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
-#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "tl880: NULL %s in %s at %u of %s\n", #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
+#ifndef TL_MODNAME
+#define TL_MODNAME "tl880"
+#endif /* TL_MODNAME */
+
+#define TL_ASSERT(a) ( (a) ? (0) : (printk(KERN_ERR "%s: assertion '%s' failed in %s at %u of %s\n", TL_MODNAME, #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
+#define CHECK_NULL(a) ( (a) ? (0) : (printk(KERN_ERR "%s: NULL %s in %s at %u of %s\n", TL_MODNAME, #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
+#define CHECK_NULL_W(a) ( (a) ? (0) : (printk(KERN_WARNING "%s: NULL %s in %s at %u of %s\n", TL_MODNAME, #a, __FUNCTION__, __LINE__, __FILE__), (1)) )
 
 
 /*** Driver types ***/
@@ -238,7 +245,7 @@ struct tl880_dev {
 	u32 iau_base;				/* Base card memory address for audio unit */
 	u32 iau_iba_reg;			/* Register used for base address */
 	u32 iau_iea_reg;			/* Register used for end address */
-	u32 iau_ira_reg;			/* Register used for base address (2) */
+	u32 iau_ira_reg;			/* Register used for read address */
 
 
 	/** Audio Chip (MSP) State **/
@@ -332,6 +339,7 @@ extern struct tl880_dev *tl880_list;
 void set_bits(u32 *value, u32 reg, int high_bit, int low_bit, u32 setvalue);
 struct tl880_dev *find_tl880(unsigned long tl880_id);
 struct tl880_dev *find_tl880_pci(struct pci_dev *dev);
+int tl880_card_count(void);
 
 /* tl880i2c.c */
 int tl880_init_i2c(struct tl880_dev *tl880dev);
@@ -348,8 +356,14 @@ int tl880_i2c_write_word_data(struct tl880_i2c_bus *i2cbus, u16 addr, u8 command
 /* tl880init.c */
 void tl880_init_myhd(struct tl880_dev *tl880dev);
 void tl880_init_wintv_hd(struct tl880_dev *tl880dev);
+void tl880_init_hipix(struct tl880_dev *tl880dev);
 void tl880_init_chip(struct tl880_dev *tl880dev);
 void tl880_init_dev(struct tl880_dev *tl880dev);
+
+void tl880_deinit_myhd(struct tl880_dev *tl880dev);
+void tl880_deinit_wintv_hd(struct tl880_dev *tl880dev);
+void tl880_deinit_hipix(struct tl880_dev *tl880dev);
+void tl880_deinit_dev(struct tl880_dev *tl880dev);
 
 /* tl880gpio.c */
 u8 tl880_set_gpio(struct tl880_dev *tl880dev, u32 gpio_line, u8 state);
@@ -410,6 +424,7 @@ u32 tl880_read_memory(struct tl880_dev *tl880dev, u32 mem);
 void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value);
 u32 tl880_read_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit, u32 value);
+void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length);
 void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value);
 
 int tl880_init_memory(struct tl880_dev *tl880dev);

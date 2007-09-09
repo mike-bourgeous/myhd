@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880gpio.c,v $
+ * Revision 1.13  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.12  2007/09/06 05:22:05  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -386,4 +389,6 @@ unsigned char tl880_set_gpio(struct tl880_dev *tl880dev, unsigned int gpio_line,
 
 	return 1;
 }
+
+EXPORT_SYMBOL(tl880_set_gpio);
 

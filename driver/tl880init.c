@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.20  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.19  2007/09/08 09:20:33  nitrogen
  * Fixed memory pool allocation.
  *
@@ -498,12 +501,16 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 			break;
 	}
 
+	/* Reset the APU */
+	tl880_disable_apu(tl880dev);
+	tl880_deinit_hardware_audio(tl880dev);
+
 	/* Set NTSC input */
 	/*
 	tl880_init_hardware_audio(tl880dev, 1);
 	tl880_apu_start_ioc(tl880dev);
-	*/
 	tl880_init_ntsc_audio(tl880dev);
+	*/
 	tl880_set_ntsc_input(tl880dev, 0);
 
 	/* Initialize DPC2 */
@@ -536,9 +543,52 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	tl880_write_register(tl880dev, 0x10184, 0x012A0000);
 	tl880_write_register(tl880dev, 0x10184, 0x01CB8000);
 
-	printk(KERN_DEBUG "tl880: GPIO at end of init: 0x10190=0x%08x 0x10194=0x%08x 0x10198=0x%08x 0x1019c=0x%08x\n",
-		tl880_read_register(tl880dev, 0x10190), tl880_read_register(tl880dev, 0x10194),
-		tl880_read_register(tl880dev, 0x10198), tl880_read_register(tl880dev, 0x1019c));
+	if(debug) {
+		printk(KERN_DEBUG "tl880: GPIO at end of init: 0x10190=0x%08x 0x10194=0x%08x 0x10198=0x%08x 0x1019c=0x%08x\n",
+			tl880_read_register(tl880dev, 0x10190), tl880_read_register(tl880dev, 0x10194),
+			tl880_read_register(tl880dev, 0x10198), tl880_read_register(tl880dev, 0x1019c));
+	}
 }
 
+void tl880_deinit_myhd(struct tl880_dev *tl880dev)
+{
+}
+
+void tl880_deinit_wintv_hd(struct tl880_dev *tl880dev)
+{
+}
+
+void tl880_deinit_hipix(struct tl880_dev *tl880dev)
+{
+}
+
+void tl880_deinit_dev(struct tl880_dev *tl880dev)
+{
+	switch(tl880dev->card_type) {
+		case TL880_CARD_MYHD_MDP100A:
+		case TL880_CARD_MYHD_MDP100:
+		case TL880_CARD_MYHD_MDP110:
+		case TL880_CARD_MYHD_MDP120:
+		case TL880_CARD_MYHD_MDP130:
+			tl880_deinit_myhd(tl880dev);
+			break;
+		case TL880_CARD_WINTV_HD:
+			tl880_deinit_wintv_hd(tl880dev);
+			break;
+		case TL880_CARD_HIPIX:
+			tl880_deinit_hipix(tl880dev);
+			break;
+		default:
+			printk(KERN_WARNING "tl880: attempting to deinit unsupported card\n");
+			break;
+	}
+
+	/* Stop audio */
+	tl880_disable_apu(tl880dev);
+	tl880_apu_stop_ioc(tl880dev);
+	tl880_deinit_hardware_audio(tl880dev);
+
+	/* Disable video */
+	tl880_set_gpio(tl880dev, 2, 0);
+}
 

@@ -1,9 +1,15 @@
 2007-09-08	Mike Bourgeous		<nitrogen at users.sourceforge.net>
 
 	* Changed TL_ASSERT and CHECK_NULL* macros to include the source file
-	  in the error message.
+	  in the error message, and to use a configurable prefix string.
 	* Decreased the resolution of the memory pool bitmap, as allocation of
 	  the memory pool was failing.
+	* Added tl880_memcpy().
+	* Added tl880_card_count().
+	* Put a lot of work into the ALSA driver.
+	* Fixed the framebuffer driver to work with the current version of the
+	  tl880 module.
+	* Added a new tool, iocread4reg.
 
 2007-09-06	Mike Bourgeous		<nitrogen at users.sourceforge.net>
 

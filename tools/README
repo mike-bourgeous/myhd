@@ -73,6 +73,10 @@ iocreadreg
 iocwritereg
 	Same thing as writereg but uses an ioctl() instead of mmap() and
 	dereference.  The ioctl() interface will be preferred in the future.
+
+iocread4reg
+	Reads 4 registers at a time, using a hexdump-style output, starting at
+	the given register address.
 	
 randram
 	Randomizes all or part of the TL880 memory (to see if anything happens).

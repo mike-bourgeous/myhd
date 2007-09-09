@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.30  2007/09/09 06:16:48  nitrogen
+ * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
+ *
  * Revision 1.29  2007/09/08 09:20:34  nitrogen
  * Fixed memory pool allocation.
  *
@@ -846,6 +849,9 @@ static struct tl880_dev *tl880_unconfigure(struct tl880_dev *tl880dev)
 	
 	printk(KERN_INFO "tl880: deinitializing card number %d\n", tl880dev->id);
 	
+	/* Stop card functions */
+	tl880_deinit_dev(tl880dev);
+
 	/* Unregister character devices */
 	cdev_del(tl880dev->char_device);
 	tl880dev->char_device = NULL;

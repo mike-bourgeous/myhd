@@ -291,7 +291,9 @@ APU (Audio Processing Unit) 3000-307c
      byte) - sounds pretty cool.  That's when using PC soundcard playback.
      Setting to 0x397 speeds up raw audio playback in Linux significantly,
      when using SPDIF output.  Setting to 0x307 sometimes disables I2S recording
-     while keeping SPDIF playback enabled (a good thing).
+     while keeping SPDIF playback enabled (a good thing).  In this case, it is
+     necessary to set register 3028 to a value outside of the audio buffer, or
+     register 302c will stop when it reaches the value of 3028.
 
 	0x00100001 when playing Dolby Digital audio, and 3028 and 302c stop
 	updating.  Using various values, it is possible to get only one or the

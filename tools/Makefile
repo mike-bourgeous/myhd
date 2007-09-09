@@ -8,7 +8,7 @@ COMPILE = ${CC} ${LOCAL_CFLAGS} ${CFLAGS}
 all: scripts striperam setalpha rampram regload regdump memdump memload memloadswab \
 	memset readmem writemem readreg writereg setbits write4reg randreg iocsetvip \
 	iocreadreg iocwritereg iocsetgpio cursor rgb2ypbpr ioccursor randosd osdtest \
-	osdimage hexcount ioctl channel randram regloadslow
+	osdimage hexcount ioctl channel randram regloadslow iocread4reg
 
 randram: randram.c
 	${COMPILE} randram.c -o randram
@@ -102,6 +102,9 @@ channel: channel.c
 
 regloadslow: regloadslow.c
 	${COMPILE} regloadslow.c -o regloadslow
+
+iocread4reg: iocread4reg.c
+	${COMPILE} iocread4reg.c -o iocread4reg
 
 
 
