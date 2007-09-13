@@ -19,6 +19,7 @@ PWD     := $(shell pwd)
 
 all:
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
+	chmod +x tl880fb_load
 
 clean:
 	$(MAKE) -C $(KDIR) M=$(PWD) clean

@@ -3,5 +3,5 @@
 modprobe i2c-algo-bit
 modprobe v4l2-common
 
-insmod ./tl880.ko
+insmod ./tl880.ko $@
 

@@ -127,6 +127,16 @@ int tl880fb_setup(char*);
 static int tl880fb_open(struct fb_info *info, int user)
 {
 	printk("tl880fb: tl880fb_open - access by %s\n", user ? "userland" : "kernel");
+
+	/* Install OSD display list */
+	tl880_write_memory(current_par.tl880dev, 0x2d8000, 0x60100040);
+	tl880_write_memory(current_par.tl880dev, 0x2d8004, 0x70000000);
+	tl880_write_memory(current_par.tl880dev, 0x2d8008, 0x80300000);
+	tl880_write_memory(current_par.tl880dev, 0x2d800c, 0x14000000);
+
+	/* Switch on video */
+	tl880_set_gpio(current_par.tl880dev, 2, 1);
+
 	return 0;
 }
 
@@ -147,6 +157,10 @@ static int tl880fb_open(struct fb_info *info, int user)
 static int tl880fb_release(struct fb_info *info, int user)
 {
 	printk(KERN_INFO "tl880fb: tl880fb_release - access by %s\n", user ? "userland" : "kernel");
+
+	/* Switch off video */
+	tl880_set_gpio(current_par.tl880dev, 2, 0);
+
 	return 0;
 }
 
@@ -871,6 +885,7 @@ int __init tl880fb_init(void)
 	 * from the bus layer and then translate it to virtual memory
 	 * space via ioremap. Consult ioport.h. 
 	 */
+	/* TODO: use TL880 memory allocation */
 	info.screen_base = current_par.tl880dev->memspace + 0x300000;
 	info.screen_size = 1024*768*4;
 	info.fbops = &tl880fb_ops;
@@ -946,9 +961,13 @@ int __init tl880fb_init(void)
 	/* Turn on video output (is this MyHD specific?) */
 	tl880_write_regbits(current_par.tl880dev, 0x10000, 7, 7, 0);
 	tl880_write_regbits(current_par.tl880dev, 0x10000, 5, 5, 1);
+
+	/*
 	tl880_write_regbits(current_par.tl880dev, 0x10190, 0xa, 0xa, 1);
 	tl880_write_regbits(current_par.tl880dev, 0x10194, 0xa, 0xa, 1);
 	tl880_write_regbits(current_par.tl880dev, 0x10198, 0xa, 0xa, 1);
+	*/
+	//tl880_set_gpio(current_par.tl880dev, 2, 1);
 
 	return 0;
 }
@@ -976,6 +995,10 @@ static void __exit tl880fb_cleanup(void)
 		tl880_write_regbits(tl880dev, 0x10198, 0xa, 0xa, 1);
 	}
 	*/
+
+	if(tl880dev) {
+		tl880_set_gpio(tl880dev, 2, 0);
+	}
 
 	unregister_framebuffer(&info);
 	fb_dealloc_cmap(&info.cmap);

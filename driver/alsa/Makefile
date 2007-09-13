@@ -9,7 +9,7 @@ ifneq ($(KERNELRELEASE),)
 obj-m := $(MODULE_NAME).o
 
 # EXTRA_CFLAGS += -I$(PWD)/../include # for extra include dir if needed
-EXTRA_CFLAGS += -Wall -Werror -I$(PWD)/../
+EXTRA_CFLAGS += -Wall -Werror -I$(PWD)/../ -fno-inline -g -O0
 
 # Second pass, the actual build.
 else

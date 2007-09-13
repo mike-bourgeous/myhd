@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880mem.c,v $
+ * Revision 1.8  2007/09/13 09:16:14  nitrogen
+ * Audio improvements.  Framebuffer tweak.  Documentation improvements.
+ *
  * Revision 1.7  2007/09/09 06:16:48  nitrogen
  * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
  *
@@ -25,7 +28,7 @@
 
 void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value)
 {
-	if(!tl880dev || !tl880dev->memspace) {
+	if(!tl880dev || !tl880dev->memspace || mem > tl880dev->memlen) {
 		return;
 	}
 	writel(value, (void *)(tl880dev->memspace + mem));
@@ -34,7 +37,7 @@ void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value)
 u32 tl880_read_memory(struct tl880_dev *tl880dev, u32 mem)
 {
 	u32 value;
-	if(!tl880dev || !tl880dev->memspace) {
+	if(!tl880dev || !tl880dev->memspace || mem > tl880dev->memlen) {
 		return 0;
 	}
 	value = readl((void *)(tl880dev->memspace + mem));
@@ -71,6 +74,14 @@ void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length
 		return;
 	}
 
+	if(addr > tl880dev->memlen) {
+		return;
+	}
+
+	if(addr + length > tl880dev->memlen) {
+		length = tl880dev->memlen - addr;
+	}
+
 	memcpy(tl880dev->memspace + addr, src, length);
 } /* }}} */
 
@@ -79,8 +90,12 @@ void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length
  */
 void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value) /* {{{ */
 {
-     	while (start_addr < end_addr) {
-	  	tl880_write_memory(tl880dev,start_addr,value);
+	if(CHECK_NULL(tl880dev)) {
+		return;
+	}
+	
+     	while(start_addr < end_addr && start_addr < tl880dev->memlen) {
+	  	tl880_write_memory(tl880dev, start_addr, value);
 	  	start_addr += 4;
      	}
      	

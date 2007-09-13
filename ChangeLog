@@ -1,3 +1,15 @@
+2007-09-12	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Increased the minimum period size in the ALSA driver to make sure
+	  that audio always works with mplayer and xine.
+
+2007-09-09	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Added boundary checks to tl880mem functions.
+	* Changed the fb driver to toggle video passthrough when the
+	  framebuffer is opened and closed.
+	* Added a new sample rate setting function to tl880audio.c.
+
 2007-09-08	Mike Bourgeous		<nitrogen at users.sourceforge.net>
 
 	* Changed TL_ASSERT and CHECK_NULL* macros to include the source file
@@ -10,6 +22,7 @@
 	* Fixed the framebuffer driver to work with the current version of the
 	  tl880 module.
 	* Added a new tool, iocread4reg.
+	* Made improvements to the ALSA driver's internal names.
 
 2007-09-06	Mike Bourgeous		<nitrogen at users.sourceforge.net>
 

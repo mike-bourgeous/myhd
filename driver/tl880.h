@@ -5,29 +5,11 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.33  2007/09/13 09:16:13  nitrogen
+ * Audio improvements.  Framebuffer tweak.  Documentation improvements.
+ *
  * Revision 1.32  2007/09/09 06:16:48  nitrogen
  * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
- *
- * Revision 1.31  2007/09/08 09:20:33  nitrogen
- * Fixed memory pool allocation.
- *
- * Revision 1.30  2007/09/06 05:22:03  nitrogen
- * Improvements to audio support, documentation, and card memory management.
- *
- * Revision 1.29  2007/04/24 06:32:13  nitrogen
- * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
- *
- * Revision 1.28  2007/03/29 09:27:39  nitrogen
- * Tweaked mkdev scripts, improved MSP init, new tool, improved tools makefile, more docs.
- *
- * Revision 1.27  2007/03/29 08:38:54  nitrogen
- * Initial MSP configuration support.
- *
- * Revision 1.26  2007/03/28 08:01:30  nitrogen
- * Initialization improvements, VPX improvements, minor comment and error message tweaks, better docs
- *
- * Revision 1.25  2007/03/26 19:23:56  nitrogen
- * Added GPIO patch by Jason P. Matthews.
  *
  */
 
@@ -404,6 +386,7 @@ void tl880_set_sampling_clock(struct tl880_dev *tl880dev, int rate); /* should b
 int tl880_audio_set_crossfade(struct tl880_dev *tl880dev, s32 arg_0, s32 arg_4, u8 arg_8, u8 arg_C,
 							  u8 arg_10, u8 arg_14, u8 arg_18, u8 arg_1C);
 
+int tl880_set_samplerate(struct tl880_dev *tl880dev, int rate);
 
 /* tl880demux.c */
 unsigned long tl880_demux_init(struct tl880_dev *tl880dev);

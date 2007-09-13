@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880init.c,v $
+ * Revision 1.21  2007/09/13 09:16:13  nitrogen
+ * Audio improvements.  Framebuffer tweak.  Documentation improvements.
+ *
  * Revision 1.20  2007/09/09 06:16:48  nitrogen
  * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
  *
@@ -504,13 +507,11 @@ void tl880_init_dev(struct tl880_dev *tl880dev)
 	/* Reset the APU */
 	tl880_disable_apu(tl880dev);
 	tl880_deinit_hardware_audio(tl880dev);
+	tl880_init_hardware_audio(tl880dev, 1);
+	//tl880_apu_start_ioc(tl880dev);
+	tl880_init_ntsc_audio(tl880dev);
 
 	/* Set NTSC input */
-	/*
-	tl880_init_hardware_audio(tl880dev, 1);
-	tl880_apu_start_ioc(tl880dev);
-	tl880_init_ntsc_audio(tl880dev);
-	*/
 	tl880_set_ntsc_input(tl880dev, 0);
 
 	/* Initialize DPC2 */

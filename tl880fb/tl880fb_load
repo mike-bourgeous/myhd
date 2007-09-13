@@ -1,0 +1,8 @@
+#!/bin/sh
+
+modprobe cfbfillrect 
+modprobe cfbcopyarea 
+modprobe cfbimgblt 
+
+insmod ./tl880fb.ko $@
+

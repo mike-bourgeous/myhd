@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880audio.c,v $
+ * Revision 1.12  2007/09/13 09:16:13  nitrogen
+ * Audio improvements.  Framebuffer tweak.  Documentation improvements.
+ *
  * Revision 1.11  2007/09/09 06:16:48  nitrogen
  * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
  *
@@ -451,7 +454,7 @@ loc_32C87:
 	tl880_write_register(tl880dev, 0x3000, bitsval);
 
 	bitsval = 0;
-	set_bits(&bitsval, 0x3004, 0, 0, 1);
+	//set_bits(&bitsval, 0x3004, 0, 0, 1); // Enables audio playback
 	set_bits(&bitsval, 0x3004, 6, 1, 3);
 	//set_bits(&bitsval, 0x3004, 7, 7, 1); // Enables I2S recording
 	set_bits(&bitsval, 0x3004, 8, 8, 1);
@@ -517,4 +520,52 @@ void tl880_set_sampling_clock(struct tl880_dev *tl880dev, int rate)
 #endif
 	return;
 }
+
+/*
+ * Sets the requested rate if it is valid.  Returns -EINVAL if the rate is invalid.
+ */
+int tl880_set_samplerate(struct tl880_dev *tl880dev, int rate)
+{
+	switch(rate) {
+		case 22050:
+			tl880_set_gpio(tl880dev, 8, 2);
+			tl880_set_gpio(tl880dev, 9, 2);
+			break;
+		case 32000:
+			tl880_set_gpio(tl880dev, 8, 0);
+			tl880_set_gpio(tl880dev, 9, 0);
+			break;
+		case 44100:
+			tl880_set_gpio(tl880dev, 8, 2);
+			tl880_set_gpio(tl880dev, 9, 0);
+			break;
+		case 48000:
+			tl880_set_gpio(tl880dev, 8, 0);
+			tl880_set_gpio(tl880dev, 9, 2);
+			break;
+		case 64000:
+			tl880_set_gpio(tl880dev, 8, 1);
+			tl880_set_gpio(tl880dev, 9, 0);
+			break;
+		case 72000:
+			tl880_set_gpio(tl880dev, 8, 2);
+			tl880_set_gpio(tl880dev, 9, 1);
+			break;
+		case 88200:
+			tl880_set_gpio(tl880dev, 8, 1);
+			tl880_set_gpio(tl880dev, 9, 1);
+			break;
+		case 96000:
+			tl880_set_gpio(tl880dev, 8, 1);
+			tl880_set_gpio(tl880dev, 9, 2);
+			break;
+		default:
+			printk(KERN_WARNING TL_MODNAME ": samplerate %d unsupported\n", rate);
+			return -EINVAL;
+	}
+
+	return 0;
+}
+
+EXPORT_SYMBOL(tl880_set_samplerate);
 
