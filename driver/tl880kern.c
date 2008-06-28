@@ -26,6 +26,9 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * $Log: tl880kern.c,v $
+ * Revision 1.31  2008/06/28 02:12:40  nitrogen
+ * Importing old changes.  See ChangeLog.
+ *
  * Revision 1.30  2007/09/09 06:16:48  nitrogen
  * Started an ALSA driver.  New iocread4reg tool.  Driver enhancements.
  *
@@ -598,6 +601,8 @@ static struct tl880_dev *tl880_create_dev(void)
 	tl880dev->apu_mask = 0;
 	tl880dev->apu_type = 0;
 	tl880dev->apu_count = 0;
+	tl880dev->apu_th_funcs = NULL;
+	tl880dev->apu_bh_funcs = NULL;
 	
 	tl880dev->blt_mask = 0;
 	tl880dev->blt_type = 0;
@@ -666,9 +671,16 @@ static struct tl880_dev *tl880_create_dev(void)
 static void tl880_delete_dev(struct tl880_dev *tl880dev)
 {
 	/* Make sure the driver is really loaded */
-	if(!tl880dev) {
-		printk(KERN_WARNING "tl880: Attempt to unload tl880 before loading?\n");
+	if(CHECK_NULL(tl880dev)) {
 		return;
+	}
+
+	/* Free interrupt handler callback lists */
+	while(tl880dev->apu_th_funcs != NULL) {
+		tl880_remove_int_callback(tl880dev, &tl880dev->apu_th_funcs, tl880dev->apu_th_funcs->func);
+	}
+	while(tl880dev->apu_bh_funcs != NULL) {
+		tl880_remove_int_callback(tl880dev, &tl880dev->apu_th_funcs, tl880dev->apu_th_funcs->func);
 	}
 
 	/* Free the device information structure */

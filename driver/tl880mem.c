@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880mem.c,v $
+ * Revision 1.9  2008/06/28 02:12:40  nitrogen
+ * Importing old changes.  See ChangeLog.
+ *
  * Revision 1.8  2007/09/13 09:16:14  nitrogen
  * Audio improvements.  Framebuffer tweak.  Documentation improvements.
  *
@@ -83,6 +86,70 @@ void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length
 	}
 
 	memcpy(tl880dev->memspace + addr, src, length);
+} /* }}} */
+
+/*
+ * Copies the given data to the given offset in card memory, reversing the byte order of each 32-bit dword.
+ * This function will truncate length to a multiple of four.
+ */
+void tl880_memcpy_swab32(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length) /* {{{ */
+{
+	u32 i;
+	u32 *src32 = src;
+	
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(src)) {
+		return;
+	}
+
+	if(addr > tl880dev->memlen) {
+		return;
+	}
+
+	if(addr + length > tl880dev->memlen) {
+		length = tl880dev->memlen - addr;
+	}
+	if(debug > 1) {
+		printk(KERN_DEBUG "tl880: memcpy_swab32 to 0x%07x length 0x%06lx\n", addr, length);
+	}
+
+	for(i = addr; i < addr + length; i += 4) {
+		tl880_write_memory(tl880dev, i, swab32(src32[i / 4]));
+	}
+} /* }}} */
+
+/*
+ * Copies the given data to the given offset in card memory, reversing the word order of each 32-bit dword.
+ * This can be used to swap left/right channels in an audio stream, for example.  This function will truncate
+ * length to a multiple of four.
+ */
+void tl880_memcpy_swahw32(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length) /* {{{ */
+{
+	u32 i;
+	u32 *src32 = src;
+	static int printme = 1;
+	
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(src)) {
+		return;
+	}
+
+	if(addr > tl880dev->memlen) {
+		return;
+	}
+
+	if(addr + length > tl880dev->memlen) {
+		length = tl880dev->memlen - addr;
+	}
+	if(debug > 1) {
+		printk(KERN_DEBUG "tl880: memcpy_swahw32 to 0x%07x length 0x%06lx\n", addr, length);
+	}
+
+	for(i = addr; i < addr + length; i += 4) {
+		if(printme) {
+			printk(KERN_DEBUG "writing 0x%08x to 0x%07x\n", src32[i/4], i);
+		}
+		tl880_write_memory(tl880dev, i, swahw32(src32[i / 4]));
+	}
+	printme = 0;
 } /* }}} */
 
 /*
@@ -180,6 +247,8 @@ EXPORT_SYMBOL(tl880_read_memory);
 EXPORT_SYMBOL(tl880_write_membits);
 EXPORT_SYMBOL(tl880_read_membits);
 EXPORT_SYMBOL(tl880_memcpy);
+EXPORT_SYMBOL(tl880_memcpy_swab32);
+EXPORT_SYMBOL(tl880_memcpy_swahw32);
 EXPORT_SYMBOL(tl880_clear_sdram);
 
 EXPORT_SYMBOL(tl880_alloc_memory);

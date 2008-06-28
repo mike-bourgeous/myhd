@@ -12,7 +12,7 @@ ifneq ($(KERNELRELEASE),)
 obj-m := $(MODULE_NAME).o
 
 # EXTRA_CFLAGS += -I$(PWD)/../include # for extra include dir if needed
-EXTRA_CFLAGS += -Wall
+EXTRA_CFLAGS += -Wall -O0
 
 # Second pass, the actual build.
 else

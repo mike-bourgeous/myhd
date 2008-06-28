@@ -5,6 +5,9 @@
  * (c) 2007 Jason P. Matthews
  *
  * $Log: tl880.h,v $
+ * Revision 1.34  2008/06/28 02:12:39  nitrogen
+ * Importing old changes.  See ChangeLog.
+ *
  * Revision 1.33  2007/09/13 09:16:13  nitrogen
  * Audio improvements.  Framebuffer tweak.  Documentation improvements.
  *
@@ -36,6 +39,7 @@
 #include <linux/poll.h>
 #include <linux/pci.h>
 #include <linux/signal.h>
+#include <linux/byteorder/swabb.h>
 #include <asm/io.h>
 #include <linux/ioport.h>
 #include <asm/pgtable.h>
@@ -127,6 +131,14 @@ struct tl880_i2c_bus {
 	struct i2c_client		*i2c_clients[I2C_CLIENTS_MAX];
 };
 
+/* Interrupt callback descriptor */
+typedef void (*int_func)(struct tl880_dev *, void *);
+struct int_func_desc {
+	int_func func;
+	void *private_data;
+	struct int_func_desc *next;
+};
+
 struct tl880_dev {
 	/** Housekeeping stuff **/
 	struct tl880_dev *next;			/* Linked list pointer */
@@ -188,6 +200,8 @@ struct tl880_dev {
 	u32 apu_mask;				/* APU interrupt mask */
 	u32 apu_type;				/* Type of APU interrupt received */
 	u32 apu_count;				/* Number of APU interrupts received */
+	struct int_func_desc *apu_th_funcs;	/* Linked list of APU top-half callbacks */
+	struct int_func_desc *apu_bh_funcs;	/* Linked list of APU bottom-half callbacks */
 
 	u32 blt_mask;				/* BLT interrupt mask */
 	u32 blt_type;				/* Type of BLT interrupt received */
@@ -361,6 +375,12 @@ irqreturn_t tl880_irq(int irq, void *dev_id);
 void tl880_bh(unsigned long tl880_id);
 void tl880_disable_interrupts(struct tl880_dev *tl880dev);
 
+int tl880_add_int_callback(struct tl880_dev *tl880dev, struct int_func_desc **list, int_func func, void *private_data);
+void tl880_remove_int_callback(struct tl880_dev *tl880dev, struct int_func_desc **list, int_func func);
+
+int tl880_register_apu_th(struct tl880_dev *tl880dev, int_func func, void *private_data);
+void tl880_unregister_apu_th(struct tl880_dev *tl880dev, int_func func);
+
 /* tl880vip.c */
 void tl880_set_vip(struct tl880_dev *tl880dev, unsigned long vip_mode);
 
@@ -376,6 +396,7 @@ void tl880_apu_start_ioc(struct tl880_dev *tl880dev);
 void tl880_apu_stop_ioc(struct tl880_dev *tl880dev);
 
 void tl880_init_hardware_audio(struct tl880_dev *tl880dev, enum audio_mode_e audio_mode);
+void tl880_deinit_hardware_audio(struct tl880_dev *tl880dev);
 
 void tl880_init_ntsc_audio(struct tl880_dev *tl880dev);
 void tl880_ntsc_audio_dpc(struct tl880_dev *tl880dev);
@@ -408,6 +429,8 @@ void tl880_write_memory(struct tl880_dev *tl880dev, u32 mem, u32 value);
 u32 tl880_read_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit);
 void tl880_write_membits(struct tl880_dev *tl880dev, u32 mem, int high_bit, int low_bit, u32 value);
 void tl880_memcpy(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length);
+void tl880_memcpy_swab32(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length);
+void tl880_memcpy_swahw32(struct tl880_dev *tl880dev, void *src, u32 addr, size_t length);
 void tl880_clear_sdram(struct tl880_dev *tl880dev, u32 start_addr, u32 end_addr, u32 value);
 
 int tl880_init_memory(struct tl880_dev *tl880dev);

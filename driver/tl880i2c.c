@@ -6,6 +6,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880i2c.c,v $
+ * Revision 1.20  2008/06/28 02:12:39  nitrogen
+ * Importing old changes.  See ChangeLog.
+ *
  * Revision 1.19  2007/04/24 06:32:13  nitrogen
  * Changed most int/long types to explicit 32-bit sizes.  Fixed compilation and execution on 64-bit CPUs.
  *
@@ -344,6 +347,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 				break;
 		}
 
+#if 0
 		cmdval = 61250 * 16 / 1000; /* US channel 3 */
 		client->driver->command(client, VIDIOCSFREQ, &cmdval);
 		tuner = i2c_get_clientdata(client);
@@ -351,6 +355,7 @@ static int tl880_i2c_attach_inform(struct i2c_client *client)
 		printk(KERN_INFO "tl880: Tuner info: type: %u, freq: %u (want %u), has_signal: %d\n",
 				tuner->type, tuner->tv_freq, cmdval,
 				tuner->has_signal ? tuner->has_signal(client) : -1);
+#endif
 	} else if(client->driver->id == I2C_DRIVERID_MSP3400 || client->driver->id == I2C_DRIVERID_TVAUDIO) {
 		struct video_audio audio_state;
 

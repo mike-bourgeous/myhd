@@ -1,3 +1,18 @@
+2008-06-27	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Patched tools/dpc/videoout to work with set_gpio (should fix MDP-120
+	  video output).
+
+2007-11-01	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Started making improvements to the interrupt handler, with the
+	  eventual goal of separating the BH into individual functions and
+	  allowing other drivers to register callbacks.
+
+2007-09-14	Mike Bourgeous		<nitrogen at users.sourceforge.net>
+
+	* Added a tl880_memcpy_swab32 function.
+
 2007-09-12	Mike Bourgeous		<nitrogen at users.sourceforge.net>
 
 	* Increased the minimum period size in the ALSA driver to make sure

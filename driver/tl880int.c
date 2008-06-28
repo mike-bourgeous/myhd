@@ -4,6 +4,9 @@
  * (c) 2003-2007 Mike Bourgeous <nitrogen at users.sourceforge.net>
  *
  * $Log: tl880int.c,v $
+ * Revision 1.21  2008/06/28 02:12:40  nitrogen
+ * Importing old changes.  See ChangeLog.
+ *
  * Revision 1.20  2007/09/06 05:22:05  nitrogen
  * Improvements to audio support, documentation, and card memory management.
  *
@@ -88,11 +91,107 @@ int tl880_vpip_int(struct tl880_dev *tl880dev)
 	return 0;
 }
 
+int tl880_add_int_callback(struct tl880_dev *tl880dev, struct int_func_desc **list, int_func func, void *private_data)
+{
+	struct int_func_desc *new, *p;
+
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(list) || CHECK_NULL(func)) {
+		return -1;
+	}
+
+	/* TODO: Check for duplicate entries in the list */
+
+	if(CHECK_NULL(new = kmalloc(sizeof(struct int_func_desc), GFP_KERNEL))) {
+		return -1;
+	}
+	new->func = func;
+	new->private_data = private_data;
+	new->next = NULL;
+
+	if(*list == NULL) {
+		/* Empty list - insert as head element */
+		*list = new;
+	} else {
+		/* Non-empty list */
+		for(p = *list; p->next != NULL; p = p->next) ;
+		p->next = new;
+	}
+
+	return 0;
+}
+
+void tl880_remove_int_callback(struct tl880_dev *tl880dev, struct int_func_desc **list, int_func func)
+{
+	struct int_func_desc *p, *p2;
+
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(list) || CHECK_NULL(func)) {
+		return;
+	}
+
+	if(*list == NULL) {
+		/* Empty list - do nothing */
+		printk(KERN_DEBUG "tl880: Attempt to remove int callback from empty callback list\n");
+		return;
+	} else if((*list)->func == func) {
+		/* Function is in list head */
+		p = *list;
+		*list = (*list)->next;
+		kfree(p);
+	} else {
+		/* TODO: test this code, maybe add a mutex */
+		for(p = *list; p->next != NULL && p->next->func != func; p = p->next) ;
+		if(p->next != NULL && p->next->func == func) {
+			p2 = p->next;
+			p->next = p2->next;
+			kfree(p2);
+		} else {
+			printk(KERN_DEBUG "tl880: Attempt to remove nonexistant int callback\n");
+		}
+	}
+
+	return;
+}
+
+void tl880_run_callbacks(struct tl880_dev *tl880dev, struct int_func_desc *list)
+{
+	struct int_func_desc *p = list;
+
+	if(CHECK_NULL(tl880dev)) {
+		return;
+	}
+
+	while(p != NULL) {
+		p->func(tl880dev, p->private_data);
+		p = p->next;
+	}
+}
+
+/* To be used by ALSA driver - returns zero on success, -1 on error */
+int tl880_register_apu_th(struct tl880_dev *tl880dev, int_func func, void *private_data)
+{
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(func)) {
+		return -1;
+	}
+	return tl880_add_int_callback(tl880dev, &tl880dev->apu_th_funcs, func, private_data);
+}
+EXPORT_SYMBOL(tl880_register_apu_th);
+
+void tl880_unregister_apu_th(struct tl880_dev *tl880dev, int_func func)
+{
+	if(CHECK_NULL(tl880dev) || CHECK_NULL(func)) {
+		return;
+	}
+	tl880_remove_int_callback(tl880dev, &tl880dev->apu_th_funcs, func);
+}
+EXPORT_SYMBOL(tl880_unregister_apu_th);
+
 int tl880_apu_int(struct tl880_dev *tl880dev)
 {
 	if(debug > 0 || tl880dev->apu_count == 1) {
 		printk(KERN_DEBUG "tl880: apu interrupt\n");
 	}
+
+	tl880_run_callbacks(tl880dev, tl880dev->apu_th_funcs);
 
 	if(tl880_read_register(tl880dev, 0x3018) &
 			tl880_read_register(tl880dev, 0x3014) &

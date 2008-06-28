@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ./dpc/dpcsync 1 1 0
+./dpc/videoout 1
 
 sleep 3
 

@@ -1,7 +1,8 @@
 /* 
  * Toggle video passthrough for TL880-based cards
  *
- * (c) 2003 Mike Bourgeous <nitrogen@slimetech.com>
+ * (c) 2003-2008 Mike Bourgeous <nitrogen@users.sourceforge.net>
+ * (c) 2007 Jason P. Matthews
  */
 #include <stdio.h>
 #include <string.h>
@@ -13,6 +14,18 @@
 #include "tl880.h"
 
 static int memfd = 0;
+
+void set_gpio(__u32 line, __u32 state)
+{
+	__u32 regval[2];
+
+	regval[0] = line;
+	regval[1] = state;
+
+	if(ioctl(memfd, TL880IOCSETGPIO, regval) < 0) {
+		perror("Unable to set gpio");
+	}
+}
 
 void set_bits(__u32 *value, __u32 reg, int high_bit, int low_bit, __u32 setvalue)
 {
@@ -93,13 +106,19 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	
-	if(!output_enable) {
-		write_register(0x10000, 0x80);
+ 	if(output_enable) {
+ 		/*
+		 * write_regbits(0x10190, 0xa, 0xa, output_enable);
+		 * write_regbits(0x10194, 0xa, 0xa, output_enable);
+		 * write_regbits(0x10198, 0xa, 0xa, output_enable);
+		 */
+ 		set_gpio(2, 1);
+ 		set_gpio(0xd, 1);
+ 	} else {
+ 		/* write_register(0x10000, 0x80); */
+ 		set_gpio(2, 0);
+ 		set_gpio(0xd, 0);
 	}
-	
-	write_regbits(0x10190, 0xa, 0xa, output_enable);
-	write_regbits(0x10194, 0xa, 0xa, output_enable);
-	write_regbits(0x10198, 0xa, 0xa, output_enable);
 
 	unmap_regspace();
 	

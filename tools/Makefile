@@ -10,6 +10,8 @@ all: scripts striperam setalpha rampram regload regdump memdump memload memloads
 	iocreadreg iocwritereg iocsetgpio cursor rgb2ypbpr ioccursor randosd osdtest \
 	osdimage hexcount ioctl channel randram regloadslow iocread4reg
 
+	make -C dpc
+
 randram: randram.c
 	${COMPILE} randram.c -o randram
 

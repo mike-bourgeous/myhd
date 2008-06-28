@@ -218,6 +218,11 @@ static int snd_card_tl880_pcm_prepare(struct snd_pcm_substream *substream)
 	return 0;
 }
 
+static void test_int(struct tl880_dev *tl880dev, void *private_data)
+{
+	printk(KERN_DEBUG TL_MODNAME ": test_int\n");
+}
+
 static void snd_card_tl880_pcm_timer_function(unsigned long data)
 {
 	struct snd_tl880_pcm *local_pcm = (struct snd_tl880_pcm *)data;
@@ -523,6 +528,7 @@ static int snd_card_tl880_playback_copy(struct snd_pcm_substream *substream, int
 				frames_to_bytes(runtime, count));
 	}
 
+	//tl880_memcpy_swahw32(
 	tl880_memcpy(
 			local_pcm->tl880->tl880dev, 
 			src, 
@@ -652,6 +658,9 @@ static int __devinit snd_tl880_add_card(int dev)
 
 	cards[dev] = tl880;
 
+	/* Add an interrupt handler for the card */
+	tl880_register_apu_th(tl880->tl880dev, test_int, tl880);
+
 	return 0;
 }
 
@@ -660,6 +669,8 @@ static void __devexit snd_tl880_remove_card(int dev)
 	if(debug >= 2) {
 		printk(KERN_INFO TL_MODNAME ": remove_card: card=%d\n", dev);
 	}
+
+	tl880_unregister_apu_th(find_tl880(dev), test_int);
 
 	if(cards[dev] != NULL) {
 		snd_card_free(cards[dev]->card); // This frees the snd_card and the snd_card_tl880

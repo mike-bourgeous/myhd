@@ -177,6 +177,7 @@ VSC 1000-1028
 1000 used in SetVSCCtrl
      bit zero set to 1 in EnableVSC
      used in VBICaptureStream::OnSetState
+     	0x00001911 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -189,12 +190,15 @@ VSC 1000-1028
 	00000000|00000000|00000000|00100000	0 in cJanus::StartNtsc->SetVSCCtrl
 	00000000|00nnnnnn|nnnnnnnn|nn000000	0x64 in cJanus::StartNtsc->SetVSCCtrl
 
-1008 is VSC interrupt mask
+1004 toggling between 0x2 and 0x0 while watching NTSC OTA
+
+1008 is VSC interrupt mask (0x4C when watching NTSC OTA)
 100c is last queued VSC interrupt
 
 1010 is used in SetVSCMIF
      is used in cJanus::RotateVscCapFrame bits 0xb-0x8,0x3-0x0
      SetVSCMIF writes 1010 and then verifies with ReadTL850RegBits up to 5 times
+     	cycling between 0x100,0x302,0x504,0x706 while watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -204,6 +208,7 @@ VSC 1000-1028
 
 1014 is written with 0x61777 in cJanus::StartNtsc
      is used in SetVSCScaler
+     	0x00080000 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -221,6 +226,7 @@ VSC 1000-1028
 	000000nn|nnnnnnnn|00000000|00000000	arg4 in SetVSCScaler
 
 101c used in SetVSCVBI
+	0x63f0 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -229,6 +235,7 @@ VSC 1000-1028
 	0000000n|nnnnnnnn|00000000|00000000	arg4 in SetVSCVBI
 
 1020 used in SetVSCVBI
+	0x63f0 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -237,6 +244,7 @@ VSC 1000-1028
 	0000000n|nnnnnnnn|00000000|00000000	argc in SetVSCVBI
 
 1024 used in SetVSCVBI
+	0x0 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -244,6 +252,7 @@ VSC 1000-1028
 	000000nn|nnnnnnnn|nnnnnnnn|nnnnn000	arg10 in SetVSCVBI
 
 1028 used in SetVSCVBI
+	0x0 when watching NTSC OTA
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
@@ -352,6 +361,9 @@ APU (Audio Processing Unit) 3000-307c
 	would normally have been silenced with these set to 02000006.
 
 3014 is APU interrupt mask
+	Read in the APU interrupt handler
+	Written in SetTL850DeferredInterrupt (bits 2-0 and 0xc-0xb)
+
 3018 is last queued APU interrupt
 
 3020 written with 0x1000 in cJanus::InitNtscAudio
@@ -473,6 +485,8 @@ MCE 6000-603c
      bits 0x4-0x0 written with 0 in cJanus::InitMceToc
 
 6028 used in GetNextTocWord (simply returns after status wait read(6028))
+	toggling between 0x24e08e44 and 0xdbfedfaf when MyHD program is closed,
+	after watching NTSC OTA
 
 602c used in LoadQuantTable; write 0x400 then table values?
 
@@ -801,7 +815,8 @@ and external display.
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|0000nnnn	Video image byte offset in memory
+	00000000|00000000|00000000|0000nnnn	Video image byte offset in
+						memory?
 	00000000|0000nnnn|nnnnnnnn|00000000	Video image x offset on display (last bit ignored)
 	nnnnnnnn|nnnn0000|00000000|00000000	Video image y offset on display
 
@@ -853,8 +868,8 @@ Aux Scaler: 100c0-100d8
 
 100c4 - auxSetPictureOrigin
 
-	00000nnn - horizontal input offset
-	0nnn0000 - vertical input offset
+	0x00000nnn - horizontal input offset
+	0x0nnn0000 - vertical input offset
 
 100c8, 100d0 - auxSetHrzScaler
 
@@ -892,22 +907,23 @@ Aux Scaler: 100c0-100d8
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	000000nn|nnnnnnnn|nnnnnnnn|nnnn0000
+	000000nn|nnnnnnnn|nnnnnnnn|nnnn0000	Cursor offset in card memory
 
 10104 used in setCursorPosition
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000nnn|nnnnnnnn	Axis 1 (X?)
-	00000nnn|nnnnnnnn|00000000|00000000	Axis 2 (Y?)
+	00000000|00000000|00000nnn|nnnnnnnn	Cursor X position on display
+	00000nnn|nnnnnnnn|00000000|00000000	Cursor Y position on display
 
 10108 used in showCursor
+	Cursor size
 
 	11111111|11111111|00000000|00000000
 	fedcba98|76543210|fedcba98|76543210
 	--------+--------+--------+--------
-	00000000|00000000|00000000|nnnnnnnn
+	00000000|00000000|00000000|nnnnnnnn	
 	00000000|nnnnnnnn|00000000|00000000
 	000000nn|00000000|00000000|00000000
 	
@@ -983,8 +999,8 @@ register	sync value	dump value
 
 MDP-120 and MDP-130 use VPX GPIOs.  Use set_gpio function.
 
-10190	GPIO enable
-10194	GPIO output enable
+10190	GPIO enable (tristate)
+10194	GPIO output enable (direction)
 10198	GPIO output	i2c output
 1019C	GPIO input	i2c input (see i2c.txt)
 
