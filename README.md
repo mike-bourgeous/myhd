@@ -5,9 +5,10 @@ use for development.  Additionally, modern hardware is fast enough to make
 standalone MPEG-2 decoder cards completely unnecessary.
 
 ## MyHD driver and utility package
-### http://myhd.sourceforge.net/
-### https://github.com/mike-bourgeous/myhd/
-### https://mike-bourgeous.github.io/myhd/
+
+https://github.com/mike-bourgeous/myhd/
+https://mike-bourgeous.github.io/myhd/
+http://myhd.sourceforge.net/
 
 Copyright 2003-2007, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
 Licensed under the GPL.
