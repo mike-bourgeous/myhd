@@ -1,0 +1,1558 @@
+<html>
+	<head>
+		<title>MyHD Linux Driver - TL880 Register Map</title>
+		<style>
+			.regrange {
+				background-color: #ffdddd;
+				text-align: center;
+			}
+
+			.register {
+				background-color: #ddeeff;
+			}
+			
+			.regdesc {
+				font-size: 0.9em;
+				background-color: #ddffee;
+			}
+			
+		</style>
+	</head>
+	<body>
+		<center><h1>TL880 Register Map - Incomplete</h1></center>
+		<center>Written 2003, Mike Bourgeous</center>
+		<p>
+		No warranty on accuracy or fitness for any purpose is made of this data.<br>
+		This data may be freely redistributed or referenced in the creation of <br>
+		any work, as long as credit is given to those who took the time to create it. <br>
+		<br>
+		Be aware that this document will not stay current.  For the latest information,<br>
+		see the tl880doc.txt file in the doc/ directory of the TL880 Linux Driver source<br>
+		distribution.  Really this should all be put in a simple database allowing the<br>
+		automatic generation of human-readable versions in text and HTML, easy<br>
+		editing of existing entries, automatic sorting of new entries, quick changes<br>
+		to formatting, and search functionality.
+		
+		<p>
+		All numbers are in hexadecimal, except for bit descriptions (binary).
+
+		<p>
+		<b>Index:</b>
+		<blockquote>
+			<a href="#HIF">HIF 0-14</a><br>
+			<a href="#VSC">VSC 1000-1028</a><br>
+			<a href="#APU">APU 3000-307c</a><br>
+			<a href="#BLT">BLT 4000-405c</a><br>
+			<a href="#PLL">PLL 5000, 5400, 5800</a><br>
+			<a href="#MCE">MCE 6000-603c</a><br>
+			<a href="#VPIP">VPIP 7000-7030</a><br>
+			<a href="#HPIP">HPIP 8000-8024</a><br>
+			<a href="#DPC">DPC 10000-101fc</a><br>
+			<blockquote>
+				<a href="#DPC2">DPC2 10180-10184</a><br>
+				<a href="#GPIO">GPIO 10190-1019c</a><br>
+			</blockquote>
+			<a href="#MCU">MCU 18000-1fffc</a><br>
+			<a href="#TSD">TSD 20000-27ffc</a><br>
+			<a href="#MIF">MIF 28000-280dc</a>
+		</blockquote>
+
+		<table width="98%" border="1" cellspacing="0" cellpadding="2" align="center">
+			<tr><th>Section</th><th>Register</th><th>Description</th></tr>
+			<tr>
+				<td rowspan="5" valign="middle" class="regrange">HIF 0-14</td>
+				<td class="register">0</td><td class="regdesc"><a name="HIF"></a>Last queued TL880 interrupt bitfield</td>
+			</tr>
+			<tr>
+				<td class="register">4</td><td class="regdesc">Interrupt enable mask</td>
+			</tr>
+			<tr>
+				<td></td><td class="regdesc">
+					Registers 0-4: Known interrupt types are in tl880kern.c: tl880_bh().
+					If a demux interrupt is received (interrupt type | 0x400), it is important to clear
+					that bit in the interrupt enable mask before leaving the interrupt handler, and
+					only reset the bit when the TSD has been dealt with; otherwise, it will continually
+					interrupt the processor, preventing anything else from happening.  Without any data
+					fed to the TSD, reading from register 27814 after the first TSD interrupt will 
+					cause it to stop interrupting.  A similar warning applies to any other type of interrupt.
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8</td><td class="regdesc">
+					Possibly last queued interrupt from <span class="register">c</span>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">c</td><td class="regdesc">
+					Possibly an interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="10">VSC 1000-1028</td>
+				<td class="register">1000</td>
+				<td class="regdesc"><a name="VSC"></a>
+					Used in SetVSCCtrl<br>
+					Bit 0 set to 1 in EnableVSC<br>
+					Used in VBICaptureStream::OnSetState
+
+					<p>
+					<tt>
+						11111111|11111111|00000000|00000000<br>
+						fedcba98|76543210|fedcba98|76543210<br>
+						--------+--------+--------+--------<br>
+						00000000|00000000|00000000|00000001	VSC Enable (?) 0 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00000000|00000000|00000010	0 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00000000|00000000|00000100	0 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00000000|00000000|00001000	0 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00000000|00000000|00010000	1 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00000000|00000000|00100000	0 in cJanus::StartNtsc-&gt;SetVSCCtrl<br>
+						00000000|00nnnnnn|nnnnnnnn|nn000000	0x64 in cJanus::StartNtsc-&gt;SetVSCCtrl
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1008</td>
+				<td class="regdesc">
+					VSC interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100c</td>
+				<td class="regdesc">
+					Last queued VSC interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1010</td>
+				<td class="regdesc">
+					Used in cJanus::RotateVscCapFrame (bits 0xb-0x8,0x3-0x0)<br>
+					Used in SetVSCMIF<br>
+					SetVSCMIF writes the register and then verifies with ReadTL850RegBits up to 5 times
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|0000nnnn	0 in cJanus::StartNtsc-&gt;SetVSCMIF<br>
+					00000000|00000000|0000nnnn|00000000	1 in cJanus::StartNtsc-&gt;SetVSCMIF
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1014</td>
+				<td class="regdesc">
+					Written with 0x61777 in cJanus::StartNtsc<br>
+					Used in SetVSCScaler<br>
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|0000nnnn|nnnnnnnn|nnnnnnnn	(arg4 &lt;&lt; 13) / arg0 in SetVSCScaler<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;	(arg0=arg4=720 in cJanus::StartNtsc-&gt;SetVSCScaler)<br>
+					nnnnnnnn|00000000|00000000|00000000	0 in SetVSCScaler
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1018</td>
+				<td class="regdesc">
+					Written with 0x2d002d0 in cJanus::StartNtsc<br>
+					Used in SetVSCScaler
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|000000nn|nnnnnnnn	arg0 in SetVSCScaler<br>
+					000000nn|nnnnnnnn|00000000|00000000	arg4 in SetVSCScaler
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">101c</td>
+				<td class="regdesc">
+					Used in SetVSCVBI
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|000000nn|nnnnnnnn	arg0 in SetVSCVBI<br>
+					0000000n|nnnnnnnn|00000000|00000000	arg4 in SetVSCVBI
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1020</td>
+				<td class="regdesc">
+					Used in SetVSCVBI
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|000000nn|nnnnnnnn	arg8 in SetVSCVBI<br>
+					0000000n|nnnnnnnn|00000000|00000000	argc in SetVSCVBI
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1024</td>
+				<td class="regdesc">
+					Used in SetVSCVBI
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					000000nn|nnnnnnnn|nnnnnnnn|nnnnn000	arg10 in SetVSCVBI
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1028</td>
+				<td class="regdesc">
+					Used in SetVSCVBI
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					000000nn|nnnnnnnn|nnnnnnnn|nnnnn000	arg10 in SetVSCVBI
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="25">APU 3000-307c</td>
+				<td class="register">3000</td>
+				<td class="regdesc"><a name="APU"></a>
+					Used in cJanus::InitNtscAudio<br>
+					Set to zero in cJanus::DisableAPU
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|00000010	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|00000100	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|000nn000	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|0nn00000	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|0000000n|n0000000	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000nn0|00000000	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|10000000|00000000	0 in cJanus::InitNtscAudio<br>
+					00000000|000000nn|00000000|00000000	!gMspI2sMaster in cJanus::InitNtscAudio<br>
+					00000000|0000nn00|00000000|00000000	!gMspI2sMaster in cJanus::InitNtscAudio<br>
+					00000000|00nn0000|00000000|00000000	0 in cJanus::InitNtscAudio<br>
+					00000000|nn000000|00000000|00000000	0 in cJanus::InitNtscAudio<br>
+					000000nn|00000000|00000000|00000000	1 in cJanus::InitNtscAudio
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3004</td>
+				<td class="regdesc">
+					Bit 2 -- stereo/mono NTSC audio<br>
+					Set to zero in cJanus::InitNtscAudio<br>
+					Set to zero in cJanus::DisableAPU
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|0nnnnnn0	3 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|10000000	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000001|00000000	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000nn0|00000000	1 in cJanus::InitNtscAudio<br>
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3008</td>
+				<td class="regdesc">
+					Used in cJanus::InitNtscAudio
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|000nn000	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000000|0nn00000	1 in cJanus::InitNtscAudio<br>
+					00000000|00000000|00000nnn|00000000	0 in cJanus::InitNtscAudio<br>
+					00000000|00000000|0nnn0000|00000000	1 in cJanus::InitNtscAudio<br>
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">300c</td>
+				<td class="regdesc" rowspan="2">
+					Written with 0x3000000
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3010</td>
+			</tr>
+			<tr>
+				<td class="register">3014</td>
+				<td class="regdesc">
+					APU interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3018</td>
+				<td class="regdesc">
+					Last queued APU interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3020</td>
+				<td class="regdesc">
+					Written with 0x1000 in cJanus::InitNtscAudio<br>
+					Used in cJanus::NtscAudioDpc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3024</td>
+				<td class="regdesc">
+					Written with 0x10fe0 in cJanus::InitNtscAudio<br>
+					Used in cJanus::NtscAudioDpc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3028</td>
+				<td class="regdesc">
+					May be NTSC recording offset in SDRAM<br>
+					Used in cJanus::RotateVscCapFrame<br>
+					Used in cJanus::InitNtscAudio (0x1000 + gpJanus[167d8] myhd1.54)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">302c</td>
+				<td class="regdesc">
+					Written with 0x1000 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3030</td>
+				<td class="regdesc">
+					Written with 0x9000 in cJanus::InitNtscAudio
+					Used in cJanus::NtscAudioDpc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3034</td>
+				<td class="regdesc">
+					APU_IAU_IBA_REG - written with _IAU_BASE
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3038</td>
+				<td class="regdesc">
+					APU_IAU_IRA_REG - written with _IAU_BASE + 0x77fc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">303c</td>
+				<td class="regdesc">
+					APU_IAU_IEA_REG - written with _IAU_BASE
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td class="regdesc">
+					_IAU_BASE is 0x7800 bytes memory allocated with yGetTL850Memory
+				</td>
+			</tr>
+			<tr>
+				<td class="register">305c</td>
+				<td class="regdesc">
+					Written with 0xc30000c3 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="register">
+					3060
+				</td>
+				<td class="regdesc" rowspan="3">
+					Written with 0x0 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3064</td>
+			</tr>
+			<tr>
+				<td class="register">3068</td>
+			</tr>
+			<tr>
+				<td class="register">306c</td>
+				<td class="regdesc">
+					Written with 0xc30000c3 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3070</td>
+				<td class="regdesc" rowspan="3">
+					Written with 0x0 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="register">3074</td>
+			</tr>
+			<tr>
+				<td class="register">3078</td>
+			</tr>
+			<tr>
+				<td class="register">307c</td>
+				<td class="regdesc">
+					Written with 0xc30000c3 in cJanus::InitNtscAudio
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="2">BLT 4000-405c</td>
+				<td class="register">4010</td>
+				<td class="regdesc"><a name="BLT"></a>
+					BLT interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">4014</td>
+				<td class="regdesc">
+					Last queued BLT interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td rowspan="3"><!--Register Range--></td>
+				<td class="register">5000</td>
+				<td class="regdesc"><a name="PLL"></a>
+					SysPllEq
+				</td>
+			</tr>
+			<tr>
+				<td class="register">5400</td>
+				<td class="regdesc">
+					MifPllEq
+				</td>
+			</tr>
+			<tr>
+				<td class="register">5800</td>
+				<td class="regdesc">
+					DPC PLL constant
+				
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000xxx Disable sync if set(?)<br>
+					00000000|00000000|00000000|00001000 Divide by two?<br>
+					00000000|00000000|00000000|00nn0000 c - 0: off/double, 1/2: on, 3: half speed<br>
+					00000000|00000000|000nnnnn|00000000 b - 0: normal, 2: half, 6: quarter<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e: eighth, 1e: sixteenth (sometimes)<br>
+					000000nn|nnnnnnnn|00000000|00000000	a: base<br>
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="12">MCE 6000-603c</td>
+				<td class="register">6000</td>
+				<td class="regdesc"><a name="MCE"></a>
+					Used in cJanus::GetTocRdPtr, cJanus::ResetMce, cJanus::UpdateMce, cJanus::InitMce<br>
+					Bit 0 written with 1 in cJanus::InitMceToc<br>
+					Bits 0xa-0x9 and 0x8-0x8 written with write_regbits in UpdateMce<br>
+					Written with 0xc000 (bits 0xe, 0xf) in cJanus::InitMce
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6004</td>
+				<td class="regdesc">
+					Used in cJanus::GetTocRdPtr, cJanus::ResetMce, cJanus::UpdateMce, cJanus::InitMce
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6008</td>
+				<td class="regdesc">
+					MCE interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">600c</td>
+				<td class="regdesc">
+					Last queued MCE interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6014</td>
+				<td class="regdesc">
+					Used in isr_StartCodeSearch, cJanus::SearchHdrWithPacing<br>
+					Written with 3 in cJanus::isr_NonSlice_Tv
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6018</td>
+				<td class="regdesc">
+					Used in cJanus::SearchHdrWithPacing as a bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6024</td>
+				<td class="regdesc">
+					Used in InitVldShiftAmt<br>
+					Bits 0x4-0x0 written with 0 in cJanus::InitMceToc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">602c</td>
+				<td class="regdesc">
+					Used in LoadQuantTable; write 0x400 then table values?
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6030</td>
+				<td class="regdesc">
+					Written with values or'd together
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	tagContext[0xec]<br>
+					00000000|00000000|00000000|00000010	tagContext[0xe8]<br>
+					00000000|00000000|00000000|00000100	tagContext[0xe4]<br>
+					00000000|00000000|00000000|00001000	tagContext[0xdc]<br>
+					00000000|00000000|00000000|00nn0000	tagContext[0xd0]<br>
+					00000000|00000000|00000000|nn000000	tagContext[0xd4]<br>
+					00000000|00000000|00000nnn|00000000	tagContext[0x94]<br>
+					00000000|00000000|nnnnn000|00000000	tagContext[0xe0]<br>
+					00000000|0000nnnn|00000000|00000000	tagContext[0xcc]<br>
+					00000000|nnnn0000|00000000|00000000	tagContext[0xc8]<br>
+					0000nnnn|00000000|00000000|00000000	tagContext[0xc4]<br>
+					nnnn0000|00000000|00000000|00000000	tagContext[0xc0]
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6034</td>
+				<td class="regdesc">
+					Used in cJanus::GetTocRdPtr, cJanus::ResetMce, cJanus::InitMceToc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">6038</td>
+				<td class="regdesc">
+					Used in cJanus::ResetMce, cJanus::InitMceToc
+				</td>
+			</tr>
+			<tr>
+				<td class="register">603c</td>
+				<td class="regdesc">
+					Used in cJanus::ChannelChangeStep2, cJanus::InitMceToc
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="11">VPIP 7000-7030</td>
+				<td class="register">7000</td>
+				<td class="regdesc"><a name="VPIP"></a>
+					Used in cJanus::VpipSetting, cJanus::StartVpip
+				
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|000000nn<br>
+					00000000|00000000|00000000|0000nn00<br>
+					00000000|00000000|00000000|00010000	1 in cJanus::VpipSetting<br>
+					00000000|00000000|00000000|00100000	0 in cJanus::VpipSetting<br>
+					00000000|00000000|00000000|01000000	0 in cJanus::VpipSetting<br>
+					00000000|00000000|00000000|10000000	0 in cJanus::VpipSetting<br>
+					00000000|00000000|0000nnnn|00000000	3 in cJanus::VpipSetting<br>
+					00000000|00000000|00nn0000|00000000<br>
+					00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting<br>
+					00000000|00000000|01000000|00000000	1 or 0 in cJanus::VpipSetting<br>
+					00000000|00nnnnnn|00000000|00000000	3f in cJanus::VpipSetting,<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cJanus[10f94][d8] in cJanus::StartVpip<br>
+					00000000|01000000|00000000|00000000	0 in cJanus::VpipSetting (field order?)
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7004</td>
+				<td class="regdesc">
+					VPIP interrupt enable mask
+					Bit zero set to 1 in cJanus::VpipSetting
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7008</td>
+				<td class="regdesc">
+					Last queued VPIP interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">700c</td>
+				<td class="regdesc">
+					Used in cJanus::DeinterlaceTop, cJanus::NtscDpcEofService, cJanus::VpipSetting,
+					cJanus::UpdateVpipBufReg, cJanus::DeinterlaceBottom
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|0000nnnn	tagContext[1d4] in cJanus::DeinterlaceTop<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tagContext[1d4] in cJanus::DeinterlaceBottom<br>
+					00000000|00000000|0000nnnn|00000000	tagContext[368] in cJanus::DeinterlaceTop<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tagContext[1d8] in cJanus::DeinterlaceBottom<br>
+					00000000|0000nnnn|00000000|00000000	tagContext[1bc] in cJanus::DeinterlaceTop<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tagContext[1c4] in cJanus::DeinterlaceBottom<br>
+					0000nnnn|00000000|00000000|00000000	tagContext[1c0] in cJanus::DeinterlaceTop<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tagContext[1c8] in cJanus::DeinterlaceBottom
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7010</td>
+				<td class="regdesc">
+					Used in cJanus::VpipSetting
+					
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|0000nnnn|nnnnn000	0 in cJanus::VpipSetting<br>
+					0000nnnn|nnnnn000|00000000|00000000	0 in cJanus::VpipSetting
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7018</td>
+				<td class="regdesc">
+					Used in cJanus::VpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|0000nnnn|nnnn0000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">701c</td>
+				<td class="regdesc">
+					Used in cJanus::StartVpip (Written with cJanus[10f94][10])
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7020</td>
+				<td class="regdesc">
+					Used in cJanus::VpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|000000nn|nnnnnnnn	Vertical scaling ratio (1080/540 or /720)?<br>
+					00000000|000nnnnn|nnnnnn00|00000000<br>
+					nnnnnnnn|nnn00000|00000000|00000000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7024</td>
+				<td class="regdesc" rowspan="2">
+					Passed to cJanus::LoadFilterCoeffs in cJanus::VpipSetting
+				</td>
+			</tr>
+			<tr>
+				<td class="register">7028</td>
+			</tr>
+			<tr>
+				<td class="register">702c</td>
+				<td class="regdesc">
+					Used in cJanus::StartVpip(2)<br>
+					Always seems to be written first or'd with 0x80000000 (bit 0x1f), then without
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|0nnnnnnn|nnnn0000|00000000<br>
+					10000000|00000000|00000000|00000000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="9">HPIP 8000-8024</td>
+				<td class="register">8000</td>
+				<td class="regdesc"><a name="HPIP"></a>
+					Used in cJanus::HpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	HPIP enable<br>
+					00000000|00000000|00000000|00000010	0 in cJanus::HpipSetting<br>
+					00000000|00000000|00000000|00000100	0 in cJanus::HpipSetting
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8008</td>
+				<td class="regdesc">
+					HPIP interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">800c</td>
+				<td class="regdesc">
+					Last queued HPIP interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8010</td>
+				<td class="regdesc">
+					HpipBufReg(?)<br>
+					Used in cJanus::HpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|0000nnnn	tagContext[0x1a4]<br>
+					00000000|00000000|000nnnnn|00000000	tagContext[0x1a8]
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8014</td>
+				<td class="regdesc">
+					Used in cJanus::HpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|0nnnnnnn	tagContext[0x254]/16<br>
+					00000000|00000000|0nnnnnnn|00000000<br>
+					00000000|0nnnnnnn|00000000|00000000<br>
+					0nnnnnnn|00000000|00000000|00000000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8018</td>
+				<td class="regdesc">
+					Used in cJanus::HpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|0nnnnnnn	tagContext[0x254]+15/16 or +31/32
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">801c</td>
+				<td class="regdesc">
+					Used in cJanus::HpipSetting
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|000000nn|nnnnnnnn<br>
+					00000000|000nnnnn|nnnnnn00|00000000<br>
+					nnnnnnnn|nnn00000|00000000|00000000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8020</td>
+				<td class="regdesc" rowspan="2">
+					Passed to cJanus::LoadFilterCoeffs in cJanus::HpipSetting
+				</td>
+			</tr>
+			<tr>
+				<td class="register">8024</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="42">DPC 10000-101fc</td>
+				<td class="register">10000</td>
+				<td class="regdesc"><a name="DPC"></a>
+					Display options bitfield
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	Top/bottom field or top/bottom buffer<br>
+					00000000|00000000|00000000|00000010	Image display enable (BVDO)<br>
+					00000000|00000000|00000000|00000100	OSD display enable<br>
+					00000000|00000000|00000000|00001000	Cursor display enable(?)<br>
+					00000000|00000000|00000000|00010000	Aux (i.e. video card overlay) enable<br>
+					00000000|00000000|00000000|00100000	Sync enable/external display enable (not sure)<br>
+					00000000|00000000|00000000|01000000	This does something to the color.<br>
+					00000000|00000000|00000001|00000000	Color bars<br>
+					00000000|00000000|00000100|00000000	Y'PbPr color (needs other settings too)
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10004</td>
+				<td class="regdesc">
+					Status register for the video generator (?)<br>
+					Used in isr_VideoSync_Tv
+					Probably read-only (never reflects writes)
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000100	Read in isr_VideoSync_Tv
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10008</td>
+				<td class="regdesc">
+					DPC interrupt enable mask
+
+					<p>
+					<tt>
+					00000100 isr_VideoSync (vertical retrace?)<br>
+					00100000 IntDpcEof0 (end of top field?)<br>
+					01000000 IntDpcEof1 (end of bottom field?)<br>
+					<br>
+					bit 9 may be preview client/aux video?<br>
+					bit 0xa may be capture client/aux video?
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1000c</td>
+				<td class="regdesc">
+					Last queued DPC interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10014</td>
+				<td class="regdesc">
+					DPC sync register 1
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000001	A<br>
+					00000000|00000000|00000000|00000010	B<br>
+					00000000|00000000|00000000|00000100	C<br>
+					00000000|00000000|00000000|00001000	D - Progressive Scan<br>
+					00000000|00000000|nnnnnnnn|nn000000	E<br>
+					00000nnn|nnnnnnnn|00000000|00000000	F - Horizontal Size<br>
+					00001000|00000000|00000000|00000000	G<br>
+					00010000|00000000|00000000|00000000	H<br>
+					00100000|00000000|00000000|00000000	I<br>
+					01000000|00000000|00000000|00000000	J
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10018</td>
+				<td class="regdesc">
+					DPC sync register 2 - Horizontal scan parameters, sync polarity
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|0000000n|nnnnnnnn	K - Horizontal Back Porch<br>
+					00000000|00000000|00000010|00000000	L - Invert Hsync<br>
+					00000000|00000000|00000100|00000000	M - Invert Vsync<br>
+					00000000|00000nnn|nnnn0000|00000000	N - Horizontal Sync Length<br>
+					000nnnnn|nnnn0000|00000000|00000000	O - Horizontal Front Porch
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1001c</td>
+				<td class="regdesc">
+					DPC sync register 3 - First/only field vertical scan parameters
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000nnn	P - Vertical Sync Length 1<br>
+					00000000|00000000|0000nnnn|nnnn0000	Q - Vertical Front Porch 1<br>
+					00000000|0nnnnnnn|nnnn0000|00000000	R - Vertical Size 1<br>
+					0000nnnn|00000000|00000000|00000000	S - Vertical Back Porch 1<br>
+					00010000|00000000|00000000|00000000	T
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10020</td>
+				<td class="regdesc">
+					DPC sync register 4 - Second field vertical scan parameters
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|00000nnn	U - Vertical Sync Length 2<br>
+					00000000|00000000|0000nnnn|nnnn0000	V - Vertical Front Porch 2<br>
+					00000000|0nnnnnnn|nnnn0000|00000000	W - Vertical Size 2<br>
+					0000nnnn|00000000|00000000|00000000	X - Vertical Back Porch 2
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10024</td>
+				<td class="regdesc">
+					DPC sync register 6
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00nnnnnn|nnnnnnnn|nnnnnnnn	Y<br>
+					00000001|00000000|00000000|00000000	Z<br>
+					nnnn0000|00000000|00000000|00000000	AA
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10028</td>
+				<td class="regdesc">
+					DPC sync register 5
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|0000nnnn|nnnnnnnn	BB<br>
+					00000001|00000000|00000000|00000000	CC
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td><!-- Register --></td>
+				<td class="regdesc">
+					Register <span class="register">5800</span> is <tt>DD</tt>.  Letters correspond to columns in
+					the <a href="modelist.html">TL880 Mode List</a>.
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10040</td>
+				<td class="regdesc">
+					Bottom two bits used in DoProgressiveFrame as a bitfield, apparently some kind of
+					register selection for <span class="register">10068</span>, <span class="register">1006c</span><br>
+					Used in cJanus::isr_NonSlice_Tv
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|000000nn<br>
+					00000000|00000000|00000000|00100000	1 in cJanus::isr_NonSlice_Tv
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10048</td>
+				<td class="regdesc">
+					DispBufReg(?) or NtscDispFrame?<br>
+					Bits 0x1e-0x14,0x11-0x8,0x7-0x4,0x3-0x0 used in cJanus::RotateNtscDispFrame
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10068</td>
+				<td class="regdesc" rowspan="2">
+					Used in DoProgressiveFrame with g_vsCtlReg
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1006c</td>
+			</tr>
+			<tr>
+				<td class="register">10070</td>
+				<td class="regdesc">
+					Used at end of DoProgressiveFrame
+				</td>
+			</tr>
+			<tr>
+				<td><!-- Register --></td>
+				<td class="regdesc">
+					Registers <span class="register">10080</span> to 
+					<span class="register">100ac</span> are the OSD context
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10080</td>
+				<td class="regdesc">
+					Seems to be a TL880 memory offset - changes palettes(?)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10084</td>
+				<td class="regdesc">
+					Seems to be a TL880 memory offset - changes OSD image(?)<br>
+					Something like "sdram offset" - used in overlay display lists
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10094</td>
+				<td class="regdesc">
+					Used in showOverlays
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|nnnnnnnn|00000000	0x80 in showOverlays
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100c0</td>
+				<td class="regdesc">
+					Used in auxSetVertScaler<br>
+					Bit 2: used in JanusProperty::SetProperty near a reference to g_auxCompVideo<br>
+					Bit 5: CDma::DisableDmaHW (set to 0), CDma::DmaRelatedHWSettings (set to 1)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100c4</td>
+				<td class="regdesc">
+					Used in auxSetPictureOrigin
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100c8</td>
+				<td class="regdesc">
+					Used in auxSetHrzScaler
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100cc</td>
+				<td class="regdesc">
+					Used in auxSetVertScaler
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100d0</td>
+				<td class="regdesc">
+					Used in auxSetHrzScaler
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100d4</td>
+				<td class="regdesc" rowspan="2">
+					Used in auxSetVertScaler
+				</td>
+			</tr>
+			<tr>
+				<td class="register">100d8</td>
+			</tr>
+			<tr>
+				<td class="register">10100</td>
+				<td class="regdesc">
+					Used in showCursor
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					000000nn|nnnnnnnn|nnnnnnnn|nnnn0000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10104</td>
+				<td class="regdesc">
+					Used in setCursorPosition
+
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000nnn|nnnnnnnn	Axis 1 (X?)<br>
+					00000nnn|nnnnnnnn|00000000|00000000	Axis 2 (Y?)
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10108</td>
+				<td class="regdesc">
+					Used in showCursor
+				
+					<p>
+					<tt>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000000|nnnnnnnn<br>
+					00000000|nnnnnnnn|00000000|00000000<br>
+					000000nn|00000000|00000000|00000000
+					</tt>
+				</td>
+			</tr>
+			<tr>
+				<td class="register">
+					10140<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					10180
+				</td>
+				<td class="regdesc">
+					Written with Y'PbPr values in OSDProperty::SetProperty
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10180</td>
+				<td class="regdesc" rowspan="2"><a name="DPC2"></a>
+					<span class="regrange">DPC2</span>: 10180 and 10184 do some weird stuff..  
+					10180 seems to possibly be a register select/status, and 10184 is 
+					register/status content.
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10184</td>
+			</tr>
+			<tr>
+				<td class="regrange">GPIO 10190-1019c</td>
+				<td class="regdesc"><a name="GPIO"></a>
+					General Purpose Input/Output pins on the TL880 chip
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10190</td>
+				<td class="regdesc">
+					GPIO enable
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10194</td>
+				<td class="regdesc">
+					GPIO output enable (I/O direction)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">10198</td>
+				<td class="regdesc">
+					GPIO output<br>
+					I<sup>2</sup>C output<br>
+					Used in cNxtVSB::NxtCheckChannel
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1019c</td>
+				<td class="regdesc">
+					GPIO input<br>
+					I<sup>2</sup>C input
+				</td>
+			</tr>
+			<tr>
+				<td><!-- Register --></td>
+				<td class="regdesc">
+
+					<p>
+					<tt>
+					MyHD: to turn on external display:<br>
+					<br>
+					register&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sync value&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dump value<br>
+					--------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;----------<br>
+					&nbsp;&nbsp;&nbsp;10190&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x00000400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x0cffffff<br>
+					&nbsp;&nbsp;&nbsp;10194&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x00000400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x000eff00<br>
+					&nbsp;&nbsp;&nbsp;10198&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x00000400&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0x000e5d00<br>
+					</tt>
+
+					<p>
+					<tt>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MyHD MDP-110 GPIO<br>
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------<br>
+					11111111|11111111|00000000|00000000<br>
+					fedcba98|76543210|fedcba98|76543210<br>
+					--------+--------+--------+--------<br>
+					00000000|00000000|00000100|00000000	Video passthrough<br>
+					00000000|00000001|00000000|00000000	SDA Read 1<br>
+					00000000|00000010|00000000|00000000	SDA Write 1<br>
+					00000000|00000100|00000000|00000000	SCL Write 1, SCL Read 1<br>
+					00000000|00001000|00000000|00000000	cNxtVsb::NxtCheckChannel<br>
+					00000000|01000000|00000000|00000000	SDA Write 2, SDA Read 2<br>
+					00000000|10000000|00000000|00000000	SCL Write 2, SCL Read 2<br>
+					00000100|00000000|00000000|00000000	SCL Write 0, SCL Read 0<br>
+					00001000|00000000|00000000|00000000	SDA Write 0, SDA Read 0
+					</tt>
+
+					<p>
+					GPIO also controls sampling clock
+				</td>
+			</tr>
+			<tr>
+				<td class="register">101a0</td>
+				<td class="regdesc" rowspan="3">
+					Zeros for bi-level (VGA) sync, something else for tri-level sync
+				</td>
+			</tr>
+			<tr>
+				<td class="register">101a4</td>
+			</tr>
+			<tr>
+				<td class="register">101a8</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="15">
+					MCU 18000-1fffc
+				</td>
+				<td class="register">18000</td>
+				<td class="regdesc"><a name="MCU"></a>
+					MCU firmware start (Length usually (always?) 0x72a registers)<br>
+					MCU instructions are two bytes wide; one instruction is written to
+					each four byte register.
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c000</td>
+				<td class="regdesc">
+					MCU data start (Length always 0x200 registers)<br>
+					MCU data is in two byte words; one word is written to each four byte
+					register.
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c2c0</td>
+				<td class="regdesc" rowspan="4">
+					Used in UpdateMce
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c2c4</td>
+			</tr>
+			<tr>
+				<td class="register">1c2c8</td>
+			</tr>
+			<tr>
+				<td class="register">1c2cc</td>
+			</tr>
+			<tr>
+				<td class="register">
+					1c2d4<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					1c2ec</td>
+				<td class="regdesc">
+					Used in UpdateMce
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c2f0</td>
+				<td class="regdesc">
+					Bit zero - startmcu<br>
+					Set to zero in firmware upload
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c2f4</td>
+				<td class="regdesc">
+					MCU interrupt enable mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c2fc</td>
+				<td class="regdesc" rowspan="2">
+					Used in UpdateMce
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1c300</td>
+			</tr>
+			<tr>
+				<td class="register">1c304</td>
+				<td class="regdesc">
+					Interrupt enable mask of some type (?)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1d800</td>
+				<td class="regdesc">
+					Used in cJanus::RestartMce, cJanus::UpdateMce, cJanus::ResetMcu<br>
+					Set to 5 before firmware upload, 6 after firmware upload
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1d804</td>
+				<td class="regdesc">
+					Used in cJanus::RestartMce, cJanus::UpdateMce, cJanus::ResetMcu<br>
+					Set to zero in firmware upload
+				</td>
+			</tr>
+			<tr>
+				<td class="register">1d810</td>
+				<td class="regdesc">
+					MCU status (?)
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="23">
+					TSD 20000-27ffc
+				</td>
+				<td class="register">20000</td>
+				<td class="regdesc"><a name="TSD"></a>
+					TSD firmware start (Length varies from card to card)<br>
+					MyHD Length 0x701 (1.55.3.9e)<br>
+					WinTV-HD Length 0x600 (2120114)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">
+					24000<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					257fc
+				</td>
+				<td class="regdesc">
+					Used in demux_init
+				</td>
+			</tr>
+			<tr>
+				<td class="register">24040</td>
+				<td class="regdesc">
+					Used in Demux_tsdStart/Stop
+				</td>
+			</tr>
+			<tr>
+				<td class="register">24048</td>
+				<td class="regdesc">
+					Interrupt enable mask of some type, maybe TSD (?)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">
+					24060<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					24078
+				</td>
+				<td class="regdesc">
+					Used in Demux_UpdatePCR
+				</td>
+			</tr>
+			<tr>
+				<td class="register">240a4</td>
+				<td class="regdesc">
+					Used in Demux_commandTableWrite
+				</td>
+			</tr>
+			<tr>
+				<td class="register">247e8</td>
+				<td class="regdesc">
+					<span class="register">247e8</span> plus some offset is used in SetChannelWritePtr
+				</td>
+			</tr>
+			<tr>
+				<td class="register">24be8</td>
+				<td class="regdesc">
+					<span class="register">24be8</span> plus some offset is used in SetPesChannelWritePtr
+				</td>
+			</tr>
+			<tr>
+				<td class="register">24d68</td>
+				<td class="regdesc">
+					<span class="register">24d68</span>.. used in InitPSI
+				</td>
+			</tr>
+			<tr>
+				<td class="register">
+					25718<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					25724
+				</td>
+				<td class="regdesc">
+					Used in _auxLdDscMbox (called in VopLoadDescriptor)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">25728</td>
+				<td class="regdesc">
+					Used in _auxLdDscMbox (called in VopLoadDescriptor)<br>
+					Used in _auxTstDscrMboxEmpty
+				</td>
+			</tr>
+			<tr>
+				<td class="register">2573c</td>
+				<td class="regdesc">
+					Used in _auxTstCurLineCnt
+				</td>
+			</tr>
+			<tr>
+				<td class="register">25740</td>
+				<td class="regdesc">
+					Used in _auxEnable/DisableDscInt, may be an interrupt mask
+				</td>
+			</tr>
+			<tr>
+				<td class="register">25744</td>
+				<td class="regdesc">
+					Used in auxSetAuxReset
+				</td>
+			</tr>
+			<tr>
+				<td class="register">25750</td>
+				<td class="regdesc" rowspan="2">
+					Used in _auxLdDscMbox (called in VopLoadDescriptor)
+				</td>
+			</tr>
+			<tr>
+				<td class="register">25754</td>
+			</tr>
+			<tr>
+				<td class="register">
+					25768<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					257e8
+				</td>
+				<td class="regdesc">
+					Demux command table?
+				</td>
+			</tr>
+			<tr>
+				<td class="register">26800</td>
+				<td class="regdesc" rowspan="2">
+					Used in Demux_stop and demux_init
+				</td>
+			</tr>
+			<tr>
+				<td class="register">26804</td>
+			</tr>
+			<tr>
+				<td class="register">27804</td>
+				<td class="regdesc" rowspan="2">
+					Used in Demux_GetSTC (([27804] &gt;&gt; 0xf) | ([27808] &lt;&lt; 0x11))<br>
+					Probably read-only
+				</td>
+			</tr>
+			<tr>
+				<td class="register">27808</td>
+			</tr>
+			<tr>
+				<td class="register">27810</td>
+				<td class="regdesc">
+					Written with _setValue in Demux_UpdatePCR<br>
+					Written with 0xa000 in cJanus::SetNtscAudioClock
+				</td>
+			</tr>
+			<tr>
+				<td class="register">27814</td>
+				<td class="regdesc">
+					Last queued TSD interrupt bitfield
+				</td>
+			</tr>
+			<tr>
+				<td class="regrange" rowspan="2">
+					MIF 28000-280dc
+				</td>
+				<td class="register"><a name="MIF"></a>
+					28040<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					&nbsp;&nbsp;&nbsp;&sdot;<br>
+					2807c
+				</td>
+				<td class="regdesc">
+					Used in cJanus::PipMifBufSetting
+				</td>
+			</tr>
+			<tr>
+				<td class="register">280dc</td>
+				<td class="regdesc">
+					Written with 0x31415926 in cJanus::RestartMce
+				</td>
+			</tr>
+
+<tr><td class="regdesc" colspan="3">
+<pre>
+
+
+Some of the values sometimes written to a few registers:
+00000004 0000009B
+00001010 00000100
+00001010 00000102
+00001010 00000302
+00001010 00000304
+00001010 00000504
+00001010 00000506
+00001010 00000700
+00001010 00000706
+00007000 00000015
+00007000 007DE310
+0000700C 09080700
+0000701C 00000090
+0000701C 00000092
+0000701C 03E07C90
+0000701C 03E07C92
+0000701C 07C0F892
+0000701C 0F81F090
+0000701C 0F81F092
+0000702C 00000000
+0000702C 80000000
+00010000 00000032
+00010000 00000033
+00010048 00C00098
+00010048 00C000BA
+00025718 00001F54
+0002571C 0000A280
+00025720 0000A000
+00025724 0000A000
+00025728 0000000C
+00025758 0000FF14
+
+
+The OSD addresses all get OR'd with 0x52300000.
+
+		</pre>
+		</td></tr>
+	</table>
+
+	</body>
+</html>
+
+
