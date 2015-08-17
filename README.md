@@ -11,7 +11,7 @@ https://mike-bourgeous.github.io/myhd/
 http://myhd.sourceforge.net/
 
 Copyright 2003-2007, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
-Licensed under the GPL.
+Licensed under the GPL.  See file headers for additional copyright notices.
 
 #### Project layout
 
