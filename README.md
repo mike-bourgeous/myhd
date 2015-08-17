@@ -1,19 +1,33 @@
-MyHD driver and utility package  --  http://myhd.sourceforge.net/
+**Note: this project will not be resumed.**
+
+My TL880-based card, a MyHD MDP-110, was stolen and thus I have no hardware to
+use for development.  Additionally, modern hardware is fast enough to make
+standalone MPEG-2 decoder cards completely unnecessary.
+
+## MyHD driver and utility package
+### http://myhd.sourceforge.net/
+### https://github.com/mike-bourgeous/myhd/
+### https://mike-bourgeous.github.io/myhd/
+
 Copyright 2003-2007, Mike Bourgeous (some 2003, Mark Lehrer; see driver/README)
 Licensed under the GPL.
 
-doc/
-	These files describe the known features of the chip
-driver/
-	Kernel module (no video capture yet - simply allows non-root to access
-	the card and enables I2C)
-tools/
-	Use these to "play" with the card and figure out how stuff works.
-tl880fb/
-	Preliminary framebuffer driver.
+#### Project layout
+
+- **doc/**
+  - These files describe the known features of the chip
+- **driver/**
+  - Kernel module (no video capture yet - simply allows non-root to access
+    the card and enables I2C)
+- **tools/**
+  - Use these to "play" with the card and figure out how stuff works.
+- **tl880fb/**
+  - Preliminary framebuffer driver.
+
+#### Description
 
 There are step-by-step instructions on compiling the driver and running tests at
-http://myhd.sourceforge.net/howtohelp.php.
+https://mike-bourgeous.github.io/myhd/howtohelp.php.
 
 For more information, please view the mailing list archives.  Also read all the
 README files in this driver distribution (find . -name README).  Reading source
@@ -31,20 +45,13 @@ To test the I2C bus(es), you will need the lm_sensors package.  Load the
 i2c-dev, i2c-algo-bit, and tl880.ko kernel modules, then run i2cdetect for each
 bus displayed in the kernel message log (each card has a different number of
 buses).  If you have any output beside all XX's, note the address and bus
-number, and run i2cdump [bus] [address].  For example, the NXT2000 on the MyHD
+number, and run i2cdump \[bus\] \[address\].  For example, the NXT2000 on the MyHD
 has address 0x14 on bus 1, so i2cdetect 1 shows a response from address 0xa, and
 i2cdump 1 0xa shows the registers of the NXT2000.
 
 
-Still needed:
+#### Still needed:
 
-Someone with PCI DMA experience.
-
-Someone who can figure out how to use WinDBG to peer into the Windows drivers.
-
-Lots and lots of time.
-
-
-
-vim: tw=80
-
+- Someone with PCI DMA experience.
+- Someone who can figure out how to use WinDBG to peer into the Windows drivers.
+- Lots and lots of time.
