@@ -6,7 +6,7 @@
 	<head>
 		<title>MyHD Linux Driver - MyHD/MyIRC Remote Receiver</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-		<link rel="stylesheet" type="text/css" href="/style/myhd_style.css">
+		<link rel="stylesheet" type="text/css" href="style/myhd_style.css">
 	</head>
 	<body bgcolor="#000000" text="black" link="#3070c0" vlink="#1060c0" class="mainclass">
 		<table width="100%" border="0" cellspacing="2" cellpadding="1" class="pagetable" bgcolor="white">
@@ -21,33 +21,33 @@
 			<b>MyHD Linux Driver</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/index.html">Home</a>
+			<a href="index.html">Home</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/status.html">Development Status</a>
+			<a href="status.html">Development Status</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/howtohelp.html">How to Help</a>
+			<a href="howtohelp.html">How to Help</a>
 		</td></tr>
 <!--
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/testcd.html">Bootable Test CD</a>
+			<a href="testcd.html">Bootable Test CD</a>
 		</td></tr>
 -->
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/tl880spy.html">TL880Spy Tool</a>
+			<a href="tl880spy.html">TL880Spy Tool</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/myirc.html">MyHD IR Receiver</a>
+			<a href="myirc.html">MyHD IR Receiver</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/juddertest.html">Judder Test for Linux</a>
+			<a href="juddertest.html">Judder Test for Linux</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/download.html">Downloads</a>
+			<a href="download.html">Downloads</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/chipsets.html">Card Chipset List</a>
+			<a href="chipsets.html">Card Chipset List</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
 			<a href="http://www.sourceforge.net/mail/?group_id=75027">Mailing Lists</a>
@@ -67,19 +67,19 @@
 			<b>News</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New TL880Spy release:</i><br><a href="/download.html#spy1.3">TL880Spy 1.3</a><br>
+			<i>New TL880Spy release:</i><br><a href="download.html#spy1.3">TL880Spy 1.3</a><br>
 			<font size="-2">Aug. 11, 2007 16:25:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.html#0.2.3">MyHD 0.2.3</a><br>
+			<i>New release:</i><br><a href="download.html#0.2.3">MyHD 0.2.3</a><br>
 			<font size="-2">Mar. 28, 2007 02:20:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.html#0.2.2">MyHD 0.2.2</a><br>
+			<i>New release:</i><br><a href="download.html#0.2.2">MyHD 0.2.2</a><br>
 			<font size="-2">Jan. 23, 2007 00:35:00 MST</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New tool release:</i><br><a href="/download.html#spy1.2">TL880Spy 1.2</a><br>
+			<i>New tool release:</i><br><a href="download.html#spy1.2">TL880Spy 1.2</a><br>
 			<font size="-2">Jan. 19, 2007 19:30:00 MST</font>
 		</td></tr>
 	</table>
@@ -89,7 +89,7 @@
 					
 				</td>
 				<td width="100%" valign="top" class="mainclass">
-				<center><img src="/images/myhd.png" alt="MyHD/MyIRC Remote Receiver"></center><br>
+				<center><img src="images/myhd.png" alt="MyHD/MyIRC Remote Receiver"></center><br>
 
 <!-- Begin main text -->
 
@@ -119,7 +119,7 @@ consequence.
 <p>To make sure Linux could interact with the receiver, I wrote a simple test
 program to initialize the receiver and dump all remote data.  The program may be
 useful to those who wish to test any irman or MyHD/MyIRC serial port receiver.
-It may be downloaded <a href="/download.html#myirc">here</a>.
+It may be downloaded <a href="download.html#myirc">here</a>.
 
 <p>After verifying that the receiver worked with Linux's serial driver and that
 the data received by my test program was identical to that shown in my
@@ -138,7 +138,7 @@ irman -d /dev/ttyS<i>?</i></code> to the lircd command line.  On Gentoo, for
 example, I modified the <code>LIRCD_OPTS</code> line in /etc/conf.d/lircd to
 read <code>LIRCD_OPTS="-d /dev/ttyS0 -H irman"</code>.
 <li>Create a configuration file for your remote, or download
-<a href="/MyHD.lirc">this one</a> for the MyHD remote.  <br><i><b>Important:</b> the
+<a href="MyHD.lirc">this one</a> for the MyHD remote.  <br><i><b>Important:</b> the
 MyHD receiver is not compatible with remote definitions generated with another
 receiver.  You must create your own remote definitions using irrecord, or
 download definitions which were created with the MyIRC receiver.</i>
@@ -168,15 +168,15 @@ Infrared Receiver (UIR/irman)</a></center>
 </td></tr>
 <tr><td>
 <center><font size="-1"><i>
-<a href="/images/myirc_top.jpg"><img src="/images/myirc_top.jpg" border=1 width="230" height="400" alt="MyIRC Top View"></a>
-<br><a href="/images/myirc_top.jpg">Top View</a>
+<a href="images/myirc_top.jpg"><img src="images/myirc_top.jpg" border=1 width="230" height="400" alt="MyIRC Top View"></a>
+<br><a href="images/myirc_top.jpg">Top View</a>
 </i></font></center>
 </td>
 <td>
 <center><font size="-1"><i>
-<a href="/images/myirc_bottom.jpg"><img src="/images/myirc_bottom.jpg"
+<a href="images/myirc_bottom.jpg"><img src="images/myirc_bottom.jpg"
 border=1 width="240" height="383" alt="MyIRC Bottom View"></a>
-<br><a href="/images/myirc_bottom.jpg">Bottom View</a>
+<br><a href="images/myirc_bottom.jpg">Bottom View</a>
 </i></font></center>
 </td>
 </tr>
