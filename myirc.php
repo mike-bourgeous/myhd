@@ -21,33 +21,33 @@
 			<b>MyHD Linux Driver</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/index.php">Home</a>
+			<a href="/index.html">Home</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/status.php">Development Status</a>
+			<a href="/status.html">Development Status</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/howtohelp.php">How to Help</a>
+			<a href="/howtohelp.html">How to Help</a>
 		</td></tr>
 <!--
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/testcd.php">Bootable Test CD</a>
+			<a href="/testcd.html">Bootable Test CD</a>
 		</td></tr>
 -->
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/tl880spy.php">TL880Spy Tool</a>
+			<a href="/tl880spy.html">TL880Spy Tool</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/myirc.php">MyHD IR Receiver</a>
+			<a href="/myirc.html">MyHD IR Receiver</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/juddertest.php">Judder Test for Linux</a>
+			<a href="/juddertest.html">Judder Test for Linux</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/download.php">Downloads</a>
+			<a href="/download.html">Downloads</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/chipsets.php">Card Chipset List</a>
+			<a href="/chipsets.html">Card Chipset List</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
 			<a href="http://www.sourceforge.net/mail/?group_id=75027">Mailing Lists</a>
@@ -67,19 +67,19 @@
 			<b>News</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New TL880Spy release:</i><br><a href="/download.php#spy1.3">TL880Spy 1.3</a><br>
+			<i>New TL880Spy release:</i><br><a href="/download.html#spy1.3">TL880Spy 1.3</a><br>
 			<font size="-2">Aug. 11, 2007 16:25:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.php#0.2.3">MyHD 0.2.3</a><br>
+			<i>New release:</i><br><a href="/download.html#0.2.3">MyHD 0.2.3</a><br>
 			<font size="-2">Mar. 28, 2007 02:20:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.php#0.2.2">MyHD 0.2.2</a><br>
+			<i>New release:</i><br><a href="/download.html#0.2.2">MyHD 0.2.2</a><br>
 			<font size="-2">Jan. 23, 2007 00:35:00 MST</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New tool release:</i><br><a href="/download.php#spy1.2">TL880Spy 1.2</a><br>
+			<i>New tool release:</i><br><a href="/download.html#spy1.2">TL880Spy 1.2</a><br>
 			<font size="-2">Jan. 19, 2007 19:30:00 MST</font>
 		</td></tr>
 	</table>
@@ -119,7 +119,7 @@ consequence.
 <p>To make sure Linux could interact with the receiver, I wrote a simple test
 program to initialize the receiver and dump all remote data.  The program may be
 useful to those who wish to test any irman or MyHD/MyIRC serial port receiver.
-It may be downloaded <a href="/download.php#myirc">here</a>.
+It may be downloaded <a href="/download.html#myirc">here</a>.
 
 <p>After verifying that the receiver worked with Linux's serial driver and that
 the data received by my test program was identical to that shown in my

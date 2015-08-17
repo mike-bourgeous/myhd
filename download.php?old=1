@@ -21,33 +21,33 @@
 			<b>MyHD Linux Driver</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/index.php">Home</a>
+			<a href="/index.html">Home</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/status.php">Development Status</a>
+			<a href="/status.html">Development Status</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/howtohelp.php">How to Help</a>
+			<a href="/howtohelp.html">How to Help</a>
 		</td></tr>
 <!--
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/testcd.php">Bootable Test CD</a>
+			<a href="/testcd.html">Bootable Test CD</a>
 		</td></tr>
 -->
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/tl880spy.php">TL880Spy Tool</a>
+			<a href="/tl880spy.html">TL880Spy Tool</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/myirc.php">MyHD IR Receiver</a>
+			<a href="/myirc.html">MyHD IR Receiver</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/juddertest.php">Judder Test for Linux</a>
+			<a href="/juddertest.html">Judder Test for Linux</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/download.php">Downloads</a>
+			<a href="/download.html">Downloads</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/chipsets.php">Card Chipset List</a>
+			<a href="/chipsets.html">Card Chipset List</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
 			<a href="http://www.sourceforge.net/mail/?group_id=75027">Mailing Lists</a>
@@ -397,7 +397,7 @@
 <a name="spy1.0"></a><a name="spy1.0beta"></a><h3>TL880Spy 1.0beta</h3>
 <b>Release notes:</b><br>
 <blockquote>
-	&nbsp;&nbsp;&nbsp;&nbsp;This initial release of the <a href="/tl880spy.php">TL880Spy</a> Windows
+	&nbsp;&nbsp;&nbsp;&nbsp;This initial release of the <a href="/tl880spy.html">TL880Spy</a> Windows
 	tweak tool should be fully functional.  It is based on the BtSpy tool
 	from the <a href="http://btwincap.sourceforge.net/">btwincap</a> Open
 	Source Windows BT8xx capture driver.  This contains modified code from
@@ -439,7 +439,7 @@
 <b>Release notes:</b><br>
 <blockquote>
 	&nbsp;&nbsp;&nbsp;&nbsp;This first release of the Judder Test for Linux
-	is fully functional.  See the <a href="/juddertest.php">Judder Test</a>
+	is fully functional.  See the <a href="/juddertest.html">Judder Test</a>
 	page for usage information.  This is a command line tool.</blockquote>
 <br>
 <b>Known issues:</b><br>

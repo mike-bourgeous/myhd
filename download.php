@@ -21,33 +21,33 @@
 			<b>MyHD Linux Driver</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/index.php">Home</a>
+			<a href="/index.html">Home</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/status.php">Development Status</a>
+			<a href="/status.html">Development Status</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/howtohelp.php">How to Help</a>
+			<a href="/howtohelp.html">How to Help</a>
 		</td></tr>
 <!--
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/testcd.php">Bootable Test CD</a>
+			<a href="/testcd.html">Bootable Test CD</a>
 		</td></tr>
 -->
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/tl880spy.php">TL880Spy Tool</a>
+			<a href="/tl880spy.html">TL880Spy Tool</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/myirc.php">MyHD IR Receiver</a>
+			<a href="/myirc.html">MyHD IR Receiver</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/juddertest.php">Judder Test for Linux</a>
+			<a href="/juddertest.html">Judder Test for Linux</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/download.php">Downloads</a>
+			<a href="/download.html">Downloads</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
-			<a href="/chipsets.php">Card Chipset List</a>
+			<a href="/chipsets.html">Card Chipset List</a>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="menuitem">
 			<a href="http://www.sourceforge.net/mail/?group_id=75027">Mailing Lists</a>
@@ -67,19 +67,19 @@
 			<b>News</b>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New TL880Spy release:</i><br><a href="/download.php#spy1.3">TL880Spy 1.3</a><br>
+			<i>New TL880Spy release:</i><br><a href="/download.html#spy1.3">TL880Spy 1.3</a><br>
 			<font size="-2">Aug. 11, 2007 16:25:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.php#0.2.3">MyHD 0.2.3</a><br>
+			<i>New release:</i><br><a href="/download.html#0.2.3">MyHD 0.2.3</a><br>
 			<font size="-2">Mar. 28, 2007 02:20:00 MDT</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New release:</i><br><a href="/download.php#0.2.2">MyHD 0.2.2</a><br>
+			<i>New release:</i><br><a href="/download.html#0.2.2">MyHD 0.2.2</a><br>
 			<font size="-2">Jan. 23, 2007 00:35:00 MST</font>
 		</td></tr>
 		<tr><td align="center" valign="middle" class="newsitem">
-			<i>New tool release:</i><br><a href="/download.php#spy1.2">TL880Spy 1.2</a><br>
+			<i>New tool release:</i><br><a href="/download.html#spy1.2">TL880Spy 1.2</a><br>
 			<font size="-2">Jan. 19, 2007 19:30:00 MST</font>
 		</td></tr>
 	</table>
@@ -97,9 +97,9 @@
 <br>
 <a href="http://www.sourceforge.net/project/showfiles.php?group_id=75027">SourceForge File Releases Page</a> - All file releases<br>
 <a href="http://myhd.sourceforge.net/myhd-debuglogs.tar.bz2">Windows Driver Debug Logs</a> - Register dumps and debug logs from the MyHD Windows driver<br>
-<a href="/download.php#driver">MyHD/TL880 Driver</a> - TL880 driver releases<br>
-<a href="/download.php#tl880spy">TL880Spy</a> - TL880 card tweak tool for Windows<br>
-<a href="/download.php#judder">Judder Test for Linux</a> - Tool for testing display/video card interaction
+<a href="/download.html#driver">MyHD/TL880 Driver</a> - TL880 driver releases<br>
+<a href="/download.html#tl880spy">TL880Spy</a> - TL880 card tweak tool for Windows<br>
+<a href="/download.html#judder">Judder Test for Linux</a> - Tool for testing display/video card interaction
 
 <!-- Driver -->
 <a name="driver"></a><center><h1>Download TL880 Driver</h1></center>
@@ -304,7 +304,7 @@
 	<li>myhd-0-1-99-1 - CVS tag (note that anonymous CVS is at least 24 hours out of date)
 </ul>
 <a name="old"></a><br><hr width="25%" size="1" align="center"><center><b>Old Driver Releases</b></center>
-<center><a href="/download.php?old=1#old">Show Old Releases</a></center>
+<center><a href="/download.html?old=1#old">Show Old Releases</a></center>
 <!-- TL880Spy -->
 <a name="tl880spy"></a><center><h1>Download TL880Spy Card Analyzer for Windows</h1></center>
 
@@ -397,7 +397,7 @@
 <a name="spy1.0"></a><a name="spy1.0beta"></a><h3>TL880Spy 1.0beta</h3>
 <b>Release notes:</b><br>
 <blockquote>
-	&nbsp;&nbsp;&nbsp;&nbsp;This initial release of the <a href="/tl880spy.php">TL880Spy</a> Windows
+	&nbsp;&nbsp;&nbsp;&nbsp;This initial release of the <a href="/tl880spy.html">TL880Spy</a> Windows
 	tweak tool should be fully functional.  It is based on the BtSpy tool
 	from the <a href="http://btwincap.sourceforge.net/">btwincap</a> Open
 	Source Windows BT8xx capture driver.  This contains modified code from
@@ -439,7 +439,7 @@
 <b>Release notes:</b><br>
 <blockquote>
 	&nbsp;&nbsp;&nbsp;&nbsp;This first release of the Judder Test for Linux
-	is fully functional.  See the <a href="/juddertest.php">Judder Test</a>
+	is fully functional.  See the <a href="/juddertest.html">Judder Test</a>
 	page for usage information.  This is a command line tool.</blockquote>
 <br>
 <b>Known issues:</b><br>
