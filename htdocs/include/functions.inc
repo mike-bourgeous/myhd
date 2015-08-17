@@ -14,6 +14,8 @@ function display_header($image, $section)
 		<link rel="stylesheet" type="text/css" href="/style/myhd_style.css">
 	</head>
 	<body bgcolor="#000000" text="black" link="#3070c0" vlink="#1060c0" class="mainclass">
+		<h2 style="text-align: center; margin: 2em 0">This project has moved to <a href="https://github.com/mike-bourgeous/myhd">https://github.com/mike-bourgeous/myhd</a></h2>
+		<hr style="margin-bottom: 2em">
 		<table width="100%" border="0" cellspacing="2" cellpadding="1" class="pagetable" bgcolor="white">
 			<tr>
 				<td width="192" valign="top" align="center" class="mainclass">
